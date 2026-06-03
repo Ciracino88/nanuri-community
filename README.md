@@ -50,3 +50,20 @@
   - 송금 완료 후 앱으로 돌아오면 상태 처리
 
 ## 아키텍처
+```mermaid
+graph TD
+    A[사용자 웹 - React] -->|Google OAuth| B[Supabase Auth]
+    A -->|익명 로그인| B
+    A -->|청구서 데이터 저장| C[Supabase DB]
+    A -->|영수증 이미지 업로드| D[Cloudflare Workers]
+    D -->|이미지 저장| E[R2 Storage]
+    D -->|이미지 URL 반환| A
+
+    F[관리자 앱 - iOS SwiftUI] -->|Google OAuth| B
+    F -->|청구서 목록 조회| C
+    F -->|상태 변경 승인/거절| C
+    F -->|계좌번호 금액 전달| G[토스 앱]
+
+    B -->|세션 관리| A
+    B -->|세션 관리| F
+```
