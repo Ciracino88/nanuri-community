@@ -6,6 +6,10 @@
 
 교회 구성원이 물품을 구입한 후 비용을 청구하고, 관리자가 이를 확인하여 토스로 송금하는 과정을 자동화한 앱입니다. 기존에 수작업으로 진행되던 회계 프로세스를 디지털화하여 청구 내역을 체계적으로 관리할 수 있습니다.
 
+## 🔗 배포 링크
+
+[https://nanuri.vercel.app](https://nanuri.vercel.app)
+
 ## 기술 스택
 
 **Web (Frontend)**
@@ -81,8 +85,18 @@ graph TD
 ```
 
 ## 프리뷰
-<img width="1333" height="728" alt="Image" src="https://github.com/user-attachments/assets/409ce5a1-45c1-491a-9001-cfab02e977a6" />
 
-<img width="1333" height="728" alt="Image" src="https://github.com/user-attachments/assets/2faed747-9082-4327-b1c8-7bc9f3fbe4df" />
+### 외부 방문자
+<div align="center">
+  <img width="600" alt="guest" src="https://github.com/user-attachments/assets/409ce5a1-45c1-491a-9001-cfab02e977a6" />
+</div>
 
-<img width="1180" height="2556" alt="Image" src="https://github.com/user-attachments/assets/1628d0f1-9175-4d66-baae-259ddc2409c5" />
+### 교회 멤버
+<div align="center">
+  <img width="600" alt="member" src="https://github.com/user-attachments/assets/2faed747-9082-4327-b1c8-7bc9f3fbe4df" />
+</div>
+
+### 관리자 앱 (iOS)
+<div align="center">
+  <img width="300" alt="admin" src="https://github.com/user-attachments/assets/1628d0f1-9175-4d66-baae-259ddc2409c5" />
+</div>
