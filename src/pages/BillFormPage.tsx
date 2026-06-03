@@ -1,14 +1,15 @@
-// src/pages/BillFormPage.tsx
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
-
-import Input from "../componants/ui/Input";
-import FileInput from "../componants/ui/FileInput";
-import Button from "../componants/ui/Button";
-import Navbar from "../componants/Navbar";
-import BankSelector from "../componants/BankSelector";
+import { uploadReceipt } from "../lib/uploadReceipt";
+import { useReceiptUpload } from "../hooks/useReceiptUpload";
+import Input from "../components/ui/Input";
+import FileInput from "../components/ui/FileInput";
+import Button from "../components/ui/Button";
+import Navbar from "../components/Navbar";
+import BankSelector from "../components/BankSelector";
+import SuccessView from "../components/SuccessView";
 
 interface FormValues {
   title: string;
@@ -16,29 +17,15 @@ interface FormValues {
   account_number: string;
   bank_name: string;
   name: string;
-  receipt: FileList;
 }
 
 export default function BillFormPage() {
   const navigate = useNavigate();
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>();
+  const { receiptFile, receiptPreview, handleReceiptChange } = useReceiptUpload();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
-  const [receiptPreview, setReceiptPreview] = useState<string>("");
-
-  const uploadReceipt = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch(`${import.meta.env.VITE_CF_WORKER_URL}/upload`, {
-      method: "POST",
-      body: formData,
-    });
-    if (!res.ok) throw new Error("영수증 업로드 실패");
-    const { url } = await res.json();
-    return url;
-  };
 
   const onSubmit = async (values: FormValues) => {
     if (!receiptFile) return;
@@ -72,20 +59,12 @@ export default function BillFormPage() {
 
   if (success) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-        <p className="text-4xl">✅</p>
-        <p className="text-lg font-medium text-gray-700">청구서가 제출되었습니다!</p>
-        <p className="text-sm text-gray-400">담당자 확인 후 처리될 예정이에요</p>
-        <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-            navigate("/");
-          }}
-          className="mt-4 px-6 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition"
-        >
-          메인 페이지로 돌아가기
-        </button>
-      </div>
+      <SuccessView
+        onBack={async () => {
+          await supabase.auth.signOut();
+          navigate("/");
+        }}
+      />
     );
   }
 
@@ -148,10 +127,7 @@ export default function BillFormPage() {
           <FileInput
             label="영수증"
             preview={receiptPreview}
-            onChange={(file) => {
-              setReceiptFile(file);
-              setReceiptPreview(URL.createObjectURL(file));
-            }}
+            onChange={handleReceiptChange}
           />
 
           {error && <p className="text-sm text-red-500 text-center">{error}</p>}

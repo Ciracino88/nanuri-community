@@ -5,7 +5,7 @@ import MemberLoginPage from "../pages/MemberLoginPage";
 import MemberBillFormPage from "../pages/MemberBillFormPage";
 import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
 import BillFormPage from "../pages/BillFormPage";
-import ProtectedRoute from "../componants/ProtectedRoute";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {

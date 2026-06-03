@@ -3,9 +3,9 @@ import { useForm } from "react-hook-form";
 import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../store/authStore";
 import { useState } from "react";
-import Input from "../componants/ui/Input";
-import Button from "../componants/ui/Button";
-import BankSelector from "../componants/BankSelector";
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
+import BankSelector from "../components/BankSelector";
 
 interface FormValues {
   name: string;
@@ -53,7 +53,7 @@ export default function MemberProfileSetupPage() {
         <div className="flex flex-col gap-1.5">
           <BankSelector
             value={watch("bank_name")}
-            onChange={(bank) => setValue("bank_name", bank, { shouldValidate: true })}
+            onChange={(bank: string) => setValue("bank_name", bank, { shouldValidate: true })}
           />
           <input type="hidden" {...register("bank_name", { required: "은행을 선택해주세요" })} />
           {errors.bank_name && <p className="text-xs text-red-500">{errors.bank_name.message}</p>}
