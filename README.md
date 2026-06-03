@@ -79,3 +79,10 @@ graph TD
     F -->|청구서 조회/승인| C
     F -->|딥링크 송금| G
 ```
+
+## 프리뷰
+<img width="1333" height="728" alt="Image" src="https://github.com/user-attachments/assets/409ce5a1-45c1-491a-9001-cfab02e977a6" />
+
+<img width="1333" height="728" alt="Image" src="https://github.com/user-attachments/assets/2faed747-9082-4327-b1c8-7bc9f3fbe4df" />
+
+<img width="1180" height="2556" alt="Image" src="https://github.com/user-attachments/assets/1628d0f1-9175-4d66-baae-259ddc2409c5" />
