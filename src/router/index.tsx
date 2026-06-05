@@ -19,7 +19,7 @@ export const router = createBrowserRouter([
   {
     path: "/member/setup",
     element: (
-      <ProtectedRoute memberOnly>
+      <ProtectedRoute memberOnly setupPage>
         <MemberProfileSetupPage />
       </ProtectedRoute>
     ),
