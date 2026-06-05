@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+@media print {
+  nav,
+  button,
+  select {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f9fafb;
+  }
+}

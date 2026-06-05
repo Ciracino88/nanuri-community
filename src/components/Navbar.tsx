@@ -37,6 +37,12 @@ export default function Navbar({ userName, onLogout, onProfileEdit, onHome, isGu
         ) : (
           <>
             <button
+              onClick={() => navigate("/accounting")}
+              className="text-sm text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
+            >
+              회계 보고서
+            </button>
+            <button
               onClick={onProfileEdit}
               className="text-sm text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
             >

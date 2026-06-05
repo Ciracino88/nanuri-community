@@ -6,6 +6,7 @@ import MemberBillFormPage from "../pages/MemberBillFormPage";
 import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
 import BillFormPage from "../pages/BillFormPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import AccountingReportPage from "../pages/AccountingReportPage";
 
 export const router = createBrowserRouter([
   {
@@ -40,4 +41,12 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  {
+  path: "/accounting",
+  element: (
+    <ProtectedRoute memberOnly setupPage>
+      <AccountingReportPage />
+    </ProtectedRoute>
+  ),
+},
 ]);
