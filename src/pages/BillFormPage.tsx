@@ -28,7 +28,10 @@ export default function BillFormPage() {
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (values: FormValues) => {
-    if (!receiptFile) return;
+    if (!receiptFile) {
+      setError("영수증을 첨부해주세요");
+      return;
+    }
     setSubmitting(true);
     setError(null);
 
