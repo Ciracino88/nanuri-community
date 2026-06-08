@@ -108,3 +108,10 @@ graph TD
 <div align="center">
   <img width="300" alt="admin" src="https://github.com/user-attachments/assets/1628d0f1-9175-4d66-baae-259ddc2409c5" />
 </div>
+
+## 트러블슈팅
+
+### 브라우저 자동 번역으로 인한 텍스트 깨짐
+- **문제**: 크롬 자동 번역 기능이 한국어 UI 텍스트를 이상하게 변환
+- **원인**: `<html>` 태그에 번역 비활성화 설정 누락
+- **해결**: `<html lang="ko" translate="no">` 추가
