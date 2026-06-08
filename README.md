@@ -43,6 +43,14 @@
   - 최초 등록 후 재사용 가능
   - 언제든지 수정 가능
 
+### 웹 (관리자)
+- **회계 보고서 작성**
+  - 토스뱅크 거래내역 CSV 파일 업로드
+  - 거래 항목별 카테고리 직접 지정
+  - 카테고리별 지출 합계 및 잔액 자동 계산
+  - 브라우저 인쇄 기능으로 PDF 저장
+  - 샘플 CSV 파일 제공으로 기능 체험 가능
+  
 ### iOS 앱 (관리자)
 - **Google 로그인 + Face ID 보안**
 - **청구서 목록 조회**
@@ -95,7 +103,7 @@ graph TD
 <div align="center">
   <img width="600" alt="member" src="https://github.com/user-attachments/assets/2faed747-9082-4327-b1c8-7bc9f3fbe4df" />
 </div>
-
+ 
 ### 관리자 앱 (iOS)
 <div align="center">
   <img width="300" alt="admin" src="https://github.com/user-attachments/assets/1628d0f1-9175-4d66-baae-259ddc2409c5" />
