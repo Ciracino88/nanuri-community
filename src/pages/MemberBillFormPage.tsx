@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
 import { uploadReceipt } from "../lib/uploadReceipt";
 import { useReceiptUpload } from "../hooks/useReceiptUpload";
 import { useAuthStore } from "../store/authStore";
@@ -10,6 +9,7 @@ import FileInput from "../components/ui/FileInput";
 import Button from "../components/ui/Button";
 import Navbar from "../components/Navbar";
 import SuccessView from "../components/SuccessView";
+import { supabase } from "../lib/supabase";
 
 interface FormValues {
   title: string;
@@ -18,7 +18,7 @@ interface FormValues {
 
 export default function MemberBillFormPage() {
   const navigate = useNavigate();
-  const { userProfile, signOut } = useAuthStore();
+  const { user, userProfile, signOut } = useAuthStore();
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>();
   const { receiptFile, receiptPreview, handleReceiptChange, reset: resetReceipt } = useReceiptUpload();
   const [submitting, setSubmitting] = useState(false);
@@ -34,7 +34,6 @@ export default function MemberBillFormPage() {
     setError(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("로그인이 필요합니다");
 
       const receiptUrl = await uploadReceipt(receiptFile);

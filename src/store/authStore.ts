@@ -19,7 +19,7 @@ interface AuthState {
   setUserProfile: (profile: UserProfile | null) => void;
   fetchUserProfile: () => Promise<void>;
   signOut: () => Promise<void>;
-  initialize: () => Promise<void>;
+  initialize: () => Promise<() => void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await get().fetchUserProfile();
     }
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
         set({ user: session.user, isAnonymous: session.user.is_anonymous ?? false });
         await get().fetchUserProfile();
@@ -68,5 +68,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
 
     set({ isLoading: false });
+    return () => subscription.unsubscribe();
   },
 }));

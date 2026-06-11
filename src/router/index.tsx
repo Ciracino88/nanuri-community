@@ -42,11 +42,11 @@ export const router = createBrowserRouter([
     ),
   },
   {
-  path: "/accounting",
-  element: (
-    <ProtectedRoute memberOnly setupPage>
-      <AccountingReportPage />
-    </ProtectedRoute>
-  ),
-},
+    path: "/accounting",
+    element: (
+      <ProtectedRoute memberOnly adminOnly>
+        <AccountingReportPage />
+      </ProtectedRoute>
+    ),
+  },
 ]);

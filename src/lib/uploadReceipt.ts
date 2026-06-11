@@ -1,7 +1,16 @@
 // src/lib/uploadReceipt.ts
+import imageCompression from "browser-image-compression";
+
 export async function uploadReceipt(file: File): Promise<string> {
+  const compressed = await imageCompression(file, {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1200,
+    useWebWorker: true,
+    exifOrientation: -1, // EXIF 회전 자동 보정
+  });
+
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", compressed);
   const res = await fetch(`${import.meta.env.VITE_CF_WORKER_URL}/upload`, {
     method: "POST",
     body: formData,

@@ -6,13 +6,19 @@ export function useReceiptUpload() {
   const [receiptPreview, setReceiptPreview] = useState<string>("");
 
   const handleReceiptChange = (file: File) => {
+    setReceiptPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
     setReceiptFile(file);
-    setReceiptPreview(URL.createObjectURL(file));
   };
 
   const reset = () => {
+    setReceiptPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return "";
+    });
     setReceiptFile(null);
-    setReceiptPreview("");
   };
 
   return { receiptFile, receiptPreview, handleReceiptChange, reset };
