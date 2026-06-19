@@ -7,7 +7,6 @@ import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
 import BillFormPage from "../pages/bill/BillFormPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 import AccountingReportPage from "../pages/AccountingReportPage";
-import LocationFeedbackPage from "../pages/LocationFeedbackPage";
 import HomePage from "../pages/HomePage";
 import SurveyNewPage from "../pages/survey/SurveyNewPage";
 import SurveyAdminPage from "../pages/survey/SurveyAdminPage";
@@ -55,10 +54,6 @@ export const router = createBrowserRouter([
         <HomePage />
       </ProtectedRoute>
     ),
-  },
-  {
-    path: "/location-feedback",
-    element: <LocationFeedbackPage />,
   },
   {
     path: "/admin/surveys",

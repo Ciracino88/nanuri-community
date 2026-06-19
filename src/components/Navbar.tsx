@@ -46,12 +46,6 @@ export default function Navbar({ userName, onLogout, onProfileEdit, isGuest }: P
               </button>
             )}
             <button
-              onClick={() => navigate("/location-feedback")}
-              className="text-sm text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
-            >
-              장소 피드백
-            </button>
-            <button
               onClick={onProfileEdit}
               className="text-sm text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
             >

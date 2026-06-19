@@ -6,6 +6,7 @@ export interface ActiveSurvey {
   template_id: string;
   title: string;
   image_url: string | null;
+  place_name: string | null;
   items: { label: string; isStar: boolean }[];
   created_at: string;
 }

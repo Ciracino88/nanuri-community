@@ -16,6 +16,7 @@ interface ActiveSurvey {
   template_id: string;
   title: string;
   image_url: string | null;
+  place_name: string | null;
   items: { label: string; isStar: boolean }[];
   created_at: string;
   responseCount: number;
@@ -149,6 +150,17 @@ export default function SurveyAdminPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <p className="text-sm font-medium text-blue-800">{survey.title}</p>
+                        {survey.place_name && (
+                          <a
+                            href={`https://map.kakao.com/link/search/${encodeURIComponent(survey.place_name)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 mt-0.5 w-fit"
+                          >
+                            <i className="ti ti-map-pin text-xs text-blue-300" aria-hidden="true" />
+                            <span className="text-xs text-blue-400 hover:underline">{survey.place_name}</span>
+                          </a>
+                        )}
                         <p className="text-xs text-blue-400 mt-0.5">
                           항목 {survey.items?.length ?? 0}개 · {formatDate(survey.created_at)} 배포 · 참여 {survey.responseCount}명
                         </p>

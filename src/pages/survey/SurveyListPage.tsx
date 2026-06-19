@@ -55,6 +55,12 @@ export default function SurveyListPage() {
                 <div className="p-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-800">{survey.title}</p>
+                    {survey.place_name && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <i className="ti ti-map-pin text-xs text-gray-300" aria-hidden="true" />
+                        <p className="text-xs text-gray-400">{survey.place_name}</p>
+                      </div>
+                    )}
                     <p className="text-xs text-gray-400 mt-0.5">항목 {survey.items?.length ?? 0}개 · {formatDate(survey.created_at)}</p>
                   </div>
                   <button

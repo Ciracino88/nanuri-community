@@ -5,6 +5,8 @@ import Button from "../../components/ui/Button";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { uploadReceipt } from "../../lib/uploadReceipt";
+import { extractGpsFromImage } from "../../lib/extractGps";
+import { reverseGeocode } from "../../lib/reverseGeocode";
 
 interface Template {
   id: string;
@@ -20,6 +22,8 @@ export default function SurveyDeployPage() {
   const [template, setTemplate] = useState<Template | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [placeName, setPlaceName] = useState<string | null>(null);
+  const [extractingGps, setExtractingGps] = useState(false);
   const [deploying, setDeploying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,11 +33,23 @@ export default function SurveyDeployPage() {
       .then(({ data }) => setTemplate(data));
   }, [id]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+    setPlaceName(null);
+    setExtractingGps(true);
+
+    try {
+      const gps = await extractGpsFromImage(file);
+      if (gps) {
+        const place = await reverseGeocode(gps.latitude, gps.longitude);
+        if (place) setPlaceName(place.buildingName || place.roadAddress || place.address);
+      }
+    } finally {
+      setExtractingGps(false);
+    }
   };
 
   const handleDeploy = async () => {
@@ -51,6 +67,7 @@ export default function SurveyDeployPage() {
         title: template.title,
         items: template.items,
         image_url: imageUrl,
+        place_name: placeName,
         status: "active",
       });
       if (error) throw error;
@@ -75,7 +92,6 @@ export default function SurveyDeployPage() {
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
-
         onProfileEdit={() => navigate("/member/setup")}
       />
 
@@ -102,7 +118,7 @@ export default function SurveyDeployPage() {
               <img src={imagePreview} alt="장소 사진" className="w-full h-full object-cover" />
               <button
                 type="button"
-                onClick={() => { setImageFile(null); setImagePreview(null); }}
+                onClick={() => { setImageFile(null); setImagePreview(null); setPlaceName(null); }}
                 className="absolute top-2 right-2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/60 transition"
               >
                 <i className="ti ti-x text-sm" aria-hidden="true" />
@@ -116,6 +132,19 @@ export default function SurveyDeployPage() {
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
           )}
+
+          {extractingGps && (
+            <p className="text-xs text-blue-400">위치 정보 추출 중...</p>
+          )}
+          {placeName && (
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-blue-50 rounded-lg">
+              <i className="ti ti-map-pin text-sm text-blue-400" aria-hidden="true" />
+              <p className="text-xs text-blue-600">{placeName}</p>
+            </div>
+          )}
+          {!extractingGps && imageFile && !placeName && (
+            <p className="text-xs text-gray-300">GPS 정보가 없는 사진입니다</p>
+          )}
         </div>
 
         {/* 항목 미리보기 */}
@@ -126,7 +155,7 @@ export default function SurveyDeployPage() {
               <div key={i} className="flex items-center justify-between px-4 py-3">
                 <span className="text-sm text-gray-700">{item.label}</span>
                 <span className={`text-xs px-2 py-0.5 rounded-md ${item.isStar ? "bg-blue-50 text-blue-400" : "bg-gray-100 text-gray-400"}`}>
-                  {item.isStar ? "별점" : "텍스트"}
+                  {item.isStar ? "감정 선택" : "텍스트"}
                 </span>
               </div>
             ))}

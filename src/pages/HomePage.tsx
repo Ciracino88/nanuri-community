@@ -15,7 +15,7 @@ interface MenuCard {
 
 const MENU_CARDS: MenuCard[] = [
   { icon: "ti-receipt", title: "청구서 제출", description: "비용 영수증 제출", path: "/member/form" },
-  { icon: "ti-map-pin", title: "장소 피드백", description: "사진으로 위치 평가", path: "/location-feedback" },
+  { icon: "ti-clipboard-list", title: "설문 참여", description: "진행 중인 설문 보기", path: "/surveys" },
 ];
 
 const ADMIN_CARDS: MenuCard[] = [

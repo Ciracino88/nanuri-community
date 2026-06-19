@@ -11,6 +11,7 @@ interface Survey {
   id: string;
   title: string;
   image_url: string | null;
+  place_name: string | null;
   items: { label: string; isStar: boolean }[];
   status: string;
 }
@@ -145,20 +146,7 @@ export default function SurveyResponsePage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar {...navbarProps} />
 
-      <div className="max-w-lg mx-auto w-full flex flex-col">
-
-        {/* 장소 사진 */}
-        {survey.image_url ? (
-          <div className="w-full aspect-square overflow-hidden rounded-2xl">
-            <img src={survey.image_url} alt="장소 사진" className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div className="w-full aspect-square bg-gray-100 flex items-center justify-center">
-            <i className="ti ti-photo text-4xl text-gray-300" aria-hidden="true" />
-          </div>
-        )}
-
-        <div className="p-5 flex flex-col gap-6">
+      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
 
           <div>
             <h1 className="text-lg font-medium text-gray-800">{survey.title}</h1>
@@ -195,7 +183,6 @@ export default function SurveyResponsePage() {
             {isEditing ? "수정 완료" : "제출하기"}
           </Button>
 
-        </div>
       </div>
     </div>
   );
