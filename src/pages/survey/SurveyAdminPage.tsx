@@ -13,7 +13,7 @@ interface Template {
 
 interface ActiveSurvey {
   id: string;
-  template_id: string;
+  template_id: string | null;
   title: string;
   image_url: string | null;
   place_name: string | null;
