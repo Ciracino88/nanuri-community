@@ -4,7 +4,7 @@ export default function MemberLoginPage() {
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/member/form` },
+      options: { redirectTo: `${window.location.origin}/home` },
     });
   };
 

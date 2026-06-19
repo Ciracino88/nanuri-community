@@ -7,6 +7,8 @@ import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
 import BillFormPage from "../pages/BillFormPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 import AccountingReportPage from "../pages/AccountingReportPage";
+import LocationFeedbackPage from "../pages/LocationFeedbackPage";
+import HomePage from "../pages/HomePage";
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +42,18 @@ export const router = createBrowserRouter([
         <BillFormPage />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: "/home",
+    element: (
+      <ProtectedRoute memberOnly>
+        <HomePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/location-feedback",
+    element: <LocationFeedbackPage />,
   },
   {
     path: "/accounting",

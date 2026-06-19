@@ -1,17 +1,19 @@
 // src/components/Navbar.tsx
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { useAuthStore } from "../store/authStore";
 
 interface Props {
   userName?: string;
   onLogout?: () => void;
   onProfileEdit?: () => void;
-  onHome: () => void;
+  onHome?: () => void;
   isGuest?: boolean;
 }
 
 export default function Navbar({ userName, onLogout, onProfileEdit, onHome, isGuest }: Props) {
   const navigate = useNavigate();
+  const { userProfile } = useAuthStore();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -36,11 +38,19 @@ export default function Navbar({ userName, onLogout, onProfileEdit, onHome, isGu
           </button>
         ) : (
           <>
+            {userProfile?.role === "admin" && (
+              <button
+                onClick={() => navigate("/accounting")}
+                className="text-sm text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
+              >
+                회계 보고서
+              </button>
+            )}
             <button
-              onClick={() => navigate("/accounting")}
+              onClick={() => navigate("/location-feedback")}
               className="text-sm text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
             >
-              회계 보고서
+              장소 피드백
             </button>
             <button
               onClick={onProfileEdit}
