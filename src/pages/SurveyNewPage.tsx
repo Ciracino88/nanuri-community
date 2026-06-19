@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Button from "../components/ui/Button";
 import { useAuthStore } from "../store/authStore";
+import { supabase } from "../lib/supabase";
 
 interface SurveyItem {
   id: string;
@@ -34,9 +35,24 @@ export default function SurveyNewPage() {
     setItems((prev) => prev.map((item) => item.id === id ? { ...item, isStar: !item.isStar } : item));
   };
 
-  const handleSave = () => {
-    // TODO: Supabase 저장
-    console.log("저장:", { title, items });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      const { error } = await supabase.from("survey_templates").insert({
+        title,
+        items: items.map(({ label, isStar }) => ({ label, isStar })),
+      });
+      if (error) throw error;
+      navigate("/admin/surveys");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "저장에 실패했습니다");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -120,7 +136,8 @@ export default function SurveyNewPage() {
           </button>
         </div>
 
-        <Button onClick={handleSave} disabled={!title || items.every((i) => !i.label)}>
+        {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+        <Button onClick={handleSave} loading={saving} disabled={!title || items.every((i) => !i.label)}>
           저장
         </Button>
 

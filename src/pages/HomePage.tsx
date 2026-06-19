@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import Navbar from "../components/Navbar";
+import { supabase } from "../lib/supabase";
 
 interface MenuCard {
   icon: string;
@@ -24,6 +26,13 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { userProfile, signOut } = useAuthStore();
   const isAdmin = userProfile?.role === "admin";
+  const [activeSurvey, setActiveSurvey] = useState<{ id: string; title: string } | null>(null);
+
+  useEffect(() => {
+    supabase.from("surveys").select("id, title").eq("status", "active")
+      .order("created_at", { ascending: false }).limit(1)
+      .then(({ data }) => setActiveSurvey(data?.[0] ?? null));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -36,18 +45,20 @@ export default function HomePage() {
 
       <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
 
-        {/* 활성 설문 배너 — 추후 Supabase 연동 */}
-        {/* {activeSurvey && (
+        {activeSurvey && (
           <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 flex items-center justify-between">
             <div>
               <p className="text-xs text-blue-500 font-medium mb-0.5">진행 중인 설문</p>
               <p className="text-sm font-medium text-blue-800">{activeSurvey.title}</p>
             </div>
-            <button onClick={() => navigate(`/survey/${activeSurvey.id}`)} className="text-sm text-blue-500 font-medium whitespace-nowrap">
+            <button
+              onClick={() => navigate(`/survey/${activeSurvey.id}`)}
+              className="text-sm text-blue-500 font-medium whitespace-nowrap ml-3"
+            >
               참여하기 →
             </button>
           </div>
-        )} */}
+        )}
 
         <div className="flex flex-col gap-3">
           <p className="text-xs text-gray-400 font-medium">메뉴</p>

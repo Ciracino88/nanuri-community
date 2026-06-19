@@ -17,6 +17,7 @@ export default {
       try {
         const formData = await request.formData();
         const file = formData.get("file");
+        const folder = formData.get("folder") ?? "receipts";
 
         if (!file) {
           return new Response(JSON.stringify({ error: "파일 없음" }), {
@@ -26,7 +27,7 @@ export default {
         }
 
         const ext = file.name.split(".").pop();
-        const key = `receipts/${crypto.randomUUID()}.${ext}`;
+        const key = `${folder}/${crypto.randomUUID()}.${ext}`;
 
         await env.R2_BUCKET.put(key, file.stream(), {
           httpMetadata: { contentType: file.type },

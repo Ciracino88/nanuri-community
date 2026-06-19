@@ -11,6 +11,8 @@ import LocationFeedbackPage from "../pages/LocationFeedbackPage";
 import HomePage from "../pages/HomePage";
 import SurveyNewPage from "../pages/SurveyNewPage";
 import SurveyAdminPage from "../pages/SurveyAdminPage";
+import SurveyDeployPage from "../pages/SurveyDeployPage";
+import SurveyResponsePage from "../pages/SurveyResponsePage";
 
 export const router = createBrowserRouter([
   {
@@ -66,10 +68,26 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: "/admin/surveys/:id/deploy",
+    element: (
+      <ProtectedRoute memberOnly adminOnly>
+        <SurveyDeployPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: "/admin/surveys/new",
     element: (
       <ProtectedRoute memberOnly adminOnly>
         <SurveyNewPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/survey/:id",
+    element: (
+      <ProtectedRoute memberOnly>
+        <SurveyResponsePage />
       </ProtectedRoute>
     ),
   },
