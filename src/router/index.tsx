@@ -9,6 +9,8 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import AccountingReportPage from "../pages/AccountingReportPage";
 import LocationFeedbackPage from "../pages/LocationFeedbackPage";
 import HomePage from "../pages/HomePage";
+import SurveyNewPage from "../pages/SurveyNewPage";
+import SurveyAdminPage from "../pages/SurveyAdminPage";
 
 export const router = createBrowserRouter([
   {
@@ -54,6 +56,22 @@ export const router = createBrowserRouter([
   {
     path: "/location-feedback",
     element: <LocationFeedbackPage />,
+  },
+  {
+    path: "/admin/surveys",
+    element: (
+      <ProtectedRoute memberOnly adminOnly>
+        <SurveyAdminPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/surveys/new",
+    element: (
+      <ProtectedRoute memberOnly adminOnly>
+        <SurveyNewPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/accounting",
