@@ -1,15 +1,15 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
-import { uploadReceipt } from "../lib/uploadReceipt";
-import { useReceiptUpload } from "../hooks/useReceiptUpload";
-import Input from "../components/ui/Input";
-import FileInput from "../components/ui/FileInput";
-import Button from "../components/ui/Button";
-import Navbar from "../components/Navbar";
-import BankSelector from "../components/BankSelector";
-import SuccessView from "../components/SuccessView";
+import { supabase } from "../../lib/supabase";
+import { uploadReceipt } from "../../lib/uploadReceipt";
+import { useReceiptUpload } from "../../hooks/useReceiptUpload";
+import Input from "../../components/ui/Input";
+import FileInput from "../../components/ui/FileInput";
+import Button from "../../components/ui/Button";
+import Navbar from "../../components/Navbar";
+import BankSelector from "../../components/BankSelector";
+import SuccessView from "../../components/SuccessView";
 
 interface FormValues {
   title: string;

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Button from "../components/ui/Button";
-import { useAuthStore } from "../store/authStore";
-import { supabase } from "../lib/supabase";
+import Navbar from "../../components/Navbar";
+import Button from "../../components/ui/Button";
+import { useAuthStore } from "../../store/authStore";
+import { supabase } from "../../lib/supabase";
 
 interface Survey {
   id: string;
@@ -58,7 +58,7 @@ export default function SurveyResponsePage() {
           .select("id")
           .eq("survey_id", id)
           .eq("user_id", user.id)
-          .single();
+          .maybeSingle();
         if (existing) setAlreadySubmitted(true);
       }
     };

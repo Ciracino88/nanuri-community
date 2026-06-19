@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Button from "../components/ui/Button";
-import { useAuthStore } from "../store/authStore";
-import { supabase } from "../lib/supabase";
+import Navbar from "../../components/Navbar";
+import Button from "../../components/ui/Button";
+import { useAuthStore } from "../../store/authStore";
+import { supabase } from "../../lib/supabase";
 
 interface SurveyItem {
   id: string;

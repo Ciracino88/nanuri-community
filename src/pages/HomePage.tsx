@@ -26,12 +26,11 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { userProfile, signOut } = useAuthStore();
   const isAdmin = userProfile?.role === "admin";
-  const [activeSurvey, setActiveSurvey] = useState<{ id: string; title: string } | null>(null);
+  const [activeSurveyCount, setActiveSurveyCount] = useState(0);
 
   useEffect(() => {
-    supabase.from("surveys").select("id, title").eq("status", "active")
-      .order("created_at", { ascending: false }).limit(1)
-      .then(({ data }) => setActiveSurvey(data?.[0] ?? null));
+    supabase.from("surveys").select("*", { count: "exact", head: true }).eq("status", "active")
+      .then(({ count }) => setActiveSurveyCount(count ?? 0));
   }, []);
 
   return (
@@ -45,17 +44,17 @@ export default function HomePage() {
 
       <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
 
-        {activeSurvey && (
+        {activeSurveyCount > 0 && (
           <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 flex items-center justify-between">
             <div>
               <p className="text-xs text-blue-500 font-medium mb-0.5">진행 중인 설문</p>
-              <p className="text-sm font-medium text-blue-800">{activeSurvey.title}</p>
+              <p className="text-sm font-medium text-blue-800">참여 가능한 설문이 {activeSurveyCount}개 있습니다</p>
             </div>
             <button
-              onClick={() => navigate(`/survey/${activeSurvey.id}`)}
+              onClick={() => navigate("/surveys")}
               className="text-sm text-blue-500 font-medium whitespace-nowrap ml-3"
             >
-              참여하기 →
+              보러가기 →
             </button>
           </div>
         )}

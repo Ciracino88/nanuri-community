@@ -1,18 +1,19 @@
 // src/router/index.tsx
 import { createBrowserRouter } from "react-router-dom";
-import GatePage from "../pages/GatePage";
-import MemberLoginPage from "../pages/MemberLoginPage";
-import MemberBillFormPage from "../pages/MemberBillFormPage";
+import GatePage from "../pages/auth/GatePage";
+import MemberLoginPage from "../pages/auth/MemberLoginPage";
+import MemberBillFormPage from "../pages/bill/MemberBillFormPage";
 import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
-import BillFormPage from "../pages/BillFormPage";
+import BillFormPage from "../pages/bill/BillFormPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 import AccountingReportPage from "../pages/AccountingReportPage";
 import LocationFeedbackPage from "../pages/LocationFeedbackPage";
 import HomePage from "../pages/HomePage";
-import SurveyNewPage from "../pages/SurveyNewPage";
-import SurveyAdminPage from "../pages/SurveyAdminPage";
-import SurveyDeployPage from "../pages/SurveyDeployPage";
-import SurveyResponsePage from "../pages/SurveyResponsePage";
+import SurveyNewPage from "../pages/survey/SurveyNewPage";
+import SurveyAdminPage from "../pages/survey/SurveyAdminPage";
+import SurveyDeployPage from "../pages/survey/SurveyDeployPage";
+import SurveyResponsePage from "../pages/survey/SurveyResponsePage";
+import SurveyListPage from "../pages/survey/SurveyListPage";
 
 export const router = createBrowserRouter([
   {
@@ -80,6 +81,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute memberOnly adminOnly>
         <SurveyNewPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/surveys",
+    element: (
+      <ProtectedRoute memberOnly>
+        <SurveyListPage />
       </ProtectedRoute>
     ),
   },

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Button from "../components/ui/Button";
-import { useAuthStore } from "../store/authStore";
-import { supabase } from "../lib/supabase";
-import { uploadReceipt } from "../lib/uploadReceipt";
+import Navbar from "../../components/Navbar";
+import Button from "../../components/ui/Button";
+import { useAuthStore } from "../../store/authStore";
+import { supabase } from "../../lib/supabase";
+import { uploadReceipt } from "../../lib/uploadReceipt";
 
 interface Template {
   id: string;
