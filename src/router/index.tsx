@@ -13,6 +13,7 @@ import SurveyAdminPage from "../pages/survey/SurveyAdminPage";
 import SurveyDeployPage from "../pages/survey/SurveyDeployPage";
 import SurveyResponsePage from "../pages/survey/SurveyResponsePage";
 import SurveyListPage from "../pages/survey/SurveyListPage";
+import SurveyResultsPage from "../pages/survey/SurveyResultsPage";
 
 export const router = createBrowserRouter([
   {
@@ -92,6 +93,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute memberOnly>
         <SurveyResponsePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/admin/surveys/:id/results",
+    element: (
+      <ProtectedRoute memberOnly adminOnly>
+        <SurveyResultsPage />
       </ProtectedRoute>
     ),
   },

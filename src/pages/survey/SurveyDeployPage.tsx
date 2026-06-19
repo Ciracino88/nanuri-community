@@ -155,7 +155,7 @@ export default function SurveyDeployPage() {
               <div key={i} className="flex items-center justify-between px-4 py-3">
                 <span className="text-sm text-gray-700">{item.label}</span>
                 <span className={`text-xs px-2 py-0.5 rounded-md ${item.isStar ? "bg-blue-50 text-blue-400" : "bg-gray-100 text-gray-400"}`}>
-                  {item.isStar ? "감정 선택" : "텍스트"}
+                  {item.isStar ? "만족도" : "텍스트"}
                 </span>
               </div>
             ))}

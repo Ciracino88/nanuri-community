@@ -169,6 +169,13 @@ export default function SurveyAdminPage() {
                     </div>
                     <div className="flex gap-2">
                       <button
+                        onClick={() => navigate(`/admin/surveys/${survey.id}/results`)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white border border-blue-100 rounded-lg text-xs text-blue-500 hover:bg-blue-50 transition"
+                      >
+                        <i className="ti ti-chart-bar text-sm" aria-hidden="true" />
+                        결과 보기
+                      </button>
+                      <button
                         onClick={() => navigator.clipboard.writeText(`${window.location.origin}/survey/${survey.id}`)}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white border border-blue-100 rounded-lg text-xs text-blue-500 hover:bg-blue-50 transition"
                       >
