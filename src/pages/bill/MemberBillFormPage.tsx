@@ -4,6 +4,7 @@ import { uploadReceipt } from "../../lib/uploadReceipt";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { useAuthStore } from "../../store/authStore";
 import { useState } from "react";
+import { useFormSubmit } from "../../hooks/useFormSubmit";
 import Input from "../../components/ui/Input";
 import FileInput from "../../components/ui/FileInput";
 import Button from "../../components/ui/Button";
@@ -21,19 +22,16 @@ export default function MemberBillFormPage() {
   const { user, userProfile, signOut } = useAuthStore();
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>();
   const { receiptFile, receiptPreview, handleReceiptChange, reset: resetReceipt } = useReceiptUpload();
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
+  const { submitting, success, error, submit, reset: resetForm } = useFormSubmit();
 
   const onSubmit = async (values: FormValues) => {
     if (!receiptFile) {
-      setError("영수증을 첨부해주세요");
+      setReceiptError("영수증을 첨부해주세요");
       return;
     }
-    setSubmitting(true);
-    setError(null);
-
-    try {
+    setReceiptError(null);
+    await submit(async () => {
       if (!user) throw new Error("로그인이 필요합니다");
 
       const receiptUrl = await uploadReceipt(receiptFile);
@@ -49,20 +47,15 @@ export default function MemberBillFormPage() {
       });
 
       if (billError) throw billError;
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "오류 발생");
-    } finally {
-      setSubmitting(false);
-    }
+    });
   };
 
   if (success) {
     return (
       <SuccessView
         onBack={() => {
-          setSuccess(false);
-          setError(null);
+          resetForm();
+          setReceiptError(null);
           reset();
           resetReceipt();
         }}
@@ -76,7 +69,7 @@ export default function MemberBillFormPage() {
         userName={userProfile?.name}
         onLogout={async () => { await signOut(); navigate("/"); }}
         onProfileEdit={() => navigate("/member/setup")}
-        onHome={() => navigate("/member/form")}
+
       />
       <div className="max-w-md mx-auto px-4 py-8">
         <div className="mb-6">
@@ -128,7 +121,7 @@ export default function MemberBillFormPage() {
             onChange={handleReceiptChange}
           />
 
-          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+          {(receiptError || error) && <p className="text-sm text-red-500 text-center">{receiptError ?? error}</p>}
 
           <Button type="submit" loading={submitting}>
             청구서 제출

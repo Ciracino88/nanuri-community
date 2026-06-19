@@ -97,7 +97,7 @@ export default function AccountingReportPage() {
             userName={userProfile?.name}
             onLogout={async () => { await signOut(); navigate("/"); }}
             onProfileEdit={() => navigate("/member/setup")}
-            onHome={() => navigate("/member/form")}
+
         />
         <div className="max-w-5xl mx-auto px-4 py-8">
             <div className="flex items-center gap-4 mb-4">

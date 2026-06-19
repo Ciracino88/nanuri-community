@@ -3,35 +3,18 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
-
-interface Survey {
-  id: string;
-  title: string;
-  image_url: string | null;
-  items: { label: string; isStar: boolean }[];
-  created_at: string;
-}
+import { useActiveSurveys } from "../../hooks/useActiveSurveys";
 
 export default function SurveyListPage() {
   const navigate = useNavigate();
   const { userProfile, signOut, user } = useAuthStore();
-  const [surveys, setSurveys] = useState<Survey[]>([]);
+  const { surveys, loading } = useActiveSurveys();
   const [respondedIds, setRespondedIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      const [{ data: surveyData }, { data: responseData }] = await Promise.all([
-        supabase.from("surveys").select("*").eq("status", "active").order("created_at", { ascending: false }),
-        user
-          ? supabase.from("survey_responses").select("survey_id").eq("user_id", user.id)
-          : Promise.resolve({ data: [] }),
-      ]);
-      setSurveys(surveyData ?? []);
-      setRespondedIds(new Set((responseData ?? []).map((r: { survey_id: string }) => r.survey_id)));
-      setLoading(false);
-    };
-    load();
+    if (!user) return;
+    supabase.from("survey_responses").select("survey_id").eq("user_id", user.id)
+      .then(({ data }) => setRespondedIds(new Set((data ?? []).map((r: { survey_id: string }) => r.survey_id))));
   }, [user]);
 
   const formatDate = (iso: string) =>
@@ -42,7 +25,7 @@ export default function SurveyListPage() {
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
-        onHome={() => navigate("/home")}
+
         onProfileEdit={() => navigate("/member/setup")}
       />
 
@@ -74,16 +57,12 @@ export default function SurveyListPage() {
                     <p className="text-sm font-medium text-gray-800">{survey.title}</p>
                     <p className="text-xs text-gray-400 mt-0.5">항목 {survey.items?.length ?? 0}개 · {formatDate(survey.created_at)}</p>
                   </div>
-                  {responded ? (
-                    <span className="text-xs text-gray-300 whitespace-nowrap ml-3">참여 완료</span>
-                  ) : (
-                    <button
-                      onClick={() => navigate(`/survey/${survey.id}`)}
-                      className="text-sm text-blue-500 font-medium whitespace-nowrap ml-3"
-                    >
-                      참여하기 →
-                    </button>
-                  )}
+                  <button
+                    onClick={() => navigate(`/survey/${survey.id}`)}
+                    className={`text-sm font-medium whitespace-nowrap ml-3 ${responded ? "text-gray-300" : "text-blue-500"}`}
+                  >
+                    {responded ? "수정하기 →" : "참여하기 →"}
+                  </button>
                 </div>
               </div>
             );

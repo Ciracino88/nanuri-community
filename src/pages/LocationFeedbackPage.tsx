@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Navbar from "../components/Navbar";
 import Button from "../components/ui/Button";
+import MoodRating from "../components/ui/MoodRating";
 import { extractGpsFromImage } from "../lib/extractGps";
 import { reverseGeocode } from "../lib/reverseGeocode";
 import type { PlaceInfo } from "../lib/reverseGeocode";
@@ -12,41 +13,6 @@ interface FeedbackFormValues {
   cleanliness: number;
   service: number;
   comment: string;
-}
-
-const RATING_LABELS = ["", "매우 불만족", "불만족", "보통", "만족", "매우 만족"];
-
-function StarRating({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  const [hovered, setHovered] = useState(0);
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          className={`text-2xl transition ${
-            star <= (hovered || value) ? "text-yellow-400" : "text-gray-200"
-          }`}
-          onMouseEnter={() => setHovered(star)}
-          onMouseLeave={() => setHovered(0)}
-          onClick={() => onChange(star)}
-        >
-          ★
-        </button>
-      ))}
-      {(hovered || value) > 0 && (
-        <span className="text-sm text-gray-400 self-center ml-1">
-          {RATING_LABELS[hovered || value]}
-        </span>
-      )}
-    </div>
-  );
 }
 
 export default function LocationFeedbackPage() {
@@ -204,7 +170,7 @@ export default function LocationFeedbackPage() {
             ].map(({ key, label }) => (
               <div key={key} className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-600">{label}</label>
-                <StarRating
+                <MoodRating
                   value={ratings[key] as number}
                   onChange={(v) => setValue(key, v)}
                 />

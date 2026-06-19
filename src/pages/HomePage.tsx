@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import Navbar from "../components/Navbar";
+import { useActiveSurveys } from "../hooks/useActiveSurveys";
 import { supabase } from "../lib/supabase";
 
 interface MenuCard {
@@ -24,31 +25,35 @@ const ADMIN_CARDS: MenuCard[] = [
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { userProfile, signOut } = useAuthStore();
+  const { userProfile, signOut, user } = useAuthStore();
   const isAdmin = userProfile?.role === "admin";
-  const [activeSurveyCount, setActiveSurveyCount] = useState(0);
+  const { surveys } = useActiveSurveys();
+  const [respondedIds, setRespondedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    supabase.from("surveys").select("*", { count: "exact", head: true }).eq("status", "active")
-      .then(({ count }) => setActiveSurveyCount(count ?? 0));
-  }, []);
+    if (!user) return;
+    supabase.from("survey_responses").select("survey_id").eq("user_id", user.id)
+      .then(({ data }) => setRespondedIds(new Set((data ?? []).map((r: { survey_id: string }) => r.survey_id))));
+  }, [user]);
+
+  const unrespondedCount = surveys.filter((s) => !respondedIds.has(s.id)).length;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
-        onHome={() => navigate("/home")}
+
         onProfileEdit={() => navigate("/member/setup")}
       />
 
       <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
 
-        {activeSurveyCount > 0 && (
+        {unrespondedCount > 0 && (
           <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 flex items-center justify-between">
             <div>
               <p className="text-xs text-blue-500 font-medium mb-0.5">진행 중인 설문</p>
-              <p className="text-sm font-medium text-blue-800">참여 가능한 설문이 {activeSurveyCount}개 있습니다</p>
+              <p className="text-sm font-medium text-blue-800">참여 가능한 설문이 {unrespondedCount}개 있습니다</p>
             </div>
             <button
               onClick={() => navigate("/surveys")}

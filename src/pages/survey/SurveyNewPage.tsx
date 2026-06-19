@@ -60,7 +60,7 @@ export default function SurveyNewPage() {
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
-        onHome={() => navigate("/home")}
+
         onProfileEdit={() => navigate("/member/setup")}
       />
 
@@ -110,7 +110,7 @@ export default function SurveyNewPage() {
 
               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <span className="text-xs text-gray-400">
-                  {item.isStar ? "별점" : "텍스트 피드백"}
+                  {item.isStar ? "감정 선택" : "텍스트 피드백"}
                 </span>
                 <button
                   type="button"

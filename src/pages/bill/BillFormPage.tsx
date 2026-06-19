@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
+import { useFormSubmit } from "../../hooks/useFormSubmit";
 import Input from "../../components/ui/Input";
 import FileInput from "../../components/ui/FileInput";
 import Button from "../../components/ui/Button";
@@ -23,19 +24,17 @@ export default function BillFormPage() {
   const navigate = useNavigate();
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>();
   const { receiptFile, receiptPreview, handleReceiptChange } = useReceiptUpload();
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { submitting, success, error, submit } = useFormSubmit();
+
+  const [receiptError, setReceiptError] = useState<string | null>(null);
 
   const onSubmit = async (values: FormValues) => {
     if (!receiptFile) {
-      setError("영수증을 첨부해주세요");
+      setReceiptError("영수증을 첨부해주세요");
       return;
     }
-    setSubmitting(true);
-    setError(null);
-
-    try {
+    setReceiptError(null);
+    await submit(async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("로그인이 필요합니다");
 
@@ -52,12 +51,7 @@ export default function BillFormPage() {
       });
 
       if (billError) throw billError;
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "오류 발생");
-    } finally {
-      setSubmitting(false);
-    }
+    });
   };
 
   if (success) {
@@ -73,13 +67,7 @@ export default function BillFormPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar
-        isGuest
-        onHome={async () => {
-          await supabase.auth.signOut();
-          navigate("/");
-        }}
-      />
+      <Navbar isGuest />
       <div className="max-w-md mx-auto px-4 py-8">
         <div className="mb-6">
           <p className="text-xs text-gray-400 mb-1">나누리 청년부</p>
@@ -133,7 +121,7 @@ export default function BillFormPage() {
             onChange={handleReceiptChange}
           />
 
-          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+          {(receiptError || error) && <p className="text-sm text-red-500 text-center">{receiptError ?? error}</p>}
 
           <Button type="submit" loading={submitting}>
             청구서 제출

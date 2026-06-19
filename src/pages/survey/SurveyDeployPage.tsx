@@ -75,7 +75,7 @@ export default function SurveyDeployPage() {
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
-        onHome={() => navigate("/home")}
+
         onProfileEdit={() => navigate("/member/setup")}
       />
 

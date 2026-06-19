@@ -7,11 +7,10 @@ interface Props {
   userName?: string;
   onLogout?: () => void;
   onProfileEdit?: () => void;
-  onHome?: () => void;
   isGuest?: boolean;
 }
 
-export default function Navbar({ userName, onLogout, onProfileEdit, onHome, isGuest }: Props) {
+export default function Navbar({ userName, onLogout, onProfileEdit, isGuest }: Props) {
   const navigate = useNavigate();
   const { userProfile } = useAuthStore();
 
@@ -23,7 +22,7 @@ export default function Navbar({ userName, onLogout, onProfileEdit, onHome, isGu
   return (
     <nav className="w-full border-b border-gray-100 bg-white px-4 py-3 flex items-center justify-between">
       <button
-        onClick={onHome}
+        onClick={() => navigate("/home")}
         className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
       >
         나누리

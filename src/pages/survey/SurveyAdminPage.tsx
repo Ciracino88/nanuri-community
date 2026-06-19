@@ -109,7 +109,7 @@ export default function SurveyAdminPage() {
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
-        onHome={() => navigate("/home")}
+
         onProfileEdit={() => navigate("/member/setup")}
       />
 
