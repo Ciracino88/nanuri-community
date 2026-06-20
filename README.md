@@ -1,6 +1,6 @@
-# 나누리 회계 앱
+# 나누리 웹
 
-나누리 청년부 비용 청구서 작성 및 관리 시스템입니다.
+나누리 청년부 재정 관리 및 설문조사 기능을 제공합니다.
 
 ## 소개
 
@@ -107,6 +107,11 @@ graph TD
 ### 관리자 앱 (iOS)
 <div align="center">
   <img width="300" alt="admin" src="https://github.com/user-attachments/assets/1628d0f1-9175-4d66-baae-259ddc2409c5" />
+</div>
+
+### 회계 장부 작성
+<div align="center">
+  <img width="300" alt="06_20_csv 파일 파싱 및 회계 장부 작성" src="https://github.com/user-attachments/assets/c296535f-3d27-4170-aab1-ae6c87081c6c" />
 </div>
 
 ## 트러블슈팅
