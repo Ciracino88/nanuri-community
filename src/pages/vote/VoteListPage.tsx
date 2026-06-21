@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/ui/Button";
+import ImageCarousel from "../../components/ui/ImageCarousel";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { uploadReceipt } from "../../lib/uploadReceipt";
@@ -141,41 +142,12 @@ export default function VoteListPage() {
 
               {imagePreviews.length > 0 ? (
                 <div className="flex flex-col gap-2">
-                  <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-                    <img src={imagePreviews[currentPreview]} alt="메뉴판" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(currentPreview)}
-                      className="absolute top-2 right-2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/60 transition"
-                    >
-                      <i className="ti ti-x text-sm" aria-hidden="true" />
-                    </button>
-                    {imagePreviews.length > 1 && (
-                      <>
-                        <button
-                          onClick={() => setCurrentPreview((v) => Math.max(0, v - 1))}
-                          disabled={currentPreview === 0}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
-                        >
-                          <i className="ti ti-chevron-left text-sm" aria-hidden="true" />
-                        </button>
-                        <button
-                          onClick={() => setCurrentPreview((v) => Math.min(imagePreviews.length - 1, v + 1))}
-                          disabled={currentPreview === imagePreviews.length - 1}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
-                        >
-                          <i className="ti ti-chevron-right text-sm" aria-hidden="true" />
-                        </button>
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                          {imagePreviews.map((_, i) => (
-                            <button key={i} onClick={() => setCurrentPreview(i)}
-                              className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentPreview ? "bg-white" : "bg-white/40"}`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  <ImageCarousel
+                    images={imagePreviews}
+                    currentIndex={currentPreview}
+                    onIndexChange={setCurrentPreview}
+                    onRemove={removeImage}
+                  />
                   <label className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-gray-200 rounded-xl text-sm text-gray-400 cursor-pointer hover:bg-gray-50 transition">
                     <i className="ti ti-plus text-base" aria-hidden="true" />
                     사진 추가

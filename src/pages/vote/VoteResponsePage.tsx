@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/ui/Button";
+import ImageCarousel from "../../components/ui/ImageCarousel";
+import SuccessScreen from "../../components/SuccessScreen";
 import { useAuthStore } from "../../store/authStore";
+import { useFormSubmit } from "../../hooks/useFormSubmit";
 import { supabase } from "../../lib/supabase";
 import { generateNickname } from "../../lib/generateNickname";
 import type { MenuItem } from "../../lib/extractMenus";
@@ -36,8 +39,7 @@ export default function VoteResponsePage() {
   const [selected, setSelected] = useState<SelectedItem[]>([]);
   const [query, setQuery] = useState("");
   const [pendingMenu, setPendingMenu] = useState<MenuItem | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const { submitting, success: submitted, submit } = useFormSubmit();
   const [responses, setResponses] = useState<VoteResponse[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -69,22 +71,27 @@ export default function VoteResponsePage() {
     return () => { supabase.removeChannel(channel); };
   }, [candidateId]);
 
-  const menuCounts = responses.reduce<Record<string, { count: number; names: string[] }>>((acc, r) => {
-    r.selected_menus.forEach((item) => {
-      const key = item.option ? `${item.name} (${item.option})` : item.name;
-      if (!acc[key]) acc[key] = { count: 0, names: [] };
-      acc[key].count += 1;
-      acc[key].names.push(r.nickname ?? "익명");
-    });
-    return acc;
-  }, {});
+  const sortedMenuCounts = useMemo(() => {
+    const counts = responses.reduce<Record<string, { count: number; names: string[] }>>((acc, r) => {
+      r.selected_menus.forEach((item) => {
+        const key = item.option ? `${item.name} (${item.option})` : item.name;
+        if (!acc[key]) acc[key] = { count: 0, names: [] };
+        acc[key].count += 1;
+        acc[key].names.push(r.nickname ?? "익명");
+      });
+      return acc;
+    }, {});
+    return Object.entries(counts).sort((a, b) => b[1].count - a[1].count);
+  }, [responses]);
 
-  const sortedMenuCounts = Object.entries(menuCounts).sort((a, b) => b[1].count - a[1].count);
+  const selectedNames = useMemo(() => selected.map((s) => s.name), [selected]);
 
-  const selectedNames = selected.map((s) => s.name);
-  const filtered = candidate?.menus.filter((m) =>
-    m.name.toLowerCase().includes(query.toLowerCase()) && !selectedNames.includes(m.name)
-  ) ?? [];
+  const filtered = useMemo(() =>
+    candidate?.menus.filter((m) =>
+      m.name.toLowerCase().includes(query.toLowerCase()) && !selectedNames.includes(m.name)
+    ) ?? [],
+    [candidate, query, selectedNames]
+  );
 
   const handleSelectMenu = (menu: MenuItem) => {
     if (menu.options && menu.options.length > 0) {
@@ -110,8 +117,7 @@ export default function VoteResponsePage() {
 
   const handleSubmit = async () => {
     if (!candidateId || selected.length === 0) return;
-    setSubmitting(true);
-    try {
+    await submit(async () => {
       const nickname = generateNickname();
       const { error } = await supabase.from("vote_responses").insert({
         candidate_id: candidateId,
@@ -119,10 +125,7 @@ export default function VoteResponsePage() {
         selected_menus: selected,
       });
       if (error) throw error;
-      setSubmitted(true);
-    } finally {
-      setSubmitting(false);
-    }
+    });
   };
 
   const navbarProps = {
@@ -137,16 +140,13 @@ export default function VoteResponsePage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar {...navbarProps} />
-        <div className="flex flex-col items-center justify-center flex-1 gap-3 p-6">
-          <p className="text-4xl">🎉</p>
-          <p className="text-base font-medium text-gray-600">메뉴 선택 완료!</p>
-          <button onClick={() => navigate("/vote")} className="text-sm text-blue-500 mt-2">
-            후보 목록으로 돌아가기
-          </button>
-        </div>
-      </div>
+      <SuccessScreen
+        emoji="🎉"
+        message="메뉴 선택 완료!"
+        buttonText="목록으로 돌아가기"
+        onButtonClick={() => navigate("/vote")}
+        navbarProps={navbarProps}
+      />
     );
   }
 
@@ -164,84 +164,36 @@ export default function VoteResponsePage() {
         </div>
 
         {lightbox && (
-          <div
-            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
-            onClick={() => setLightbox(false)}
-          >
-            <img
-              src={candidate.image_urls[currentImage]}
-              alt="메뉴판 확대"
-              className="max-w-full max-h-full object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
+          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center" onClick={() => setLightbox(false)}>
+            <div onClick={(e) => e.stopPropagation()} className="w-full h-full flex items-center justify-center">
+              <ImageCarousel
+                images={candidate.image_urls}
+                currentIndex={currentImage}
+                onIndexChange={setCurrentImage}
+              />
+            </div>
             <button
               onClick={() => setLightbox(false)}
               className="absolute top-4 right-4 text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center hover:bg-black/60 transition"
             >
               <i className="ti ti-x text-lg" aria-hidden="true" />
             </button>
-            {candidate.image_urls.length > 1 && (
-              <>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setCurrentImage((v) => Math.max(0, v - 1)); }}
-                  disabled={currentImage === 0}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
-                >
-                  <i className="ti ti-chevron-left text-lg" aria-hidden="true" />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setCurrentImage((v) => Math.min(candidate.image_urls.length - 1, v + 1)); }}
-                  disabled={currentImage === candidate.image_urls.length - 1}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
-                >
-                  <i className="ti ti-chevron-right text-lg" aria-hidden="true" />
-                </button>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {candidate.image_urls.map((_, i) => (
-                    <button key={i} onClick={(e) => { e.stopPropagation(); setCurrentImage(i); }}
-                      className={`w-2 h-2 rounded-full transition-all ${i === currentImage ? "bg-white" : "bg-white/40"}`}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
           </div>
         )}
 
         {candidate.image_urls?.length > 0 && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-            <img src={candidate.image_urls[currentImage]} alt="메뉴판" className="w-full h-full object-cover" />
+          <div className="relative">
+            <ImageCarousel
+              images={candidate.image_urls}
+              currentIndex={currentImage}
+              onIndexChange={setCurrentImage}
+            />
             <button
               onClick={() => setLightbox(true)}
-              className="absolute bottom-2 right-2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/60 transition"
+              className="absolute bottom-2 right-2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/60 transition z-10"
             >
               <i className="ti ti-arrows-maximize text-sm" aria-hidden="true" />
             </button>
-            {candidate.image_urls.length > 1 && (
-              <>
-                <button
-                  onClick={() => setCurrentImage((v) => Math.max(0, v - 1))}
-                  disabled={currentImage === 0}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
-                >
-                  <i className="ti ti-chevron-left text-sm" aria-hidden="true" />
-                </button>
-                <button
-                  onClick={() => setCurrentImage((v) => Math.min(candidate.image_urls.length - 1, v + 1))}
-                  disabled={currentImage === candidate.image_urls.length - 1}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
-                >
-                  <i className="ti ti-chevron-right text-sm" aria-hidden="true" />
-                </button>
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                  {candidate.image_urls.map((_, i) => (
-                    <button key={i} onClick={() => setCurrentImage(i)}
-                      className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentImage ? "bg-white" : "bg-white/40"}`}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
           </div>
         )}
 

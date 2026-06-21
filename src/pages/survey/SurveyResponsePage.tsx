@@ -6,6 +6,7 @@ import MoodRating from "../../components/ui/MoodRating";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { useFormSubmit } from "../../hooks/useFormSubmit";
+import SuccessScreen from "../../components/SuccessScreen";
 import { generateNickname } from "../../lib/generateNickname";
 
 interface Survey {
@@ -132,16 +133,13 @@ export default function SurveyResponsePage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar {...navbarProps} />
-        <div className="flex flex-col items-center justify-center flex-1 gap-3 p-6">
-          <p className="text-4xl">🎉</p>
-          <p className="text-base font-medium text-gray-600">
-            {isEditing ? "응답이 수정되었습니다!" : "참여해주셔서 감사합니다!"}
-          </p>
-          <button onClick={() => navigate("/home")} className="text-sm text-blue-500 mt-2">홈으로 돌아가기</button>
-        </div>
-      </div>
+      <SuccessScreen
+        emoji="🎉"
+        message={isEditing ? "응답이 수정되었습니다!" : "참여해주셔서 감사합니다!"}
+        buttonText="홈으로 돌아가기"
+        onButtonClick={() => navigate("/home")}
+        navbarProps={navbarProps}
+      />
     );
   }
 

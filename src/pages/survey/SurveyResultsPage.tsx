@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { useAuthStore } from "../../store/authStore";
@@ -60,16 +60,17 @@ export default function SurveyResultsPage() {
 
   const total = responses.length;
 
-  const getMoodCounts = (itemIndex: number) =>
+  const getMoodCounts = useMemo(() => (itemIndex: number) =>
     MOOD_LEVELS.map((mood) => ({
       ...mood,
       count: responses.filter((r) => r.answers[itemIndex] === mood.value).length,
-    }));
+    })), [responses]);
 
-  const getTextAnswers = (itemIndex: number) =>
+  const getTextAnswers = useMemo(() => (itemIndex: number) =>
     responses
       .filter((r) => typeof r.answers[itemIndex] === "string" && (r.answers[itemIndex] as string).trim())
-      .map((r) => ({ text: r.answers[itemIndex] as string, nickname: r.nickname }));
+      .map((r) => ({ text: r.answers[itemIndex] as string, nickname: r.nickname })),
+    [responses]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
