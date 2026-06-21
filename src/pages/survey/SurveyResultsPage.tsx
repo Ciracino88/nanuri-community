@@ -13,6 +13,7 @@ interface Survey {
 
 interface Response {
   answers: Record<string, number | string>;
+  nickname: string | null;
 }
 
 const MOOD_LEVELS = [
@@ -39,11 +40,11 @@ export default function SurveyResultsPage() {
         supabase.from("surveys").select("id, title, place_name, items").eq("id", id).single(),
         supabase
           .from("survey_responses")
-          .select("answers")
+          .select("answers, nickname")
           .eq("survey_id", id),
       ]);
       setSurvey(surveyData);
-      setResponses((responseData ?? []).map((r) => ({ answers: r.answers })));
+      setResponses((responseData ?? []).map((r) => ({ answers: r.answers, nickname: r.nickname ?? null })));
       setLoading(false);
     };
     load();
@@ -68,7 +69,7 @@ export default function SurveyResultsPage() {
   const getTextAnswers = (itemIndex: number) =>
     responses
       .filter((r) => typeof r.answers[itemIndex] === "string" && (r.answers[itemIndex] as string).trim())
-      .map((r) => r.answers[itemIndex] as string);
+      .map((r) => ({ text: r.answers[itemIndex] as string, nickname: r.nickname }));
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -125,25 +126,25 @@ export default function SurveyResultsPage() {
             {survey.items.some((item) => item.isStar) && (
               <div className="flex flex-col gap-2">
                 <p className="text-xs text-gray-400 font-medium">만족도 항목</p>
-                <div className="bg-white border border-gray-100 rounded-xl divide-y divide-gray-100">
+                <div className="grid grid-cols-3 gap-2.5">
                   {survey.items.map((item, i) => {
                     if (!item.isStar) return null;
                     const counts = getMoodCounts(i);
+                    const max = Math.max(...counts.map((m) => m.count), 1);
                     return (
-                      <div key={i} className="p-4">
-                        <p className="text-sm font-medium text-gray-700 mb-3">{item.label}</p>
-                        <div className="flex flex-col gap-2">
+                      <div key={i} className="group aspect-square bg-white border border-gray-100 hover:border-gray-300 hover:shadow-[0_0_0_3px_rgba(0,0,0,0.06)] rounded-xl p-3.5 flex flex-col items-center justify-between transition-all cursor-pointer">
+                        <p className="text-sm font-medium text-gray-700 text-center leading-tight line-clamp-2">{item.label}</p>
+                        <div className="flex items-end justify-center gap-2 w-full px-3" style={{ height: "72px" }}>
                           {counts.map((mood, mi) => (
-                            <div key={mood.value} className="flex items-center gap-2.5">
-                              <i className={`ti ${mood.icon} text-lg ${mood.color}`} aria-hidden="true" />
-                              <span className="text-xs text-gray-400 w-10">{mood.label}</span>
-                              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div key={mood.value} className="flex flex-col items-center gap-1 flex-1">
+                              <span className="text-xs font-medium text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity h-3.5 leading-none">{mood.count}</span>
+                              <div className="w-full bg-gray-100 rounded-t overflow-hidden flex flex-col justify-end" style={{ height: "56px" }}>
                                 <div
-                                  className={`h-full rounded-full transition-all ${BAR_COLORS[mi]}`}
-                                  style={{ width: total > 0 ? `${Math.round((mood.count / total) * 100)}%` : "0%" }}
+                                  className={`w-full rounded-t transition-all group-hover:brightness-110 ${BAR_COLORS[mi]}`}
+                                  style={{ height: `${Math.round((mood.count / max) * 100)}%` }}
                                 />
                               </div>
-                              <span className="text-xs text-gray-400 w-6 text-right">{mood.count}</span>
+                              <i className={`ti ${mood.icon} text-sm ${mood.color}`} aria-hidden="true" />
                             </div>
                           ))}
                         </div>
@@ -163,8 +164,11 @@ export default function SurveyResultsPage() {
                 <div key={i} className="flex flex-col gap-2">
                   <p className="text-xs text-gray-400 font-medium">{item.label}</p>
                   <div className="bg-white border border-gray-100 rounded-xl divide-y divide-gray-100">
-                    {answers.map((text, j) => (
-                      <div key={j} className="px-4 py-3">
+                    {answers.map(({ text, nickname }, j) => (
+                      <div key={j} className="px-4 py-3 flex flex-col gap-1">
+                        {nickname && (
+                          <p className="text-xs text-gray-400">{nickname}</p>
+                        )}
                         <p className="text-sm text-gray-700 leading-relaxed">{text}</p>
                       </div>
                     ))}

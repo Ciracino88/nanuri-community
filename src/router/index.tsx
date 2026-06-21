@@ -90,11 +90,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/survey/:id",
-    element: (
-      <ProtectedRoute memberOnly>
-        <SurveyResponsePage />
-      </ProtectedRoute>
-    ),
+    element: <SurveyResponsePage />,
   },
   {
     path: "/admin/surveys/:id/results",

@@ -6,6 +6,7 @@ import MoodRating from "../../components/ui/MoodRating";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { useFormSubmit } from "../../hooks/useFormSubmit";
+import { generateNickname } from "../../lib/generateNickname";
 
 interface Survey {
   id: string;
@@ -48,7 +49,7 @@ export default function SurveyResponsePage() {
   }, [id, user]);
 
   const handleSubmit = async () => {
-    if (!survey || !user) return;
+    if (!survey) return;
     await submit(async () => {
       if (existingResponseId) {
         const { error } = await supabase
@@ -57,9 +58,11 @@ export default function SurveyResponsePage() {
           .eq("id", existingResponseId);
         if (error) throw error;
       } else {
+        const nickname = generateNickname();
         const { error } = await supabase.from("survey_responses").insert({
           survey_id: survey.id,
-          user_id: user.id,
+          user_id: user?.id ?? null,
+          nickname,
           answers,
         });
         if (error) throw error;
