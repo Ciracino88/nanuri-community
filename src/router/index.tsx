@@ -14,6 +14,8 @@ import SurveyDeployPage from "../pages/survey/SurveyDeployPage";
 import SurveyResponsePage from "../pages/survey/SurveyResponsePage";
 import SurveyListPage from "../pages/survey/SurveyListPage";
 import SurveyResultsPage from "../pages/survey/SurveyResultsPage";
+import VoteListPage from "../pages/vote/VoteListPage";
+import VoteResponsePage from "../pages/vote/VoteResponsePage";
 
 export const router = createBrowserRouter([
   {
@@ -99,6 +101,18 @@ export const router = createBrowserRouter([
         <SurveyResultsPage />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: "/vote",
+    element: (
+      <ProtectedRoute memberOnly>
+        <VoteListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/vote/candidate/:candidateId",
+    element: <VoteResponsePage />,
   },
   {
     path: "/accounting",

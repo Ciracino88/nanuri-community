@@ -1,0 +1,354 @@
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Navbar from "../../components/Navbar";
+import Button from "../../components/ui/Button";
+import { useAuthStore } from "../../store/authStore";
+import { supabase } from "../../lib/supabase";
+import { generateNickname } from "../../lib/generateNickname";
+import type { MenuItem } from "../../lib/extractMenus";
+
+interface Candidate {
+  id: string;
+  name: string;
+  image_urls: string[];
+  menus: MenuItem[];
+}
+
+interface SelectedItem {
+  name: string;
+  option?: string;
+}
+
+interface VoteResponse {
+  id: string;
+  nickname: string;
+  selected_menus: SelectedItem[];
+}
+
+export default function VoteResponsePage() {
+  const { candidateId } = useParams<{ candidateId: string }>();
+  const navigate = useNavigate();
+  const { userProfile, signOut } = useAuthStore();
+
+  const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [currentImage, setCurrentImage] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
+  const [selected, setSelected] = useState<SelectedItem[]>([]);
+  const [query, setQuery] = useState("");
+  const [pendingMenu, setPendingMenu] = useState<MenuItem | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [responses, setResponses] = useState<VoteResponse[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!candidateId) return;
+
+    supabase.from("vote_candidates").select("*").eq("id", candidateId).single()
+      .then(({ data }) => setCandidate(data));
+
+    supabase.from("vote_responses").select("id, nickname, selected_menus").eq("candidate_id", candidateId)
+      .then(({ data }) => setResponses(data ?? []));
+
+    const channel = supabase
+      .channel(`vote_responses:${candidateId}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "vote_responses",
+        filter: `candidate_id=eq.${candidateId}`,
+      }, ({ eventType, new: newRow, old: oldRow }) => {
+        if (eventType === "INSERT") {
+          setResponses((prev) => [...prev, newRow as VoteResponse]);
+        } else if (eventType === "DELETE") {
+          setResponses((prev) => prev.filter((r) => r.id !== (oldRow as VoteResponse).id));
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [candidateId]);
+
+  const menuCounts = responses.reduce<Record<string, { count: number; names: string[] }>>((acc, r) => {
+    r.selected_menus.forEach((item) => {
+      const key = item.option ? `${item.name} (${item.option})` : item.name;
+      if (!acc[key]) acc[key] = { count: 0, names: [] };
+      acc[key].count += 1;
+      acc[key].names.push(r.nickname ?? "익명");
+    });
+    return acc;
+  }, {});
+
+  const sortedMenuCounts = Object.entries(menuCounts).sort((a, b) => b[1].count - a[1].count);
+
+  const selectedNames = selected.map((s) => s.name);
+  const filtered = candidate?.menus.filter((m) =>
+    m.name.toLowerCase().includes(query.toLowerCase()) && !selectedNames.includes(m.name)
+  ) ?? [];
+
+  const handleSelectMenu = (menu: MenuItem) => {
+    if (menu.options && menu.options.length > 0) {
+      setPendingMenu(menu);
+      setQuery("");
+    } else {
+      setSelected((prev) => [...prev, { name: menu.name }]);
+      setQuery("");
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleSelectOption = (option: string) => {
+    if (!pendingMenu) return;
+    setSelected((prev) => [...prev, { name: pendingMenu.name, option }]);
+    setPendingMenu(null);
+    inputRef.current?.focus();
+  };
+
+  const removeMenu = (name: string) => {
+    setSelected((prev) => prev.filter((m) => m.name !== name));
+  };
+
+  const handleSubmit = async () => {
+    if (!candidateId || selected.length === 0) return;
+    setSubmitting(true);
+    try {
+      const nickname = generateNickname();
+      const { error } = await supabase.from("vote_responses").insert({
+        candidate_id: candidateId,
+        nickname,
+        selected_menus: selected,
+      });
+      if (error) throw error;
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const navbarProps = {
+    userName: userProfile?.name,
+    onLogout: signOut,
+    onProfileEdit: () => navigate("/member/setup"),
+  };
+
+  if (!candidate) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-sm text-gray-300">불러오는 중...</div>;
+  }
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar {...navbarProps} />
+        <div className="flex flex-col items-center justify-center flex-1 gap-3 p-6">
+          <p className="text-4xl">🎉</p>
+          <p className="text-base font-medium text-gray-600">메뉴 선택 완료!</p>
+          <button onClick={() => navigate("/vote")} className="text-sm text-blue-500 mt-2">
+            후보 목록으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar {...navbarProps} />
+
+      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
+
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/vote")} className="text-gray-300 hover:text-gray-500 transition">
+            <i className="ti ti-arrow-left text-lg" aria-hidden="true" />
+          </button>
+          <h1 className="text-lg font-medium text-gray-800">{candidate.name}</h1>
+        </div>
+
+        {lightbox && (
+          <div
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+            onClick={() => setLightbox(false)}
+          >
+            <img
+              src={candidate.image_urls[currentImage]}
+              alt="메뉴판 확대"
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setLightbox(false)}
+              className="absolute top-4 right-4 text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center hover:bg-black/60 transition"
+            >
+              <i className="ti ti-x text-lg" aria-hidden="true" />
+            </button>
+            {candidate.image_urls.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setCurrentImage((v) => Math.max(0, v - 1)); }}
+                  disabled={currentImage === 0}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
+                >
+                  <i className="ti ti-chevron-left text-lg" aria-hidden="true" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setCurrentImage((v) => Math.min(candidate.image_urls.length - 1, v + 1)); }}
+                  disabled={currentImage === candidate.image_urls.length - 1}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
+                >
+                  <i className="ti ti-chevron-right text-lg" aria-hidden="true" />
+                </button>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {candidate.image_urls.map((_, i) => (
+                    <button key={i} onClick={(e) => { e.stopPropagation(); setCurrentImage(i); }}
+                      className={`w-2 h-2 rounded-full transition-all ${i === currentImage ? "bg-white" : "bg-white/40"}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {candidate.image_urls?.length > 0 && (
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+            <img src={candidate.image_urls[currentImage]} alt="메뉴판" className="w-full h-full object-cover" />
+            <button
+              onClick={() => setLightbox(true)}
+              className="absolute bottom-2 right-2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/60 transition"
+            >
+              <i className="ti ti-arrows-maximize text-sm" aria-hidden="true" />
+            </button>
+            {candidate.image_urls.length > 1 && (
+              <>
+                <button
+                  onClick={() => setCurrentImage((v) => Math.max(0, v - 1))}
+                  disabled={currentImage === 0}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
+                >
+                  <i className="ti ti-chevron-left text-sm" aria-hidden="true" />
+                </button>
+                <button
+                  onClick={() => setCurrentImage((v) => Math.min(candidate.image_urls.length - 1, v + 1))}
+                  disabled={currentImage === candidate.image_urls.length - 1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
+                >
+                  <i className="ti ti-chevron-right text-sm" aria-hidden="true" />
+                </button>
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                  {candidate.image_urls.map((_, i) => (
+                    <button key={i} onClick={() => setCurrentImage(i)}
+                      className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentImage ? "bg-white" : "bg-white/40"}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-500">메뉴 선택</label>
+
+          {selected.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selected.map((item) => (
+                <span
+                  key={item.name}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 text-sm rounded-lg"
+                >
+                  {item.name}{item.option && ` (${item.option})`}
+                  <button onClick={() => removeMenu(item.name)} className="text-blue-400 hover:text-blue-600">
+                    <i className="ti ti-x text-xs" aria-hidden="true" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {pendingMenu ? (
+            <div className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col gap-2">
+              <p className="text-sm font-medium text-gray-700">{pendingMenu.name} — 옵션 선택</p>
+              <div className="flex flex-wrap gap-2">
+                {pendingMenu.options?.map((opt) => (
+                  <button
+                    key={opt.label}
+                    onClick={() => handleSelectOption(opt.label)}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition"
+                  >
+                    {opt.label}{opt.price && <span className="text-xs text-gray-400 ml-1">{opt.price}</span>}
+                  </button>
+                ))}
+                <button
+                  onClick={() => { setSelected((prev) => [...prev, { name: pendingMenu.name }]); setPendingMenu(null); }}
+                  className="px-3 py-1.5 border border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:bg-gray-50 transition"
+                >
+                  옵션 없음
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative">
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder={candidate.menus.length > 0 ? "메뉴 검색..." : "메뉴 정보가 없습니다"}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                disabled={candidate.menus.length === 0}
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition"
+              />
+              {query && filtered.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden z-10">
+                  {filtered.slice(0, 8).map((m) => (
+                    <button
+                      key={m.name}
+                      onClick={() => handleSelectMenu(m)}
+                      className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between"
+                    >
+                      <span>{m.name}</span>
+                      <div className="flex items-center gap-2">
+                        {m.options && m.options.length > 0 && (
+                          <span className="text-xs text-blue-400">{m.options.map((o) => o.label).join(" / ")}</span>
+                        )}
+                        {m.price && <span className="text-xs text-gray-400">{m.price}</span>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {query && filtered.length === 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm text-gray-300">
+                  검색 결과가 없습니다
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Button onClick={handleSubmit} loading={submitting} disabled={selected.length === 0}>
+          선택 완료
+        </Button>
+
+        {sortedMenuCounts.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-gray-500">현재 메뉴 현황</p>
+              <p className="text-xs text-gray-400">{responses.length}명 참여</p>
+            </div>
+            <div className="bg-white border border-gray-100 rounded-xl divide-y divide-gray-100">
+              {sortedMenuCounts.map(([menuName, { count, names }]) => (
+                <div key={menuName} className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <p className="text-sm text-gray-700 truncate">{menuName}</p>
+                    <p className="text-xs text-gray-400 truncate">{names.join(", ")}</p>
+                  </div>
+                  <span className="text-sm font-medium text-blue-500 shrink-0">{count}명</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}

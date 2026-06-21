@@ -1,0 +1,242 @@
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../../components/Navbar";
+import Button from "../../components/ui/Button";
+import { useAuthStore } from "../../store/authStore";
+import { supabase } from "../../lib/supabase";
+import { uploadReceipt } from "../../lib/uploadReceipt";
+import { extractMenusFromImage, type MenuItem } from "../../lib/extractMenus";
+
+interface Candidate {
+  id: string;
+  name: string;
+  image_urls: string[];
+  menus: MenuItem[];
+  created_at: string;
+}
+
+export default function VoteListPage() {
+  const navigate = useNavigate();
+  const { userProfile, signOut } = useAuthStore();
+
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+
+  const [name, setName] = useState("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [currentPreview, setCurrentPreview] = useState(0);
+  const [extracting, setExtracting] = useState(false);
+  const [menus, setMenus] = useState<MenuItem[]>([]);
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    supabase.from("vote_candidates").select("*").order("created_at", { ascending: false })
+      .then(({ data }) => { setCandidates(data ?? []); setLoading(false); });
+  }, []);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+
+    const newFiles = [...imageFiles, ...files];
+    const newPreviews = [...imagePreviews, ...files.map((f) => URL.createObjectURL(f))];
+    setImageFiles(newFiles);
+    setImagePreviews(newPreviews);
+    setCurrentPreview(newPreviews.length - 1);
+    setMenus([]);
+    setExtracting(true);
+    try {
+      const extracted = await extractMenusFromImage(newFiles);
+      setMenus(extracted);
+    } finally {
+      setExtracting(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newFiles = imageFiles.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImageFiles(newFiles);
+    setImagePreviews(newPreviews);
+    setCurrentPreview(Math.min(currentPreview, newPreviews.length - 1));
+    setMenus([]);
+  };
+
+  const resetForm = () => {
+    setName("");
+    setImageFiles([]);
+    setImagePreviews([]);
+    setCurrentPreview(0);
+    setMenus([]);
+    if (fileRef.current) fileRef.current.value = "";
+    setShowForm(false);
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      const imageUrls = await Promise.all(imageFiles.map((f) => uploadReceipt(f, "votes")));
+      const { data, error } = await supabase.from("vote_candidates").insert({
+        name: name.trim(),
+        image_urls: imageUrls,
+        menus,
+      }).select().single();
+      if (error) throw error;
+      setCandidates((prev) => [data, ...prev]);
+      resetForm();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar
+        userName={userProfile?.name}
+        onLogout={signOut}
+        onProfileEdit={() => navigate("/member/setup")}
+      />
+
+      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-medium text-gray-800">메뉴 종합</h1>
+            <p className="text-sm text-gray-400 mt-0.5">메뉴판 이미지를 올리고 메뉴를 종합받으세요</p>
+          </div>
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="flex items-center gap-1.5 text-sm text-blue-500 font-medium"
+          >
+            <i className="ti ti-upload text-base" aria-hidden="true" />
+            메뉴판 업로드
+          </button>
+        </div>
+
+        {showForm && (
+          <div className="fixed inset-0 bg-black/60 z-40 flex items-end sm:items-center justify-center" onClick={resetForm}>
+            <div
+              className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-medium text-gray-800">메뉴판 업로드</h2>
+                <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 transition">
+                  <i className="ti ti-x text-lg" aria-hidden="true" />
+                </button>
+              </div>
+
+              <input
+                type="text"
+                placeholder="장소 이름"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition"
+              />
+
+              {imagePreviews.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+                    <img src={imagePreviews[currentPreview]} alt="메뉴판" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(currentPreview)}
+                      className="absolute top-2 right-2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/60 transition"
+                    >
+                      <i className="ti ti-x text-sm" aria-hidden="true" />
+                    </button>
+                    {imagePreviews.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setCurrentPreview((v) => Math.max(0, v - 1))}
+                          disabled={currentPreview === 0}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
+                        >
+                          <i className="ti ti-chevron-left text-sm" aria-hidden="true" />
+                        </button>
+                        <button
+                          onClick={() => setCurrentPreview((v) => Math.min(imagePreviews.length - 1, v + 1))}
+                          disabled={currentPreview === imagePreviews.length - 1}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center disabled:opacity-30 hover:bg-black/60 transition"
+                        >
+                          <i className="ti ti-chevron-right text-sm" aria-hidden="true" />
+                        </button>
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                          {imagePreviews.map((_, i) => (
+                            <button key={i} onClick={() => setCurrentPreview(i)}
+                              className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentPreview ? "bg-white" : "bg-white/40"}`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <label className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-gray-200 rounded-xl text-sm text-gray-400 cursor-pointer hover:bg-gray-50 transition">
+                    <i className="ti ti-plus text-base" aria-hidden="true" />
+                    사진 추가
+                    <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />
+                  </label>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center gap-1.5 py-8 bg-gray-50 border border-dashed border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition">
+                  <i className="ti ti-camera text-xl text-gray-300" aria-hidden="true" />
+                  <p className="text-sm text-gray-400">메뉴판 사진 업로드</p>
+                  <p className="text-xs text-gray-300">여러 장 선택 가능</p>
+                  <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />
+                </label>
+              )}
+
+              {extracting && <p className="text-xs text-blue-400">메뉴 추출 중...</p>}
+              {!extracting && menus.length > 0 && <p className="text-xs text-emerald-500">메뉴 {menus.length}개 추출 완료</p>}
+
+              <Button onClick={handleSave} loading={saving} disabled={!name.trim() || extracting}>
+                저장
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {loading ? (
+          <p className="text-sm text-gray-300 text-center py-10">불러오는 중...</p>
+        ) : candidates.length === 0 ? (
+          <p className="text-sm text-gray-300 text-center py-10">아직 등록된 메뉴판이 없습니다</p>
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            {candidates.map((c) => (
+              <div key={c.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+                {c.image_urls?.length > 0 && (
+                  <img src={c.image_urls[0]} alt={c.name} className="w-full h-36 object-cover" />
+                )}
+                <div className="p-4 flex items-center justify-between">
+                  <button onClick={() => navigate(`/vote/candidate/${c.id}`)} className="flex-1 text-left">
+                    <p className="text-sm font-medium text-gray-800">{c.name}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">메뉴 {c.menus.length}개 · 사진 {c.image_urls?.length ?? 0}장</p>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`"${c.name}"을 삭제할까요?`)) return;
+                        await supabase.from("vote_candidates").delete().eq("id", c.id);
+                        setCandidates((prev) => prev.filter((x) => x.id !== c.id));
+                      }}
+                      className="text-gray-300 hover:text-red-400 transition p-1"
+                    >
+                      <i className="ti ti-trash text-base" aria-hidden="true" />
+                    </button>
+                    <i className="ti ti-chevron-right text-gray-300 text-lg" aria-hidden="true" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
