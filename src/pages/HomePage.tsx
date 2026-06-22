@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import Navbar from "../components/Navbar";
@@ -10,19 +10,53 @@ interface MenuCard {
   title: string;
   description: string;
   path: string;
-  adminOnly?: boolean;
 }
 
 const MENU_CARDS: MenuCard[] = [
-  { icon: "ti-credit-card", title: "청구서 제출", description: "비용 영수증 제출", path: "/member/form" },
-  { icon: "ti-chart-bar", title: "설문 참여", description: "진행 중인 설문 보기", path: "/surveys" },
-  { icon: "ti-salad", title: "메뉴 종합", description: "메뉴판 올리고 메뉴 종합", path: "/vote" },
+  { icon: "ti-credit-card", title: "청구서 제출", description: "청구 내용과 금액, 영수증을 제출하면 관리자가 확인 후 송금해드려요", path: "/member/form" },
+  { icon: "ti-chart-bar", title: "설문 참여", description: "로그인 없이 링크만으로 설문에 참여하고 결과를 실시간으로 확인해요", path: "/surveys" },
+  { icon: "ti-salad", title: "메뉴 종합", description: "메뉴판 사진을 올리면 AI가 메뉴를 추출하고 모두의 선택을 모아줘요", path: "/vote" },
 ];
 
 const ADMIN_CARDS: MenuCard[] = [
-  { icon: "ti-chart-bar", title: "회계 보고서", description: "지출 내역 조회", path: "/accounting" },
-  { icon: "ti-clipboard-list", title: "설문 관리", description: "설문 작성 및 배포", path: "/admin/surveys" },
+  { icon: "ti-chart-bar", title: "회계 보고서", description: "지출 내역을 한눈에 조회하고 관리해요", path: "/accounting" },
+  { icon: "ti-clipboard-list", title: "설문 관리", description: "설문을 작성하고 링크로 배포해요", path: "/admin/surveys" },
 ];
+
+function FeatureCard({ card, delay, onClick }: { card: MenuCard; delay: number; onClick: () => void }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      className="bg-white border border-gray-100 rounded-2xl p-6 text-left hover:border-gray-200 hover:shadow-sm transition-all duration-300"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(20px)",
+        transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s, box-shadow 0.2s, border-color 0.2s`,
+      }}
+    >
+      <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-3">
+        <i className={`ti ${card.icon} text-xl text-gray-500`} aria-hidden="true" />
+      </div>
+      <p className="text-sm font-medium text-gray-800 mb-1.5">{card.title}</p>
+      <p className="text-xs text-gray-400 leading-relaxed">{card.description}</p>
+    </button>
+  );
+}
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -44,11 +78,10 @@ export default function HomePage() {
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
-
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
+      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
 
         {unrespondedCount > 0 && (
           <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 flex items-center justify-between">
@@ -65,37 +98,21 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2.5">
           <p className="text-xs text-gray-400 font-medium">메뉴</p>
-          <div className="grid grid-cols-2 gap-3">
-            {MENU_CARDS.map((card) => (
-              <button
-                key={card.path}
-                onClick={() => navigate(card.path)}
-                className="bg-white rounded-xl border border-gray-100 p-4 text-left hover:bg-gray-50 transition"
-              >
-                <i className={`ti ${card.icon} text-2xl text-gray-400 mb-2.5 block`} aria-hidden="true" />
-                <p className="text-sm font-medium text-gray-800 mb-0.5">{card.title}</p>
-                <p className="text-xs text-gray-400">{card.description}</p>
-              </button>
+          <div className="flex flex-col gap-2.5">
+            {MENU_CARDS.map((card, i) => (
+              <FeatureCard key={card.path} card={card} delay={i * 0.1} onClick={() => navigate(card.path)} />
             ))}
           </div>
         </div>
 
         {isAdmin && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             <p className="text-xs text-gray-400 font-medium">관리자</p>
-            <div className="grid grid-cols-2 gap-3">
-              {ADMIN_CARDS.map((card) => (
-                <button
-                  key={card.path}
-                  onClick={() => navigate(card.path)}
-                  className="bg-white rounded-xl border border-gray-100 p-4 text-left hover:bg-gray-50 transition"
-                >
-                  <i className={`ti ${card.icon} text-2xl text-gray-400 mb-2.5 block`} aria-hidden="true" />
-                  <p className="text-sm font-medium text-gray-800 mb-0.5">{card.title}</p>
-                  <p className="text-xs text-gray-400">{card.description}</p>
-                </button>
+            <div className="flex flex-col gap-2.5">
+              {ADMIN_CARDS.map((card, i) => (
+                <FeatureCard key={card.path} card={card} delay={i * 0.1} onClick={() => navigate(card.path)} />
               ))}
             </div>
           </div>
