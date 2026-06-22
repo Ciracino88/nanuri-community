@@ -4,6 +4,7 @@ import Navbar from "../../components/Navbar";
 import Button from "../../components/ui/Button";
 import ImageCarousel from "../../components/ui/ImageCarousel";
 import SuccessScreen from "../../components/SuccessScreen";
+import LoadingScreen from "../../components/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
 import { useFormSubmit } from "../../hooks/useFormSubmit";
 import { supabase } from "../../lib/supabase";
@@ -135,7 +136,7 @@ export default function VoteResponsePage() {
   };
 
   if (!candidate) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-sm text-gray-300">불러오는 중...</div>;
+    return <LoadingScreen />;
   }
 
   if (submitted) {

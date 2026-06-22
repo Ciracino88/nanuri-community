@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import LoadingScreen from "../../components/LoadingScreen";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import { useAuthStore } from "../../store/authStore";
@@ -50,16 +51,6 @@ export default function SurveyResultsPage() {
     load();
   }, [id]);
 
-  if (loading || !survey) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-sm text-gray-300">
-        불러오는 중...
-      </div>
-    );
-  }
-
-  const total = responses.length;
-
   const getMoodCounts = useMemo(() => (itemIndex: number) =>
     MOOD_LEVELS.map((mood) => ({
       ...mood,
@@ -71,6 +62,12 @@ export default function SurveyResultsPage() {
       .filter((r) => typeof r.answers[itemIndex] === "string" && (r.answers[itemIndex] as string).trim())
       .map((r) => ({ text: r.answers[itemIndex] as string, nickname: r.nickname })),
     [responses]);
+
+  if (loading || !survey) {
+    return <LoadingScreen />;
+  }
+
+  const total = responses.length;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

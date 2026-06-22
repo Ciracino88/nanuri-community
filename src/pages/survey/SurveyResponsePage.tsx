@@ -7,6 +7,7 @@ import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { useFormSubmit } from "../../hooks/useFormSubmit";
 import SuccessScreen from "../../components/SuccessScreen";
+import LoadingScreen from "../../components/LoadingScreen";
 import { generateNickname } from "../../lib/generateNickname";
 
 interface Survey {
@@ -95,9 +96,7 @@ export default function SurveyResponsePage() {
 
   if (!survey) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center text-sm text-gray-300">
-        불러오는 중...
-      </div>
+      <LoadingScreen />
     );
   }
 

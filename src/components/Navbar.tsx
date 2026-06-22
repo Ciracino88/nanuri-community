@@ -21,9 +21,12 @@ export default function Navbar({ userName, onLogout, onProfileEdit, isGuest }: P
     <nav className="w-full border-b border-gray-100 bg-white px-5 py-3 flex items-center justify-between">
       <button
         onClick={() => navigate("/home")}
-        className="text-sm font-medium text-gray-800 hover:text-gray-600 transition"
+        className="flex items-center gap-2 hover:opacity-70 transition"
       >
-        나누리
+        <div className="w-7 h-7 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
+          <i className="ti ti-seeding text-base text-gray-500" aria-hidden="true" />
+        </div>
+        <span className="text-sm font-semibold text-gray-800">나누리</span>
       </button>
       <div className="flex items-center gap-1">
         {isGuest ? (
