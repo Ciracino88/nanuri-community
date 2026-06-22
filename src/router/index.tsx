@@ -6,7 +6,9 @@ import MemberBillFormPage from "../pages/bill/MemberBillFormPage";
 import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
 import BillFormPage from "../pages/bill/BillFormPage";
 import ProtectedRoute from "../components/ProtectedRoute";
-import AccountingReportPage from "../pages/AccountingReportPage";
+import AccountingReportPage from "../pages/accounting/AccountingReportPage";
+import AccountingListPage from "../pages/accounting/AccountingListPage";
+import AccountingDetailPage from "../pages/accounting/AccountingDetailPage";
 import HomePage from "../pages/HomePage";
 import SurveyNewPage from "../pages/survey/SurveyNewPage";
 import SurveyAdminPage from "../pages/survey/SurveyAdminPage";
@@ -118,7 +120,23 @@ export const router = createBrowserRouter([
     path: "/accounting",
     element: (
       <ProtectedRoute memberOnly adminOnly>
+        <AccountingListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/accounting/new",
+    element: (
+      <ProtectedRoute memberOnly adminOnly>
         <AccountingReportPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/accounting/:id",
+    element: (
+      <ProtectedRoute memberOnly adminOnly>
+        <AccountingDetailPage />
       </ProtectedRoute>
     ),
   },
