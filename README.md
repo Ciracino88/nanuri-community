@@ -1,122 +1,138 @@
-# 나누리 웹
+# 나누리 (Nanuri) – 청년부 비용 청구서 작성 앱
 
-나누리 청년부 재정 관리 및 설문조사 기능을 제공합니다.
-
-## 소개
-
-교회 구성원이 물품을 구입한 후 비용을 청구하고, 관리자가 이를 확인하여 토스로 송금하는 과정을 자동화한 앱입니다. 기존에 수작업으로 진행되던 회계 프로세스를 디지털화하여 청구 내역을 체계적으로 관리할 수 있습니다.
-
-## 🔗 배포 링크
-
-[https://nanuri.vercel.app](https://nanuri.vercel.app)
-
-## 기술 스택
-
-**Web (Frontend)**
-- React + TypeScript
-- Vite
-- Tailwind CSS
-- React Router DOM
-- Zustand
-- React Hook Form
-- Supabase JS SDK
-
-**Backend**
-- Supabase (Auth, PostgreSQL Database, RLS)
-- Cloudflare Workers + R2 (영수증 이미지 스토리지)
-
-**Admin App (iOS)**
-- Swift / SwiftUI
-- Supabase Swift SDK
-- Google Sign-In SDK
+교회 청년부의 비용 청구·회계 장부 작성, 모임 장소 후보 메뉴 추출/투표, 찬양팀 일정 공유를 한 곳에서 처리하는 웹 애플리케이션입니다. 멤버는 영수증을 찍어 비용을 청구하고, 관리자(회계)는 거래내역 CSV를 업로드해 회계 장부를 작성합니다.
 
 ## 주요 기능
 
-### 웹 (사용자)
-- **교회 멤버 / 외부 방문자 구분 로그인**
-  - 교회 멤버: Google OAuth 로그인 후 저장된 계좌 정보로 빠르게 청구
-  - 외부 방문자: 익명 로그인으로 이름, 계좌 정보 직접 입력 후 청구
-- **비용 청구서 작성**
-  - 제목, 금액, 영수증 이미지 업로드
-  - 은행 퀵 선택 메뉴로 간편하게 계좌 정보 입력
-- **계좌 정보 관리**
-  - 최초 등록 후 재사용 가능
-  - 언제든지 수정 가능
+### 1. 영수증 비용 청구
+멤버 본인 청구(`/member/form`)와 게스트 청구(`/guest/form`)를 분리 지원합니다. 영수증 이미지는 업로드 전 클라이언트에서 압축(`browser-image-compression`)한 뒤 Cloudflare Worker를 통해 R2에 저장됩니다.
 
-### 웹 (관리자)
-- **회계 보고서 작성**
-  - 토스뱅크 거래내역 CSV 파일 업로드
-  - 거래 항목별 카테고리 직접 지정
-  - 카테고리별 지출 합계 및 잔액 자동 계산
-  - 브라우저 인쇄 기능으로 PDF 저장
-  - 샘플 CSV 파일 제공으로 기능 체험 가능
-  
-### iOS 앱 (관리자)
-- **Google 로그인 + Face ID 보안**
-- **청구서 목록 조회**
-  - 청구자 이름, 계좌, 금액, 영수증 확인
-  - 대기중 / 송금완료 / 거절 상태 관리
-- **토스 딥링크 송금**
-  - 송금 버튼 클릭 시 토스 앱으로 자동 이동
-  - 계좌번호, 금액 자동 입력
-  - 송금 완료 후 앱으로 돌아오면 상태 처리
+### 2. 거래내역 파싱 및 회계 장부 작성
+토스뱅크에서 내려받은 거래내역 CSV를 업로드하면 `papaparse`로 파싱해 거래 목록으로 변환합니다. 각 거래에 수입/지출 카테고리를 지정하면 카테고리별 합계와 잔액이 자동 계산되며, 회계 리포트로 저장해 기간별로 조회할 수 있습니다.
+
+### 3. 메뉴판 이미지 → Claude API 메뉴 추출 (모임 장소 후보 투표)
+모임 장소 후보를 등록할 때 메뉴판 사진을 올리면 Claude API(Anthropic SDK)가 이미지에서 메뉴 항목을 자동으로 추출해 종합해줍니다. 추출된 메뉴 정보와 함께 후보 장소를 비교하고 투표할 수 있습니다.
+
+### 4. 찬양팀 일정 공유
+매주 주일(일요일) 기준으로 인도자, 싱어, 피아노, 어쿠스틱, 베이스, 일렉, 드럼, PPT 등 포지션별 참여 가능 여부를 멤버가 직접 등록/확정합니다. 같은 포지션에 중복 등록 시 교체 확인 절차를 거치며, Supabase Realtime으로 변경 사항이 실시간 반영됩니다.
+
+### 그 외: 행사 후 장소 피드백 (설문)
+행사 진행 중 찍은 사진을 올리면 EXIF에서 GPS 좌표를 추출하고 역지오코딩으로 장소명을 알아낸 뒤, 그 장소에서 진행한 행사에 대한 피드백 폼을 만들어 배포·응답을 받을 수 있습니다.
+
+### 공통
+- **인증/권한**: Supabase Auth 기반, 멤버 전용 / 게스트 전용 / 관리자 전용 라우트를 `ProtectedRoute`로 분리 제어
+- **익명 닉네임 생성**: 게스트용 랜덤 닉네임(형용사+동물+이모지) 자동 생성
+
+## 기술 스택
+
+| 영역 | 기술 |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4 |
+| 상태 관리 | Zustand |
+| 데이터 패칭 | TanStack Query, React Hook Form |
+| 라우팅 | React Router v7 |
+| Backend / DB | Supabase (Auth, Postgres) |
+| 파일 저장 | Cloudflare Workers + R2 |
+| AI | Anthropic Claude API (메뉴 추출) |
+| 기타 | exifr (EXIF 파싱), browser-image-compression, papaparse |
+| 배포 | Vercel (프론트엔드), Cloudflare Workers (업로드/지오코딩 API) |
 
 ## 아키텍처
+
 ```mermaid
 graph TD
-    subgraph Web["🌐 Web (React)"]
-        A[사용자]
-    end
-
-    subgraph Backend["⚙️ Backend"]
-        B[Supabase Auth]
-        C[Supabase DB]
-    end
-
-    subgraph Storage["📦 Storage"]
-        D[Cloudflare Workers]
-        E[R2 Storage]
-    end
-
-    subgraph Admin["📱 Admin (iOS)"]
-        F[관리자]
-        G[토스 앱]
-    end
-
-    A -->|로그인| B
-    A -->|청구서 저장| C
-    A -->|영수증 업로드| D
-    D --> E
-    F -->|로그인| B
-    F -->|청구서 조회/승인| C
-    F -->|딥링크 송금| G
+    User[사용자] --> SPA[React SPA<br/>Vite + TypeScript]
+    SPA --> Supabase[Supabase<br/>Auth · Postgres DB]
+    SPA --> Worker[Cloudflare Worker<br/>업로드/지오코딩]
+    SPA --> Claude[Claude API<br/>메뉴 정보 추출]
+    Worker --> R2[Cloudflare R2<br/>영수증/사진 저장]
+    Worker --> Kakao[카카오 API<br/>좌표→주소 변환]
 ```
 
-## 프리뷰
+- **React SPA**: 클라이언트는 Supabase, Cloudflare Worker, Claude API와 각각 직접 통신
+- **Cloudflare Worker**: 영수증/사진 파일은 R2에 저장하고, 좌표는 카카오 API로 주소 변환
+- **배포**: 프론트엔드는 Vercel, Worker는 Cloudflare Workers에 별도 배포
 
-### 외부 방문자
-<div align="center">
-  <img width="600" alt="guest" src="https://github.com/user-attachments/assets/409ce5a1-45c1-491a-9001-cfab02e977a6" />
-</div>
+## 프로젝트 구조
 
-### 교회 멤버
-<div align="center">
-  <img width="600" alt="member" src="https://github.com/user-attachments/assets/2faed747-9082-4327-b1c8-7bc9f3fbe4df" />
-</div>
- 
-### 관리자 앱 (iOS)
-<div align="center">
-  <img width="300" alt="admin" src="https://github.com/user-attachments/assets/1628d0f1-9175-4d66-baae-259ddc2409c5" />
-</div>
+```
+src/
+├── components/        # 공용 컴포넌트 (Navbar, ProtectedRoute, LoadingScreen 등)
+│   └── ui/             # 버튼, 인풋, 캐러셀 등 UI 프리미티브
+├── hooks/              # 데이터 패칭/도메인 로직 커스텀 훅
+│   ├── useAccountingCategories.ts
+│   ├── useAccountingReport.ts
+│   ├── useActiveSurveys.ts
+│   ├── useFormSubmit.ts
+│   ├── useReceiptUpload.ts
+│   └── useWorshipSchedule.ts
+├── lib/                 # 외부 연동 / 유틸리티
+│   ├── supabase.ts        # Supabase 클라이언트
+│   ├── uploadReceipt.ts    # 영수증 압축 + Worker 업로드
+│   ├── extractGps.ts       # 이미지 EXIF GPS 추출
+│   ├── reverseGeocode.ts   # 좌표 → 주소 변환 (Worker 경유)
+│   ├── extractMenus.ts     # Claude API로 메뉴판 이미지 → 메뉴 목록 추출
+│   └── generateNickname.ts # 게스트 닉네임 생성
+├── pages/
+│   ├── auth/             # 로그인 / 게이트 페이지
+│   ├── bill/             # 멤버/게스트 비용 청구 폼
+│   ├── accounting/       # 회계 리포트 목록/상세/생성
+│   ├── survey/           # 설문 생성/배포/응답/결과
+│   ├── vote/             # 투표 목록/응답
+│   └── worship/          # 찬양팀 일정
+├── router/              # React Router 라우트 정의
+└── store/               # Zustand 전역 상태 (인증)
 
-### 회계 장부 작성
-<div align="center">
-  <img width="300" alt="06_20_csv 파일 파싱 및 회계 장부 작성" src="https://github.com/user-attachments/assets/c296535f-3d27-4170-aab1-ae6c87081c6c" />
-</div>
+worker/                  # Cloudflare Worker (영수증 업로드/삭제, 역지오코딩 API)
+supabase/                 # Supabase 프로젝트 설정 (config.toml)
+```
 
-## 트러블슈팅
+## 시작하기
 
-### 브라우저 자동 번역으로 인한 텍스트 깨짐
-- **문제**: 크롬 자동 번역 기능이 한국어 UI 텍스트를 이상하게 변환
-- **원인**: `<html>` 태그에 번역 비활성화 설정 누락
-- **해결**: `<html lang="ko" translate="no">` 추가
+### 1. 의존성 설치
+
+```bash
+npm install
+```
+
+### 2. 환경 변수 설정
+
+프로젝트 루트에 `.env` 파일을 생성하고 아래 값을 채워주세요.
+
+```env
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_ANTHROPIC_API_KEY=
+VITE_CF_WORKER_URL=
+```
+
+### 3. 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+### 4. 빌드 / 미리보기
+
+```bash
+npm run build
+npm run preview
+```
+
+## Cloudflare Worker
+
+영수증 업로드/삭제와 역지오코딩을 담당하는 별도 백엔드입니다. `worker/wrangler.toml`을 환경에 맞게 설정한 뒤 배포합니다.
+
+```bash
+cd worker
+npx wrangler deploy
+```
+
+## 배포
+
+- 프론트엔드: Vercel (`vercel.json`에 SPA rewrite 설정 포함)
+- API: Cloudflare Workers
+
+## 라이선스
+
+비공개 프로젝트입니다. (별도 라이선스 명시 전까지 무단 배포/사용을 금합니다.)
