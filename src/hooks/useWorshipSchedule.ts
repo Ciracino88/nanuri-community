@@ -31,7 +31,7 @@ async function fetchWorshipData(year: number, month: number) {
   const [{ data: schedules }, { data: members }, { data: availability }] = await Promise.all([
     supabase.from("worship_schedules").select("id, date").order("date"),
     supabase.from("user_profiles").select("id, name, position, avatar_url").not("position", "is", null),
-    supabase.from("worship_availability").select("schedule_id, user_id, available"),
+    supabase.from("worship_availability").select("schedule_id, user_id, position, available"),
   ]);
 
   return {
@@ -51,18 +51,8 @@ export function useWorshipSchedule(year: number, month: number) {
         event: "*",
         schema: "public",
         table: "worship_availability",
-      }, (payload) => {
-        const row = payload.new as { schedule_id: string; user_id: string; available: boolean };
-        queryClient.setQueryData(["worship", year, month], (old: Awaited<ReturnType<typeof fetchWorshipData>> | undefined) => {
-          if (!old) return old;
-          const exists = old.availability.some((a) => a.schedule_id === row.schedule_id && a.user_id === row.user_id);
-          const newAvailability = exists
-            ? old.availability.map((a) =>
-                a.schedule_id === row.schedule_id && a.user_id === row.user_id ? { ...a, available: row.available } : a
-              )
-            : [...old.availability, row];
-          return { ...old, availability: newAvailability };
-        });
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ["worship", year, month] });
       })
       .subscribe();
 
