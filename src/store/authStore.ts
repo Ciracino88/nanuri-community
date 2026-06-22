@@ -59,15 +59,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") && session?.user) {
         set({ user: session.user, isAnonymous: session.user.is_anonymous ?? false });
         await get().fetchUserProfile();
       } else if (event === "SIGNED_OUT") {
         set({ user: null, userProfile: null, isAnonymous: false });
       }
+      if (event === "INITIAL_SESSION") {
+        set({ isLoading: false });
+      }
     });
 
-    set({ isLoading: false });
     return () => subscription.unsubscribe();
   },
 }));

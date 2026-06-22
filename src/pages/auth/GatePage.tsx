@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { useAuthStore } from "../../store/authStore";
 
 export default function GatePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { user, isAnonymous, isLoading } = useAuthStore();
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (user && !isAnonymous) navigate("/home", { replace: true });
+  }, [user, isAnonymous, isLoading]);
 
   const handleGuest = async () => {
     setLoading(true);
