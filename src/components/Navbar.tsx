@@ -1,7 +1,6 @@
 // src/components/Navbar.tsx
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { useAuthStore } from "../store/authStore";
 
 interface Props {
   userName?: string;
@@ -12,7 +11,6 @@ interface Props {
 
 export default function Navbar({ userName, onLogout, onProfileEdit, isGuest }: Props) {
   const navigate = useNavigate();
-  const { userProfile } = useAuthStore();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -20,14 +18,14 @@ export default function Navbar({ userName, onLogout, onProfileEdit, isGuest }: P
   };
 
   return (
-    <nav className="w-full border-b border-gray-100 bg-white px-4 py-3 flex items-center justify-between">
+    <nav className="w-full border-b border-gray-100 bg-white px-5 py-3 flex items-center justify-between">
       <button
         onClick={() => navigate("/home")}
-        className="text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+        className="text-sm font-medium text-gray-800 hover:text-gray-600 transition"
       >
         나누리
       </button>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {isGuest ? (
           <button
             onClick={() => navigate("/member/login")}
@@ -37,25 +35,19 @@ export default function Navbar({ userName, onLogout, onProfileEdit, isGuest }: P
           </button>
         ) : (
           <>
-            {userProfile?.role === "admin" && (
-              <button
-                onClick={() => navigate("/accounting")}
-                className="text-sm text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
-              >
-                회계 보고서
-              </button>
-            )}
             <button
               onClick={onProfileEdit}
-              className="text-sm text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition"
+              title={userName ? `${userName}님` : "프로필 수정"}
             >
-              {userName ? `${userName}님` : "프로필 수정"}
+              <i className="ti ti-user text-lg" aria-hidden="true" />
             </button>
             <button
               onClick={handleLogout}
-              className="text-sm text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-50 transition"
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 hover:text-red-400 transition"
+              title="로그아웃"
             >
-              로그아웃
+              <i className="ti ti-logout text-lg" aria-hidden="true" />
             </button>
           </>
         )}
