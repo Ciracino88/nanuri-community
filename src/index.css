@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
 html, body, #root {
   max-width: 100vw;
   overflow-x: hidden;
