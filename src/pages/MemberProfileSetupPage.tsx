@@ -51,7 +51,7 @@ export default function MemberProfileSetupPage() {
       avatar_url = await uploadReceipt(avatarFile, "avatars");
     }
 
-    await supabase.from("user_profiles").upsert({
+    const { error } = await supabase.from("user_profiles").upsert({
       id: user.id,
       name: values.name,
       bank_name: values.bank_name,
@@ -59,6 +59,12 @@ export default function MemberProfileSetupPage() {
       position: positions.length > 0 ? positions : null,
       avatar_url,
     });
+
+    if (error) {
+      console.error("[MemberProfileSetupPage] upsert error:", error);
+      setSubmitting(false);
+      return;
+    }
 
     await fetchUserProfile();
     setSubmitting(false);
