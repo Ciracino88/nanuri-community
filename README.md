@@ -37,6 +37,22 @@
 | 기타 | exifr (EXIF 파싱), browser-image-compression, papaparse |
 | 배포 | Vercel (프론트엔드), Cloudflare Workers (업로드/지오코딩 API) |
 
+## 아키텍처
+
+```mermaid
+graph TD
+    User[사용자] --> SPA[React SPA<br/>Vite + TypeScript]
+    SPA --> Supabase[Supabase<br/>Auth · Postgres DB]
+    SPA --> Worker[Cloudflare Worker<br/>업로드/지오코딩]
+    SPA --> Claude[Claude API<br/>메뉴 정보 추출]
+    Worker --> R2[Cloudflare R2<br/>영수증/사진 저장]
+    Worker --> Kakao[카카오 API<br/>좌표→주소 변환]
+```
+
+- **React SPA**: 클라이언트는 Supabase, Cloudflare Worker, Claude API와 각각 직접 통신
+- **Cloudflare Worker**: 영수증/사진 파일은 R2에 저장하고, 좌표는 카카오 API로 주소 변환
+- **배포**: 프론트엔드는 Vercel, Worker는 Cloudflare Workers에 별도 배포
+
 ## 프로젝트 구조
 
 ```
