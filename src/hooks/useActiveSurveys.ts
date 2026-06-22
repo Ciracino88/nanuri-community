@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 
 export interface ActiveSurvey {
@@ -11,24 +11,21 @@ export interface ActiveSurvey {
   created_at: string;
 }
 
+async function fetchActiveSurveys(): Promise<ActiveSurvey[]> {
+  const { data, error } = await supabase
+    .from("surveys")
+    .select("*")
+    .eq("status", "active")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export function useActiveSurveys() {
-  const [surveys, setSurveys] = useState<ActiveSurvey[]>([]);
-  const [count, setCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data: surveys = [], isLoading: loading, refetch } = useQuery({
+    queryKey: ["active_surveys"],
+    queryFn: fetchActiveSurveys,
+  });
 
-  const fetch = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from("surveys")
-      .select("*")
-      .eq("status", "active")
-      .order("created_at", { ascending: false });
-    setSurveys(data ?? []);
-    setCount(data?.length ?? 0);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetch(); }, []);
-
-  return { surveys, count, loading, refetch: fetch };
+  return { surveys, count: surveys.length, loading, refetch };
 }

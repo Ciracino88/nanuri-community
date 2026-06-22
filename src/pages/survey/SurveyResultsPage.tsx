@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
@@ -17,6 +18,22 @@ interface Response {
   nickname: string | null;
 }
 
+interface ResultsData {
+  survey: Survey | null;
+  responses: Response[];
+}
+
+async function fetchResults(id: string): Promise<ResultsData> {
+  const [{ data: surveyData }, { data: responseData }] = await Promise.all([
+    supabase.from("surveys").select("id, title, place_name, items").eq("id", id).single(),
+    supabase.from("survey_responses").select("answers, nickname").eq("survey_id", id),
+  ]);
+  return {
+    survey: surveyData,
+    responses: (responseData ?? []).map((r) => ({ answers: r.answers, nickname: r.nickname ?? null })),
+  };
+}
+
 const MOOD_LEVELS = [
   { value: 1, icon: "ti-mood-sad", label: "불만족", color: "text-red-400" },
   { value: 2, icon: "ti-mood-empty", label: "평범", color: "text-amber-400" },
@@ -28,28 +45,34 @@ const BAR_COLORS = ["bg-red-400", "bg-amber-400", "bg-emerald-500"];
 export default function SurveyResultsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { userProfile, signOut } = useAuthStore();
 
-  const [survey, setSurvey] = useState<Survey | null>(null);
-  const [responses, setResponses] = useState<Response[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["survey_results", id],
+    queryFn: () => fetchResults(id!),
+    enabled: !!id,
+  });
+  const survey = data?.survey ?? null;
+  const responses = data?.responses ?? [];
 
   useEffect(() => {
     if (!id) return;
-    const load = async () => {
-      const [{ data: surveyData }, { data: responseData }] = await Promise.all([
-        supabase.from("surveys").select("id, title, place_name, items").eq("id", id).single(),
-        supabase
-          .from("survey_responses")
-          .select("answers, nickname")
-          .eq("survey_id", id),
-      ]);
-      setSurvey(surveyData);
-      setResponses((responseData ?? []).map((r) => ({ answers: r.answers, nickname: r.nickname ?? null })));
-      setLoading(false);
-    };
-    load();
-  }, [id]);
+    const channel = supabase
+      .channel(`survey_results_${id}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "survey_responses",
+      }, (payload) => {
+        const row = (payload.new ?? payload.old) as { survey_id?: string };
+        if (row?.survey_id === id) {
+          queryClient.invalidateQueries({ queryKey: ["survey_results", id] });
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [id, queryClient]);
 
   const getMoodCounts = useMemo(() => (itemIndex: number) =>
     MOOD_LEVELS.map((mood) => ({

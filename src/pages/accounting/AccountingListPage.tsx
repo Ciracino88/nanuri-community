@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
@@ -13,24 +14,44 @@ interface Report {
     created_at: string;
 }
 
+async function fetchReports(): Promise<Report[]> {
+    const { data, error } = await supabase
+        .from("accounting_reports")
+        .select("*")
+        .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+}
+
 export default function AccountingListPage() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { userProfile, signOut } = useAuthStore();
-    const [reports, setReports] = useState<Report[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        supabase.from("accounting_reports").select("*").order("created_at", { ascending: false })
-            .then(({ data }) => { setReports(data ?? []); setLoading(false); });
-    }, []);
+    const { data: reports = [], isLoading } = useQuery({
+        queryKey: ["accounting_reports"],
+        queryFn: fetchReports,
+    });
 
-    const handleDelete = async (id: string) => {
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const { error } = await supabase.from("accounting_reports").delete().eq("id", id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["accounting_reports"] });
+        },
+        onError: () => {
+            toast.error("삭제에 실패했어요");
+        },
+    });
+
+    const handleDelete = (id: string) => {
         if (!confirm("이 장부를 삭제할까요?")) return;
-        await supabase.from("accounting_reports").delete().eq("id", id);
-        setReports((prev) => prev.filter((r) => r.id !== id));
+        deleteMutation.mutate(id);
     };
 
-    if (loading) return <LoadingScreen />;
+    if (isLoading) return <LoadingScreen />;
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -76,7 +97,8 @@ export default function AccountingListPage() {
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => handleDelete(r.id)}
-                                        className="text-gray-300 hover:text-red-400 transition p-1"
+                                        disabled={deleteMutation.isPending}
+                                        className="text-gray-300 hover:text-red-400 transition p-1 disabled:opacity-40"
                                     >
                                         <i className="ti ti-trash text-base" aria-hidden="true" />
                                     </button>

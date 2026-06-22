@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/ui/Button";
 import ImageCarousel from "../../components/ui/ImageCarousel";
@@ -17,12 +19,24 @@ interface Candidate {
   created_at: string;
 }
 
+async function fetchCandidates(): Promise<Candidate[]> {
+  const { data, error } = await supabase
+    .from("vote_candidates")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export default function VoteListPage() {
   const navigate = useNavigate();
   const { userProfile, signOut } = useAuthStore();
 
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: candidates = [], isLoading: loading } = useQuery({
+    queryKey: ["vote_candidates"],
+    queryFn: fetchCandidates,
+  });
   const [showForm, setShowForm] = useState(false);
 
   const [name, setName] = useState("");
@@ -31,13 +45,16 @@ export default function VoteListPage() {
   const [currentPreview, setCurrentPreview] = useState(0);
   const [extracting, setExtracting] = useState(false);
   const [menus, setMenus] = useState<MenuItem[]>([]);
-  const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    supabase.from("vote_candidates").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => { setCandidates(data ?? []); setLoading(false); });
-  }, []);
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("vote_candidates").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vote_candidates"] }),
+    onError: () => toast.error("삭제에 실패했어요"),
+  });
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -78,22 +95,26 @@ export default function VoteListPage() {
     setShowForm(false);
   };
 
-  const handleSave = async () => {
-    if (!name.trim()) return;
-    setSaving(true);
-    try {
+  const saveMutation = useMutation({
+    mutationFn: async () => {
       const imageUrls = await Promise.all(imageFiles.map((f) => uploadReceipt(f, "votes")));
-      const { data, error } = await supabase.from("vote_candidates").insert({
+      const { error } = await supabase.from("vote_candidates").insert({
         name: name.trim(),
         image_urls: imageUrls,
         menus,
-      }).select().single();
+      });
       if (error) throw error;
-      setCandidates((prev) => [data, ...prev]);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vote_candidates"] });
       resetForm();
-    } finally {
-      setSaving(false);
-    }
+    },
+    onError: () => toast.error("저장에 실패했어요"),
+  });
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+    saveMutation.mutate();
   };
 
   return (
@@ -121,14 +142,14 @@ export default function VoteListPage() {
         </div>
 
         {showForm && (
-          <div className="fixed inset-0 bg-black/60 z-40 flex items-end sm:items-center justify-center" onClick={() => { if (!extracting && !saving) resetForm(); }}>
+          <div className="fixed inset-0 bg-black/60 z-40 flex items-end sm:items-center justify-center" onClick={() => { if (!extracting && !saveMutation.isPending) resetForm(); }}>
             <div
               className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-medium text-gray-800">메뉴판 업로드</h2>
-                <button onClick={() => { if (!extracting && !saving) resetForm(); }} disabled={extracting || saving} className="text-gray-400 hover:text-gray-600 transition disabled:opacity-30">
+                <button onClick={() => { if (!extracting && !saveMutation.isPending) resetForm(); }} disabled={extracting || saveMutation.isPending} className="text-gray-400 hover:text-gray-600 transition disabled:opacity-30">
                   <i className="ti ti-x text-lg" aria-hidden="true" />
                 </button>
               </div>
@@ -167,7 +188,7 @@ export default function VoteListPage() {
               {extracting && <LoadingSpinner label="이미지에서 메뉴를 추출하고 있어요" />}
               {!extracting && menus.length > 0 && <p className="text-xs text-emerald-500">메뉴 {menus.length}개 추출 완료</p>}
 
-              <Button onClick={handleSave} loading={saving} disabled={!name.trim() || extracting}>
+              <Button onClick={handleSave} loading={saveMutation.isPending} disabled={!name.trim() || extracting}>
                 저장
               </Button>
             </div>
@@ -192,12 +213,12 @@ export default function VoteListPage() {
                   </button>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={async () => {
+                      onClick={() => {
                         if (!confirm(`"${c.name}"을 삭제할까요?`)) return;
-                        await supabase.from("vote_candidates").delete().eq("id", c.id);
-                        setCandidates((prev) => prev.filter((x) => x.id !== c.id));
+                        deleteMutation.mutate(c.id);
                       }}
-                      className="text-gray-300 hover:text-red-400 transition p-1"
+                      disabled={deleteMutation.isPending}
+                      className="text-gray-300 hover:text-red-400 transition p-1 disabled:opacity-40"
                     >
                       <i className="ti ti-trash text-base" aria-hidden="true" />
                     </button>

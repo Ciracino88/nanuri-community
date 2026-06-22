@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
@@ -23,84 +25,115 @@ interface ActiveSurvey {
   responseCount: number;
 }
 
+interface AdminData {
+  templates: Template[];
+  activeSurveys: ActiveSurvey[];
+}
+
+async function fetchAdminData(): Promise<AdminData> {
+  const [{ data: tplData }, { data: surveyData }] = await Promise.all([
+    supabase.from("survey_templates").select("*").order("created_at", { ascending: false }),
+    supabase.from("surveys").select("*").eq("status", "active").order("created_at", { ascending: false }),
+  ]);
+
+  const surveys = surveyData ?? [];
+  const activeSurveys = await Promise.all(
+    surveys.map(async (s) => {
+      const { count } = await supabase
+        .from("survey_responses")
+        .select("*", { count: "exact", head: true })
+        .eq("survey_id", s.id);
+      return { ...s, responseCount: count ?? 0 };
+    })
+  );
+
+  return { templates: tplData ?? [], activeSurveys };
+}
+
+async function deleteR2Image(imageUrl: string) {
+  await fetch(`${import.meta.env.VITE_CF_WORKER_URL}/delete`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ receiptUrl: imageUrl }),
+  });
+}
+
 export default function SurveyAdminPage() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const queryClient = useQueryClient();
   const { userProfile, signOut } = useAuthStore();
 
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [activeSurveys, setActiveSurveys] = useState<ActiveSurvey[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchData = async () => {
-    setLoading(true);
-    const [{ data: tplData }, { data: surveyData }] = await Promise.all([
-      supabase.from("survey_templates").select("*").order("created_at", { ascending: false }),
-      supabase.from("surveys").select("*").eq("status", "active").order("created_at", { ascending: false }),
-    ]);
-    setTemplates(tplData ?? []);
-
-    const surveys = surveyData ?? [];
-    const surveysWithCount = await Promise.all(
-      surveys.map(async (s) => {
-        const { count } = await supabase
-          .from("survey_responses")
-          .select("*", { count: "exact", head: true })
-          .eq("survey_id", s.id);
-        return { ...s, responseCount: count ?? 0 };
-      })
-    );
-    setActiveSurveys(surveysWithCount);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchData(); }, [location.key]);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["survey_admin"],
+    queryFn: fetchAdminData,
+  });
+  const templates = data?.templates ?? [];
+  const activeSurveys = data?.activeSurveys ?? [];
 
   useEffect(() => {
-    if (activeSurveys.length === 0) return;
-    const channels = activeSurveys.map((survey) =>
-      supabase
-        .channel(`survey_responses_${survey.id}`)
-        .on("postgres_changes", {
-          event: "INSERT",
-          schema: "public",
-          table: "survey_responses",
-          filter: `survey_id=eq.${survey.id}`,
-        }, () => {
-          setActiveSurveys((prev) =>
-            prev.map((s) => s.id === survey.id ? { ...s, responseCount: s.responseCount + 1 } : s)
-          );
-        })
-        .subscribe()
-    );
-    return () => { channels.forEach((ch) => supabase.removeChannel(ch)); };
-  }, [activeSurveys.length]);
+    const channel = supabase
+      .channel("survey_admin_responses")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "survey_responses",
+      }, (payload) => {
+        const surveyId = (payload.new as { survey_id: string }).survey_id;
+        queryClient.setQueryData(["survey_admin"], (old: AdminData | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            activeSurveys: old.activeSurveys.map((s) =>
+              s.id === surveyId ? { ...s, responseCount: s.responseCount + 1 } : s
+            ),
+          };
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [queryClient]);
 
-  const handleDelete = async (id: string) => {
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("survey_templates").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["survey_admin"] }),
+    onError: () => toast.error("템플릿 삭제에 실패했어요"),
+  });
+
+  const closeSurveyMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("surveys").update({ status: "closed" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["survey_admin"] }),
+    onError: () => toast.error("설문 종료에 실패했어요"),
+  });
+
+  const deleteSurveyMutation = useMutation({
+    mutationFn: async ({ id, imageUrl }: { id: string; imageUrl: string | null }) => {
+      if (imageUrl) await deleteR2Image(imageUrl);
+      const { error } = await supabase.from("surveys").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["survey_admin"] }),
+    onError: () => toast.error("설문 삭제에 실패했어요"),
+  });
+
+  const handleDelete = (id: string) => {
     if (!confirm("템플릿을 삭제할까요?")) return;
-    await supabase.from("survey_templates").delete().eq("id", id);
-    setTemplates((prev) => prev.filter((t) => t.id !== id));
+    deleteTemplateMutation.mutate(id);
   };
 
-  const handleCloseSurvey = async (id: string) => {
+  const handleCloseSurvey = (id: string) => {
     if (!confirm("설문을 종료할까요?")) return;
-    await supabase.from("surveys").update({ status: "closed" }).eq("id", id);
-    setActiveSurveys((prev) => prev.filter((s) => s.id !== id));
+    closeSurveyMutation.mutate(id);
   };
 
-  const deleteR2Image = async (imageUrl: string) => {
-    await fetch(`${import.meta.env.VITE_CF_WORKER_URL}/delete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ receiptUrl: imageUrl }),
-    });
-  };
-
-  const handleDeleteSurvey = async (id: string, imageUrl: string | null) => {
+  const handleDeleteSurvey = (id: string, imageUrl: string | null) => {
     if (!confirm("설문을 삭제할까요? 응답 데이터도 모두 삭제됩니다.")) return;
-    if (imageUrl) await deleteR2Image(imageUrl);
-    await supabase.from("surveys").delete().eq("id", id);
-    setActiveSurveys((prev) => prev.filter((s) => s.id !== id));
+    deleteSurveyMutation.mutate({ id, imageUrl });
   };
 
   const formatDate = (iso: string) =>
