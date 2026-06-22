@@ -30,7 +30,7 @@ export default function MemberProfileSetupPage() {
     },
   });
   const [submitting, setSubmitting] = useState(false);
-  const [position, setPosition] = useState<string>(userProfile?.position ?? "");
+  const [positions, setPositions] = useState<string[]>(userProfile?.position ?? []);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(userProfile?.avatar_url ?? null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -56,7 +56,7 @@ export default function MemberProfileSetupPage() {
       name: values.name,
       bank_name: values.bank_name,
       account_number: values.account_number,
-      position: position || null,
+      position: positions.length > 0 ? positions : null,
       avatar_url,
     });
 
@@ -110,9 +110,9 @@ export default function MemberProfileSetupPage() {
               <button
                 key={p}
                 type="button"
-                onClick={() => setPosition(position === p ? "" : p)}
+                onClick={() => setPositions((prev) => prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p])}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition ${
-                  position === p
+                  positions.includes(p)
                     ? "bg-gray-800 text-white border-gray-800"
                     : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
                 }`}

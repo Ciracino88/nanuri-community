@@ -8,7 +8,7 @@ interface UserProfile {
   account_number: string;
   bank_name: string;
   role: string;
-  position: string | null;
+  position: string[] | null;
   avatar_url: string | null;
 }
 
@@ -67,7 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       } else if (event === "SIGNED_OUT") {
         set({ user: null, userProfile: null, isAnonymous: false });
       }
-      if (event === "INITIAL_SESSION") {
+      if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
         set({ isLoading: false });
       }
     });

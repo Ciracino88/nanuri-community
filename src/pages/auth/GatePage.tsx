@@ -1,7 +1,8 @@
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../store/authStore";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const FEATURES = [
   { icon: "ti-credit-card", label: "청구서 제출" },
@@ -14,10 +15,8 @@ export default function GatePage() {
   const [loading, setLoading] = useState(false);
   const { user, isAnonymous, isLoading } = useAuthStore();
 
-  useEffect(() => {
-    if (isLoading) return;
-    if (user && !isAnonymous) navigate("/home", { replace: true });
-  }, [user, isAnonymous, isLoading]);
+  if (isLoading) return <LoadingScreen />;
+  if (user && !isAnonymous) return <Navigate to="/home" replace />;
 
   const handleGuest = async () => {
     setLoading(true);

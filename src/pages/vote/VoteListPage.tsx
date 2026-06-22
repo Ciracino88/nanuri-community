@@ -121,21 +121,21 @@ export default function VoteListPage() {
         </div>
 
         {showForm && (
-          <div className="fixed inset-0 bg-black/60 z-40 flex items-end sm:items-center justify-center" onClick={resetForm}>
+          <div className="fixed inset-0 bg-black/60 z-40 flex items-end sm:items-center justify-center" onClick={() => { if (!extracting && !saving) resetForm(); }}>
             <div
               className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-medium text-gray-800">메뉴판 업로드</h2>
-                <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 transition">
+                <button onClick={() => { if (!extracting && !saving) resetForm(); }} disabled={extracting || saving} className="text-gray-400 hover:text-gray-600 transition disabled:opacity-30">
                   <i className="ti ti-x text-lg" aria-hidden="true" />
                 </button>
               </div>
 
               <input
                 type="text"
-                placeholder="장소 이름"
+                placeholder="제목을 입력해주세요"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition"
@@ -147,7 +147,7 @@ export default function VoteListPage() {
                     images={imagePreviews}
                     currentIndex={currentPreview}
                     onIndexChange={setCurrentPreview}
-                    onRemove={removeImage}
+                    onRemove={extracting ? undefined : removeImage}
                   />
                   <label className="flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-gray-200 rounded-xl text-sm text-gray-400 cursor-pointer hover:bg-gray-50 transition">
                     <i className="ti ti-plus text-base" aria-hidden="true" />
@@ -164,7 +164,7 @@ export default function VoteListPage() {
                 </label>
               )}
 
-              {extracting && <p className="text-xs text-blue-400">메뉴 추출 중...</p>}
+              {extracting && <LoadingSpinner label="이미지에서 메뉴를 추출하고 있어요" />}
               {!extracting && menus.length > 0 && <p className="text-xs text-emerald-500">메뉴 {menus.length}개 추출 완료</p>}
 
               <Button onClick={handleSave} loading={saving} disabled={!name.trim() || extracting}>
