@@ -166,11 +166,13 @@ export default function VoteResponsePage() {
 
         {lightbox && (
           <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center" onClick={() => setLightbox(false)}>
-            <div onClick={(e) => e.stopPropagation()} className="w-full h-full flex items-center justify-center">
+            <div onClick={(e) => e.stopPropagation()} className="w-full h-full flex items-center justify-center p-4">
               <ImageCarousel
                 images={candidate.image_urls}
                 currentIndex={currentImage}
                 onIndexChange={setCurrentImage}
+                aspectRatio="full"
+                objectFit="contain"
               />
             </div>
             <button

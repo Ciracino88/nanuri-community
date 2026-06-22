@@ -3,15 +3,16 @@ interface Props {
   currentIndex: number;
   onIndexChange: (index: number) => void;
   onRemove?: (index: number) => void;
-  aspectRatio?: "video" | "square";
+  aspectRatio?: "video" | "square" | "full";
+  objectFit?: "cover" | "contain";
 }
 
-export default function ImageCarousel({ images, currentIndex, onIndexChange, onRemove, aspectRatio = "video" }: Props) {
-  const aspectClass = aspectRatio === "square" ? "aspect-square" : "aspect-video";
+export default function ImageCarousel({ images, currentIndex, onIndexChange, onRemove, aspectRatio = "video", objectFit = "cover" }: Props) {
+  const aspectClass = aspectRatio === "square" ? "aspect-square" : aspectRatio === "full" ? "h-full" : "aspect-video";
 
   return (
     <div className={`relative w-full ${aspectClass} rounded-xl overflow-hidden`}>
-      <img src={images[currentIndex]} alt={`이미지 ${currentIndex + 1}`} className="w-full h-full object-cover" />
+      <img src={images[currentIndex]} alt={`이미지 ${currentIndex + 1}`} className={`w-full h-full ${objectFit === "contain" ? "object-contain" : "object-cover"}`} />
 
       {onRemove && (
         <button

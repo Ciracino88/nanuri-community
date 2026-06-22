@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 
@@ -131,7 +132,7 @@ export default function SurveyAdminPage() {
         </div>
 
         {loading ? (
-          <div className="text-center text-sm text-gray-300 py-10">불러오는 중...</div>
+          <LoadingSpinner />
         ) : (
           <>
             {/* 진행 중인 설문 */}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { useActiveSurveys } from "../../hooks/useActiveSurveys";
@@ -37,7 +38,7 @@ export default function SurveyListPage() {
         </div>
 
         {loading ? (
-          <div className="text-center text-sm text-gray-300 py-10">불러오는 중...</div>
+          <LoadingSpinner />
         ) : surveys.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-xl p-6 text-center text-sm text-gray-300">
             현재 진행 중인 설문이 없습니다

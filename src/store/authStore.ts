@@ -8,6 +8,8 @@ interface UserProfile {
   account_number: string;
   bank_name: string;
   role: string;
+  position: string | null;
+  avatar_url: string | null;
 }
 
 interface AuthState {
@@ -37,7 +39,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const { data } = await supabase
       .from("user_profiles")
-      .select("name, account_number, bank_name, role")
+      .select("name, account_number, bank_name, role, position, avatar_url")
       .eq("id", user.id)
       .single();
 

@@ -16,11 +16,12 @@ const MENU_CARDS: MenuCard[] = [
   { icon: "ti-credit-card", title: "청구서 제출", description: "청구 내용과 금액, 영수증을 제출하면 관리자가 확인 후 송금해드려요", path: "/member/form" },
   { icon: "ti-chart-bar", title: "설문 참여", description: "로그인 없이 링크만으로 설문에 참여하고 결과를 실시간으로 확인해요", path: "/surveys" },
   { icon: "ti-salad", title: "메뉴 종합", description: "메뉴판 사진을 올리면 AI가 메뉴를 추출하고 모두의 선택을 모아줘요", path: "/vote" },
+  { icon: "ti-music", title: "찬양팀 일정", description: "포지션별 주일 참여 가능 여부를 확인하고 내 일정을 등록해요", path: "/worship" },
 ];
 
 const ADMIN_CARDS: MenuCard[] = [
-  { icon: "ti-chart-bar", title: "회계 보고서", description: "지출 내역을 한눈에 조회하고 관리해요", path: "/accounting" },
-  { icon: "ti-clipboard-list", title: "설문 관리", description: "설문을 작성하고 링크로 배포해요", path: "/admin/surveys" },
+  { icon: "ti-currency-won", title: "회계 보고서", description: "지출 내역을 한눈에 조회하고 관리해요", path: "/accounting" },
+  { icon: "ti-chart-bar", title: "설문 관리", description: "설문을 작성하고 링크로 배포해요", path: "/admin/surveys" },
 ];
 
 function FeatureCard({ card, delay, onClick }: { card: MenuCard; delay: number; onClick: () => void }) {

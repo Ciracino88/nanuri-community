@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/ui/Button";
 import ImageCarousel from "../../components/ui/ImageCarousel";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { uploadReceipt } from "../../lib/uploadReceipt";
@@ -174,7 +175,7 @@ export default function VoteListPage() {
         )}
 
         {loading ? (
-          <p className="text-sm text-gray-300 text-center py-10">불러오는 중...</p>
+          <LoadingSpinner />
         ) : candidates.length === 0 ? (
           <p className="text-sm text-gray-300 text-center py-10">아직 등록된 메뉴판이 없습니다</p>
         ) : (
