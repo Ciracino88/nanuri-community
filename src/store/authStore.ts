@@ -10,6 +10,7 @@ interface UserProfile {
   role: string;
   position: string[] | null;
   avatar_url: string | null;
+  team: string | null;
 }
 
 interface AuthState {
