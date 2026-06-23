@@ -202,7 +202,7 @@ export default function MemberProfileSetupPage() {
             inputMode="tel"
             {...register("phone")}
           />
-        </div>
+        </div>}
 
         <Button type="submit" loading={submitting}>
           저장하기
