@@ -11,7 +11,7 @@ interface UserProfile {
   position: string[] | null;
   avatar_url: string | null;
   team: string | null;
-  phone: string | null;
+  phone?: string | null;
 }
 
 interface AuthState {
