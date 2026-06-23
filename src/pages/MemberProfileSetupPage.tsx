@@ -7,11 +7,7 @@ import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import BankSelector from "../components/BankSelector";
 import { uploadReceipt } from "../lib/uploadReceipt";
-
-const POSITIONS = [
-  "인도자", "싱어1", "싱어2", "메인 피아노", "세컨 피아노",
-  "어쿠스틱", "베이스", "일렉", "드럼", "PPT",
-];
+import { POSITIONS } from "../constants/worship";
 
 interface FormValues {
   name: string;

@@ -7,11 +7,7 @@ import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { useWorshipSchedule } from "../../hooks/useWorshipSchedule";
 import PositionSlot from "../../components/worship/PositionSlot";
-
-const POSITIONS = [
-  "인도자", "싱어1", "싱어2", "메인 피아노", "세컨 피아노",
-  "어쿠스틱", "베이스", "일렉", "드럼", "PPT",
-];
+import { POSITIONS } from "../../constants/worship";
 
 const MONTH_NAMES = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
 
