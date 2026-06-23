@@ -22,8 +22,8 @@ export default function ProtectedRoute({ children, memberOnly, guestOnly, setupP
 
   if (adminOnly && userProfile?.role !== "admin") return <Navigate to="/member/form" />;
 
-  // setupPage면 프로필 체크 스킵
-  if (!setupPage && !adminOnly && memberOnly && !isAnonymous && (!userProfile || !userProfile.account_number || !userProfile.bank_name)) {
+  // setupPage면 프로필 체크 스킵 (필수: 이름 / 팀은 기본값 보장)
+  if (!setupPage && !adminOnly && memberOnly && !isAnonymous && (!userProfile || !userProfile.name)) {
     return <Navigate to="/member/setup" />;
   }
 
