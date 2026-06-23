@@ -6,6 +6,7 @@ import LoadingScreen from "../../components/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { useWorshipSchedule } from "../../hooks/useWorshipSchedule";
+import { useCalendar } from "../../hooks/useCalendar";
 import PositionSlot from "../../components/worship/PositionSlot";
 import { POSITIONS } from "../../constants/worship";
 
@@ -29,11 +30,7 @@ export default function WorshipSchedulePage() {
   const { user, userProfile, signOut } = useAuthStore();
 
   const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [slideDir, setSlideDir] = useState<"left" | "right">("right");
-  const [slideKey, setSlideKey] = useState(0);
+  const { year: viewYear, month: viewMonth, selectedDate, slideDir, slideKey, moveMonth, selectDate } = useCalendar();
   const [togglingPosition, setTogglingPosition] = useState<string | null>(null);
   const [teamFilter, setTeamFilter] = useState<string>("나누리");
 
@@ -47,18 +44,6 @@ export default function WorshipSchedulePage() {
   const sundaysInMonth = getSundaysInMonth(viewYear, viewMonth);
   const defaultSelected = sundaysInMonth.find((d) => d >= today) ?? sundaysInMonth[sundaysInMonth.length - 1];
   const activeDate = selectedDate ?? defaultSelected;
-
-  const moveMonth = (delta: number) => {
-    let m = viewMonth + delta;
-    let y = viewYear;
-    if (m > 11) { m = 0; y++; }
-    if (m < 0) { m = 11; y--; }
-    setSlideDir(delta > 0 ? "right" : "left");
-    setSlideKey((k) => k + 1);
-    setViewMonth(m);
-    setViewYear(y);
-    setSelectedDate(null);
-  };
 
   const updateCache = (scheduleId: string, userId: string, position: string, available: boolean) => {
     queryClient.setQueryData(["worship", viewYear, viewMonth], (old: typeof data) => {
@@ -225,7 +210,7 @@ export default function WorshipSchedulePage() {
               return (
                 <button
                   key={dateStr}
-                  onClick={() => setSelectedDate(d)}
+                  onClick={() => selectDate(d)}
                   className={`py-3 flex flex-col items-center gap-0.5 transition ${isActive ? "bg-gray-800" : "hover:bg-gray-50"}`}
                 >
                   <span className={`text-xs ${isActive ? "text-white/50" : "text-gray-400"}`}>일</span>
