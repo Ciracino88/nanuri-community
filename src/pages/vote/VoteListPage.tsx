@@ -8,6 +8,7 @@ import ImageCarousel from "../../components/ui/ImageCarousel";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
+import { fetchList } from "../../lib/supabaseList";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { extractMenusFromImage, type MenuItem } from "../../lib/extractMenus";
 
@@ -19,15 +20,6 @@ interface Candidate {
   created_at: string;
 }
 
-async function fetchCandidates(): Promise<Candidate[]> {
-  const { data, error } = await supabase
-    .from("vote_candidates")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return data ?? [];
-}
-
 export default function VoteListPage() {
   const navigate = useNavigate();
   const { userProfile, signOut } = useAuthStore();
@@ -35,7 +27,7 @@ export default function VoteListPage() {
   const queryClient = useQueryClient();
   const { data: candidates = [], isLoading: loading } = useQuery({
     queryKey: ["vote_candidates"],
-    queryFn: fetchCandidates,
+    queryFn: () => fetchList<Candidate>("vote_candidates"),
   });
   const [showForm, setShowForm] = useState(false);
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import Lightbox from "../../components/ui/Lightbox";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/ui/Button";
@@ -36,7 +37,6 @@ export default function VoteResponsePage() {
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [currentImage, setCurrentImage] = useState(0);
-  const [lightbox, setLightbox] = useState(false);
   const [selected, setSelected] = useState<SelectedItem[]>([]);
   const [query, setQuery] = useState("");
   const [pendingMenu, setPendingMenu] = useState<MenuItem | null>(null);
@@ -164,26 +164,6 @@ export default function VoteResponsePage() {
           <h1 className="text-lg font-medium text-gray-800">{candidate.name}</h1>
         </div>
 
-        {lightbox && (
-          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center" onClick={() => setLightbox(false)}>
-            <div onClick={(e) => e.stopPropagation()} className="w-full h-full flex items-center justify-center p-4">
-              <ImageCarousel
-                images={candidate.image_urls}
-                currentIndex={currentImage}
-                onIndexChange={setCurrentImage}
-                aspectRatio="full"
-                objectFit="contain"
-              />
-            </div>
-            <button
-              onClick={() => setLightbox(false)}
-              className="absolute top-4 right-4 text-white bg-black/40 rounded-full w-9 h-9 flex items-center justify-center hover:bg-black/60 transition"
-            >
-              <i className="ti ti-x text-lg" aria-hidden="true" />
-            </button>
-          </div>
-        )}
-
         {candidate.image_urls?.length > 0 && (
           <div className="relative">
             <ImageCarousel
@@ -191,12 +171,7 @@ export default function VoteResponsePage() {
               currentIndex={currentImage}
               onIndexChange={setCurrentImage}
             />
-            <button
-              onClick={() => setLightbox(true)}
-              className="absolute bottom-2 right-2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/60 transition z-10"
-            >
-              <i className="ti ti-arrows-maximize text-sm" aria-hidden="true" />
-            </button>
+            <Lightbox images={candidate.image_urls} initialIndex={currentImage} />
           </div>
         )}
 

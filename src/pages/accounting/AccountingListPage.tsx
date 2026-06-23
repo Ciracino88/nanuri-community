@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
+import { fetchList } from "../../lib/supabaseList";
 import LoadingScreen from "../../components/LoadingScreen";
 
 interface Report {
@@ -14,15 +15,6 @@ interface Report {
     created_at: string;
 }
 
-async function fetchReports(): Promise<Report[]> {
-    const { data, error } = await supabase
-        .from("accounting_reports")
-        .select("*")
-        .order("created_at", { ascending: false });
-    if (error) throw error;
-    return data ?? [];
-}
-
 export default function AccountingListPage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -30,7 +22,7 @@ export default function AccountingListPage() {
 
     const { data: reports = [], isLoading } = useQuery({
         queryKey: ["accounting_reports"],
-        queryFn: fetchReports,
+        queryFn: () => fetchList<Report>("accounting_reports"),
     });
 
     const deleteMutation = useMutation({

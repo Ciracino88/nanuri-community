@@ -6,6 +6,7 @@ import Navbar from "../../components/Navbar";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
+import { fetchList } from "../../lib/supabaseList";
 
 interface Template {
   id: string;
@@ -30,14 +31,8 @@ interface AdminData {
   activeSurveys: ActiveSurvey[];
 }
 
-async function fetchAdminData(): Promise<AdminData> {
-  const [{ data: tplData }, { data: surveyData }] = await Promise.all([
-    supabase.from("survey_templates").select("*").order("created_at", { ascending: false }),
-    supabase.from("surveys").select("*").eq("status", "active").order("created_at", { ascending: false }),
-  ]);
-
-  const surveys = surveyData ?? [];
-  const activeSurveys = await Promise.all(
+async function attachResponseCounts(surveys: Omit<ActiveSurvey, "responseCount">[]): Promise<ActiveSurvey[]> {
+  return Promise.all(
     surveys.map(async (s) => {
       const { count } = await supabase
         .from("survey_responses")
@@ -46,8 +41,15 @@ async function fetchAdminData(): Promise<AdminData> {
       return { ...s, responseCount: count ?? 0 };
     })
   );
+}
 
-  return { templates: tplData ?? [], activeSurveys };
+async function fetchAdminData(): Promise<AdminData> {
+  const [templates, surveys] = await Promise.all([
+    fetchList<Template>("survey_templates"),
+    fetchList<Omit<ActiveSurvey, "responseCount">>("surveys", { filter: { status: "active" } }),
+  ]);
+  const activeSurveys = await attachResponseCounts(surveys);
+  return { templates, activeSurveys };
 }
 
 async function deleteR2Image(imageUrl: string) {

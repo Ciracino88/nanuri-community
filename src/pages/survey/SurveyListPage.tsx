@@ -1,22 +1,15 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
-import { supabase } from "../../lib/supabase";
 import { useActiveSurveys } from "../../hooks/useActiveSurveys";
+import { useRespondedIds } from "../../hooks/useRespondedIds";
 
 export default function SurveyListPage() {
   const navigate = useNavigate();
   const { userProfile, signOut, user } = useAuthStore();
   const { surveys, loading } = useActiveSurveys();
-  const [respondedIds, setRespondedIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("survey_responses").select("survey_id").eq("user_id", user.id)
-      .then(({ data }) => setRespondedIds(new Set((data ?? []).map((r: { survey_id: string }) => r.survey_id))));
-  }, [user]);
+  const respondedIds = useRespondedIds(user?.id);
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });

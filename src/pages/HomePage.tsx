@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import Navbar from "../components/Navbar";
 import { useActiveSurveys } from "../hooks/useActiveSurveys";
-import { supabase } from "../lib/supabase";
+import { useRespondedIds } from "../hooks/useRespondedIds";
 
 interface MenuCard {
   icon: string;
@@ -64,13 +64,7 @@ export default function HomePage() {
   const { userProfile, signOut, user } = useAuthStore();
   const isAdmin = userProfile?.role === "admin";
   const { surveys } = useActiveSurveys();
-  const [respondedIds, setRespondedIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("survey_responses").select("survey_id").eq("user_id", user.id)
-      .then(({ data }) => setRespondedIds(new Set((data ?? []).map((r: { survey_id: string }) => r.survey_id))));
-  }, [user]);
+  const respondedIds = useRespondedIds(user?.id);
 
   const unrespondedCount = surveys.filter((s) => !respondedIds.has(s.id)).length;
 
