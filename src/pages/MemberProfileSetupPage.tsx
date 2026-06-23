@@ -34,6 +34,13 @@ export default function MemberProfileSetupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [positions, setPositions] = useState<string[]>(userProfile?.position ?? []);
   const [team, setTeam] = useState<string>(userProfile?.team ?? "나누리");
+  const hasOptionalData = !!(
+    (userProfile?.position?.length) ||
+    userProfile?.bank_name ||
+    userProfile?.account_number ||
+    userProfile?.phone
+  );
+  const [showOptional, setShowOptional] = useState(hasOptionalData);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(userProfile?.avatar_url ?? null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -138,15 +145,18 @@ export default function MemberProfileSetupPage() {
           </div>
         </div>
 
-        {/* 구분선 */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-gray-100" />
-          <p className="text-xs text-gray-400">선택 입력</p>
-          <div className="flex-1 h-px bg-gray-100" />
-        </div>
+        {/* 선택 입력 토글 */}
+        <button
+          type="button"
+          onClick={() => setShowOptional((v) => !v)}
+          className="flex items-center justify-between w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition"
+        >
+          <span className="text-sm text-gray-500">추가 정보 입력</span>
+          <i className={`ti ${showOptional ? "ti-chevron-up" : "ti-chevron-down"} text-gray-400`} aria-hidden="true" />
+        </button>
 
         {/* 선택 입력 */}
-        <div className="flex flex-col gap-5">
+        {showOptional && <div className="flex flex-col gap-5 animate-[fadeIn_0.2s_ease]">
 
           {/* 포지션 */}
           <div className="flex flex-col gap-1.5">
