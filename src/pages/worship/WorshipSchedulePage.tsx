@@ -274,7 +274,7 @@ export default function WorshipSchedulePage() {
                       key={pos}
                       position={pos}
                       member={confirmed ?? null}
-                      isMine={isMine}
+                      isMine={isMine && canToggle}
                       myAvailable={myAvailForPos?.available ?? false}
                       toggling={togglingPosition === pos}
                       onToggle={activeScheduleId && canToggle ? () => toggleAvailability(activeScheduleId, pos) : undefined}
@@ -295,7 +295,7 @@ export default function WorshipSchedulePage() {
                       key={pos}
                       position={pos}
                       member={confirmed ?? null}
-                      isMine={isMine}
+                      isMine={isMine && canToggle}
                       myAvailable={myAvailForPos?.available ?? false}
                       toggling={togglingPosition === pos}
                       onToggle={activeScheduleId && canToggle ? () => toggleAvailability(activeScheduleId, pos) : undefined}
