@@ -31,6 +31,7 @@ export default function MemberProfileSetupPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [positions, setPositions] = useState<string[]>(userProfile?.position ?? []);
+  const [team, setTeam] = useState<string>(userProfile?.team ?? "나누리");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(userProfile?.avatar_url ?? null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -57,6 +58,7 @@ export default function MemberProfileSetupPage() {
       bank_name: values.bank_name,
       account_number: values.account_number,
       position: positions.length > 0 ? positions : null,
+      team,
       avatar_url,
     });
 
@@ -124,6 +126,27 @@ export default function MemberProfileSetupPage() {
                 }`}
               >
                 {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 팀 */}
+        <div className="flex flex-col gap-1.5">
+          <p className="text-sm font-medium text-gray-700">팀</p>
+          <div className="flex gap-2">
+            {["나누리", "섬김이"].map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTeam(t)}
+                className={`px-4 py-1.5 rounded-full text-sm border transition ${
+                  team === t
+                    ? "bg-gray-800 text-white border-gray-800"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                }`}
+              >
+                {t}
               </button>
             ))}
           </div>

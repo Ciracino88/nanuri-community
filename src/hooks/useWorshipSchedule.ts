@@ -30,7 +30,7 @@ async function fetchWorshipData(year: number, month: number) {
 
   const [{ data: schedules }, { data: members }, { data: availability }] = await Promise.all([
     supabase.from("worship_schedules").select("id, date").order("date"),
-    supabase.from("user_profiles").select("id, name, position, avatar_url").not("position", "is", null),
+    supabase.from("user_profiles").select("id, name, position, avatar_url, team").not("position", "is", null),
     supabase.from("worship_availability").select("schedule_id, user_id, position, available"),
   ]);
 

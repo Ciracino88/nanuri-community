@@ -19,6 +19,7 @@ interface MemberProfile {
   name: string;
   position: string[] | null;
   avatar_url: string | null;
+  team: string | null;
 }
 
 
@@ -45,11 +46,13 @@ export default function WorshipSchedulePage() {
   const [slideDir, setSlideDir] = useState<"left" | "right">("right");
   const [slideKey, setSlideKey] = useState(0);
   const [togglingPosition, setTogglingPosition] = useState<string | null>(null);
+  const [teamFilter, setTeamFilter] = useState<string>("나누리");
 
   const { data, isLoading } = useWorshipSchedule(viewYear, viewMonth);
 
   const schedules = data?.schedules ?? [];
-  const members = data?.members ?? [];
+  const allMembers = data?.members ?? [];
+  const members = allMembers.filter((m) => (m.team ?? "나누리") === teamFilter);
   const availability = data?.availability ?? [];
 
   const sundaysInMonth = getSundaysInMonth(viewYear, viewMonth);
@@ -86,7 +89,7 @@ export default function WorshipSchedulePage() {
   };
 
   const toggleAvailability = async (scheduleId: string, position: string) => {
-    if (!user || togglingPosition) return;
+    if (!user || togglingPosition || userProfile?.team !== teamFilter) return;
     setTogglingPosition(position);
 
     const snapshot = queryClient.getQueryData(["worship", viewYear, viewMonth]);
@@ -157,6 +160,7 @@ export default function WorshipSchedulePage() {
   const activeDateStr = activeDate?.toISOString().slice(0, 10) ?? "";
   const activeScheduleId = getScheduleId(activeDateStr);
   const myPositions = userProfile?.position ?? [];
+  const canToggle = (userProfile?.team ?? "나누리") === teamFilter;
   const confirmedCount = activeScheduleId
     ? POSITIONS.filter((pos) => !!getConfirmedMember(activeScheduleId, pos)).length
     : 0;
@@ -173,9 +177,26 @@ export default function WorshipSchedulePage() {
 
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
 
-        <div>
-          <p className="text-xs text-gray-400 mb-0.5">나누리 청년부</p>
-          <h1 className="text-xl font-medium text-gray-800">찬양팀 일정</h1>
+        <div className="flex flex-col gap-3">
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">찬양팀 일정</p>
+            <h1 className="text-xl font-medium text-gray-800">주일 스케줄</h1>
+          </div>
+          <div className="flex gap-2">
+            {["나누리", "섬김이"].map((t) => (
+              <button
+                key={t}
+                onClick={() => setTeamFilter(t)}
+                className={`px-4 py-1.5 rounded-full text-sm border transition ${
+                  teamFilter === t
+                    ? "bg-gray-800 text-white border-gray-800"
+                    : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
         </div>
 
         {myPositions.length === 0 && (
@@ -256,7 +277,7 @@ export default function WorshipSchedulePage() {
                       isMine={isMine}
                       myAvailable={myAvailForPos?.available ?? false}
                       toggling={togglingPosition === pos}
-                      onToggle={activeScheduleId ? () => toggleAvailability(activeScheduleId, pos) : undefined}
+                      onToggle={activeScheduleId && canToggle ? () => toggleAvailability(activeScheduleId, pos) : undefined}
                     />
                   );
                 })}
@@ -277,7 +298,7 @@ export default function WorshipSchedulePage() {
                       isMine={isMine}
                       myAvailable={myAvailForPos?.available ?? false}
                       toggling={togglingPosition === pos}
-                      onToggle={activeScheduleId ? () => toggleAvailability(activeScheduleId, pos) : undefined}
+                      onToggle={activeScheduleId && canToggle ? () => toggleAvailability(activeScheduleId, pos) : undefined}
                     />
                   );
                 })}
