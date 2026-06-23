@@ -5,12 +5,11 @@ import LoadingScreen from "./LoadingScreen";
 interface Props {
   children: React.ReactNode;
   memberOnly?: boolean;
-  guestOnly?: boolean;
   setupPage?: boolean;
   adminOnly?: boolean;
 }
 
-export default function ProtectedRoute({ children, memberOnly, guestOnly, setupPage, adminOnly }: Props) {
+export default function ProtectedRoute({ children, memberOnly, setupPage, adminOnly }: Props) {
   const { user, isAnonymous, userProfile, isLoading } = useAuthStore();
 
   if (isLoading) return <LoadingScreen />;
@@ -18,7 +17,6 @@ export default function ProtectedRoute({ children, memberOnly, guestOnly, setupP
   if (!user) return <Navigate to="/" />;
 
   if (memberOnly && isAnonymous) return <Navigate to="/" />;
-  if (guestOnly && !isAnonymous) return <Navigate to="/" />;
 
   if (adminOnly && userProfile?.role !== "admin") return <Navigate to="/member/form" />;
 

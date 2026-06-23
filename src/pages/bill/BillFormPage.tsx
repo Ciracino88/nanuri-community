@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { useFormSubmit } from "../../hooks/useFormSubmit";
+import { useAuthStore } from "../../store/authStore";
 import Input from "../../components/ui/Input";
 import FileInput from "../../components/ui/FileInput";
 import Button from "../../components/ui/Button";
@@ -22,6 +23,7 @@ interface FormValues {
 
 export default function BillFormPage() {
   const navigate = useNavigate();
+  const { isAnonymous } = useAuthStore();
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>();
   const { receiptFile, receiptPreview, handleReceiptChange } = useReceiptUpload();
   const { submitting, success, error, submit } = useFormSubmit();
@@ -58,8 +60,12 @@ export default function BillFormPage() {
     return (
       <SuccessView
         onBack={async () => {
-          await supabase.auth.signOut();
-          navigate("/");
+          if (isAnonymous) {
+            await supabase.auth.signOut();
+            navigate("/");
+          } else {
+            navigate("/home");
+          }
         }}
       />
     );

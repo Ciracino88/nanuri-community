@@ -48,7 +48,7 @@ export const router = createBrowserRouter([
   {
     path: "/guest/form",
     element: (
-      <ProtectedRoute guestOnly>
+      <ProtectedRoute>
         <BillFormPage />
       </ProtectedRoute>
     ),
