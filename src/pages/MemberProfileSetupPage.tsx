@@ -71,7 +71,7 @@ export default function MemberProfileSetupPage() {
       return;
     }
 
-    await fetchUserProfile();
+    await fetchUserProfile().catch(() => {});
     setSubmitting(false);
     navigate("/home");
   };
