@@ -41,6 +41,8 @@ async function fetchWorshipData(year: number, month: number) {
   };
 }
 
+export type WorshipData = Awaited<ReturnType<typeof fetchWorshipData>>;
+
 export function useWorshipSchedule(year: number, month: number) {
   const queryClient = useQueryClient();
 

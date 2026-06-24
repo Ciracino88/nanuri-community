@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "../../components/Navbar";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
-import { supabase } from "../../lib/supabase";
 import { useWorshipSchedule } from "../../hooks/useWorshipSchedule";
 import { useCalendar } from "../../hooks/useCalendar";
+import { useToggleAvailability } from "../../hooks/useToggleAvailability";
 import PositionSlot from "../../components/worship/PositionSlot";
 import { POSITIONS } from "../../constants/worship";
 
@@ -26,12 +25,10 @@ function getSundaysInMonth(year: number, month: number): Date[] {
 
 export default function WorshipSchedulePage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { user, userProfile, signOut } = useAuthStore();
 
   const today = new Date();
   const { year: viewYear, month: viewMonth, selectedDate, slideDir, slideKey, moveMonth, selectDate } = useCalendar();
-  const [togglingPosition, setTogglingPosition] = useState<string | null>(null);
   const [teamFilter, setTeamFilter] = useState<string>("나누리");
 
   const { data, isLoading } = useWorshipSchedule(viewYear, viewMonth);
@@ -45,81 +42,13 @@ export default function WorshipSchedulePage() {
   const defaultSelected = sundaysInMonth.find((d) => d >= today) ?? sundaysInMonth[sundaysInMonth.length - 1];
   const activeDate = selectedDate ?? defaultSelected;
 
-  const updateCache = (scheduleId: string, userId: string, position: string, available: boolean) => {
-    queryClient.setQueryData(["worship", viewYear, viewMonth], (old: typeof data) => {
-      if (!old) return old;
-      const existing = old.availability.find(
-        (a) => a.schedule_id === scheduleId && a.user_id === userId && a.position === position
-      );
-      const newAvailability = existing
-        ? old.availability.map((a) =>
-            a.schedule_id === scheduleId && a.user_id === userId && a.position === position
-              ? { ...a, available }
-              : a
-          )
-        : [...old.availability, { schedule_id: scheduleId, user_id: userId, position, available }];
-      return { ...old, availability: newAvailability };
-    });
-  };
-
-  const toggleAvailability = async (scheduleId: string, position: string) => {
-    if (!user || togglingPosition || userProfile?.team !== teamFilter) return;
-    setTogglingPosition(position);
-
-    const snapshot = queryClient.getQueryData(["worship", viewYear, viewMonth]);
-
-    try {
-      const currentAvail = availability.find(
-        (a) => a.schedule_id === scheduleId && a.user_id === user.id && a.position === position
-      );
-
-      if (currentAvail?.available) {
-        updateCache(scheduleId, user.id, position, false);
-        const { error } = await supabase.from("worship_availability")
-          .update({ available: false })
-          .eq("schedule_id", scheduleId)
-          .eq("user_id", user.id)
-          .eq("position", position);
-        if (error) throw error;
-        return;
-      }
-
-      const conflicting = members.find(
-        (m) => m.id !== user.id &&
-          m.position?.includes(position) &&
-          availability.find((a) => a.schedule_id === scheduleId && a.user_id === m.id && a.position === position && a.available)
-      );
-
-      if (conflicting) {
-        const ok = confirm(`${conflicting.name}님이 이미 등록되어 있어요. 교체할까요?`);
-        if (!ok) return;
-        updateCache(scheduleId, conflicting.id, position, false);
-        const { error } = await supabase.from("worship_availability")
-          .update({ available: false })
-          .eq("schedule_id", scheduleId)
-          .eq("user_id", conflicting.id)
-          .eq("position", position);
-        if (error) throw error;
-      }
-
-      updateCache(scheduleId, user.id, position, true);
-      const { error } = currentAvail
-        ? await supabase.from("worship_availability")
-            .update({ available: true })
-            .eq("schedule_id", scheduleId)
-            .eq("user_id", user.id)
-            .eq("position", position)
-        : await supabase.from("worship_availability")
-            .insert({ schedule_id: scheduleId, user_id: user.id, position, available: true });
-      if (error) throw error;
-
-    } catch (err) {
-      console.error("[toggleAvailability] error:", err);
-      queryClient.setQueryData(["worship", viewYear, viewMonth], snapshot);
-    } finally {
-      setTogglingPosition(null);
-    }
-  };
+  const { toggle: toggleAvailability, togglingPosition } = useToggleAvailability({
+    year: viewYear,
+    month: viewMonth,
+    members,
+    availability,
+    teamFilter,
+  });
 
   const getScheduleId = (date: string) => schedules.find((s) => s.date === date)?.id;
   const getConfirmedMember = (scheduleId: string, position: string) => {
