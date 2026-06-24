@@ -75,12 +75,12 @@ export default function BillFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface">
       <Navbar isGuest />
       <div className="max-w-md mx-auto px-4 py-8">
         <div className="mb-6">
-          <p className="text-xs text-gray-400 mb-1">나누리 청년부</p>
-          <h1 className="text-xl font-medium text-gray-800">비용 청구서 작성</h1>
+          <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
+          <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
@@ -97,7 +97,7 @@ export default function BillFormPage() {
               onChange={(bank) => setValue("bank_name", bank, { shouldValidate: true })}
             />
             <input type="hidden" {...register("bank_name", { required: "은행을 선택해주세요" })} />
-            {errors.bank_name && <p className="text-xs text-red-500">{errors.bank_name.message}</p>}
+            {errors.bank_name && <p className="text-caption text-danger">{errors.bank_name.message}</p>}
           </div>
 
           <Input
@@ -130,7 +130,7 @@ export default function BillFormPage() {
             onChange={handleReceiptChange}
           />
 
-          {(receiptError || error) && <p className="text-sm text-red-500 text-center">{receiptError ?? error}</p>}
+          {(receiptError || error) && <p className="text-body text-danger text-center">{receiptError ?? error}</p>}
 
           <Button type="submit" loading={submitting}>
             청구서 제출

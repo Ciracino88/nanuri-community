@@ -70,7 +70,7 @@ export default function MemberBillFormPage() {
 
   if (!hasAccount) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-surface">
         <Navbar
           userName={userProfile?.name}
           onLogout={async () => { await signOut(); navigate("/"); }}
@@ -78,36 +78,36 @@ export default function MemberBillFormPage() {
         />
         <div className="max-w-md mx-auto px-4 py-8">
           <div className="mb-6">
-            <p className="text-xs text-gray-400 mb-1">나누리 청년부</p>
-            <h1 className="text-xl font-medium text-gray-800">비용 청구서 작성</h1>
+            <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
+            <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
           </div>
 
-          <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3.5 flex items-center gap-3 mb-5">
-            <i className="ti ti-alert-circle text-amber-400 text-lg shrink-0" aria-hidden="true" />
-            <p className="text-sm text-amber-700">청구서를 제출하려면 입금받을 계좌 정보가 필요해요</p>
+          <div className="bg-warning-subtle border border-warning-soft rounded-xl px-4 py-3.5 flex items-center gap-3 mb-5">
+            <i className="ti ti-alert-circle text-warning text-lg shrink-0" aria-hidden="true" />
+            <p className="text-body text-warning">청구서를 제출하려면 입금받을 계좌 정보가 필요해요</p>
           </div>
 
           <div className="flex flex-col gap-3">
             <button
               onClick={() => navigate("/member/setup")}
-              className="w-full bg-white border border-gray-100 rounded-xl px-4 py-4 flex items-center justify-between hover:border-gray-200 transition text-left"
+              className="w-full bg-card border border-line-soft rounded-xl px-4 py-4 flex items-center justify-between hover:border-line transition text-left"
             >
               <div className="flex flex-col gap-0.5">
-                <p className="text-sm font-medium text-gray-800">프로필에 계좌 등록하기</p>
-                <p className="text-xs text-gray-400">한 번 등록하면 다음부터 자동으로 입력돼요</p>
+                <p className="text-body font-medium text-fg-strong">프로필에 계좌 등록하기</p>
+                <p className="text-caption text-fg-faint">한 번 등록하면 다음부터 자동으로 입력돼요</p>
               </div>
-              <i className="ti ti-chevron-right text-gray-300 text-lg shrink-0" aria-hidden="true" />
+              <i className="ti ti-chevron-right text-fg-faint text-lg shrink-0" aria-hidden="true" />
             </button>
 
             <button
               onClick={() => navigate("/guest/form")}
-              className="w-full bg-white border border-gray-100 rounded-xl px-4 py-4 flex items-center justify-between hover:border-gray-200 transition text-left"
+              className="w-full bg-card border border-line-soft rounded-xl px-4 py-4 flex items-center justify-between hover:border-line transition text-left"
             >
               <div className="flex flex-col gap-0.5">
-                <p className="text-sm font-medium text-gray-800">이번만 계좌 직접 입력하기</p>
-                <p className="text-xs text-gray-400">등록 없이 이번 청구서에만 계좌를 입력해요</p>
+                <p className="text-body font-medium text-fg-strong">이번만 계좌 직접 입력하기</p>
+                <p className="text-caption text-fg-faint">등록 없이 이번 청구서에만 계좌를 입력해요</p>
               </div>
-              <i className="ti ti-chevron-right text-gray-300 text-lg shrink-0" aria-hidden="true" />
+              <i className="ti ti-chevron-right text-fg-faint text-lg shrink-0" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function MemberBillFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface">
       <Navbar
         userName={userProfile?.name}
         onLogout={async () => { await signOut(); navigate("/"); }}
@@ -125,19 +125,19 @@ export default function MemberBillFormPage() {
       />
       <div className="max-w-md mx-auto px-4 py-8">
         <div className="mb-6">
-          <p className="text-xs text-gray-400 mb-1">나누리 청년부</p>
-          <h1 className="text-xl font-medium text-gray-800">비용 청구서 작성</h1>
+          <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
+          <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
           {userProfile && (
-            <p className="text-sm text-gray-500 mt-1">{userProfile.name}님, 안녕하세요</p>
+            <p className="text-body text-fg-muted mt-1">{userProfile.name}님, 안녕하세요</p>
           )}
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+            <div className="flex items-center justify-between bg-surface rounded-lg px-4 py-3">
               <div>
-                <p className="text-xs text-gray-400">입금 계좌</p>
-                <p className="text-sm font-medium text-gray-700">
+                <p className="text-caption text-fg-faint">입금 계좌</p>
+                <p className="text-body font-medium text-fg">
                   {userProfile?.bank_name} {userProfile?.account_number}
                 </p>
               </div>
@@ -145,7 +145,7 @@ export default function MemberBillFormPage() {
             <button
               type="button"
               onClick={() => navigate("/member/setup")}
-              className="text-xs text-blue-400 hover:text-blue-500 transition text-right pr-1"
+              className="text-caption text-info hover:text-info transition text-right pr-1"
             >
               계좌 정보가 다른가요? 수정하기 →
             </button>
@@ -173,7 +173,7 @@ export default function MemberBillFormPage() {
             onChange={handleReceiptChange}
           />
 
-          {(receiptError || error) && <p className="text-sm text-red-500 text-center">{receiptError ?? error}</p>}
+          {(receiptError || error) && <p className="text-body text-danger text-center">{receiptError ?? error}</p>}
 
           <Button type="submit" loading={submitting}>
             청구서 제출
