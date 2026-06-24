@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { fetchList } from "../../lib/supabaseList";
@@ -52,7 +53,7 @@ export default function AccountingListPage() {
                 onLogout={async () => { await signOut(); navigate("/"); }}
                 onProfileEdit={() => navigate("/member/setup")}
             />
-            <div className="max-w-2xl mx-auto w-full px-4 py-8 flex flex-col gap-5">
+            <PageContainer width="wide">
 
                 <div className="flex items-center justify-between">
                     <div>
@@ -101,7 +102,7 @@ export default function AccountingListPage() {
                     </div>
                 )}
 
-            </div>
+            </PageContainer>
         </div>
     );
 }

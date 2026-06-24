@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
 import { useWorshipSchedule } from "../../hooks/useWorshipSchedule";
@@ -97,7 +98,7 @@ export default function WorshipSchedulePage() {
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+      <PageContainer width="wide">
 
         <div className="flex flex-col gap-3">
           <div>
@@ -191,7 +192,7 @@ export default function WorshipSchedulePage() {
           </div>
         )}
 
-      </div>
+      </PageContainer>
     </div>
   );
 }

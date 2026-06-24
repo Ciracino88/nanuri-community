@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import { useAuthStore } from "../../store/authStore";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useAccountingReport } from "../../hooks/useAccountingReport";
@@ -19,7 +20,7 @@ export default function AccountingDetailPage() {
                 onLogout={async () => { await signOut(); navigate("/"); }}
                 onProfileEdit={() => navigate("/member/setup")}
             />
-            <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
+            <PageContainer width="full">
 
                 <div className="flex items-center gap-3">
                     <button onClick={() => navigate("/accounting")} className="text-fg-faint hover:text-fg-muted transition">
@@ -116,7 +117,7 @@ export default function AccountingDetailPage() {
                     </div>
                 </div>
 
-            </div>
+            </PageContainer>
         </div>
     );
 }

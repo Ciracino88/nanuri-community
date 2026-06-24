@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import Navbar from "../components/Navbar";
+import PageContainer from "../components/PageContainer";
 import { useActiveSurveys } from "../hooks/useActiveSurveys";
 import { useRespondedIds } from "../hooks/useRespondedIds";
 
@@ -76,7 +77,7 @@ export default function HomePage() {
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
+      <PageContainer width="default">
 
         {unrespondedCount > 0 && (
           <div className="bg-info-subtle rounded-xl p-4 border border-info-soft flex items-center justify-between">
@@ -113,7 +114,7 @@ export default function HomePage() {
           </div>
         )}
 
-      </div>
+      </PageContainer>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import Papa from "papaparse";
 import Button from "../../components/ui/Button";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import { useAuthStore } from "../../store/authStore";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
@@ -104,7 +105,7 @@ export default function AccountingReportPage() {
                 onLogout={async () => { await signOut(); navigate("/"); }}
                 onProfileEdit={() => navigate("/member/setup")}
             />
-            <div className="max-w-5xl mx-auto px-4 py-8">
+            <PageContainer width="full" stack={false}>
                 <div className="flex items-center gap-4 mb-4">
                     <div className="flex-1 flex flex-col gap-2">
                         <button onClick={() => navigate("/accounting")} className="text-fg-faint hover:text-fg-muted transition w-fit">
@@ -241,7 +242,7 @@ export default function AccountingReportPage() {
                         </Button>
                     </div>
                 )}
-            </div>
+            </PageContainer>
 
         {/* 저장 확인 모달 */}
         {showConfirmModal && (
