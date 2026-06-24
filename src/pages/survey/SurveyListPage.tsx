@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
@@ -8,7 +7,7 @@ import { useRespondedIds } from "../../hooks/useRespondedIds";
 
 export default function SurveyListPage() {
   const navigate = useNavigate();
-  const { userProfile, signOut, user } = useAuthStore();
+  const { user } = useAuthStore();
   const { surveys, loading } = useActiveSurveys();
   const respondedIds = useRespondedIds(user?.id);
 
@@ -16,15 +15,7 @@ export default function SurveyListPage() {
     new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={signOut}
-
-        onProfileEdit={() => navigate("/member/setup")}
-      />
-
-      <PageContainer width="default">
+    <PageContainer width="default">
 
         <div>
           <h1 className="text-heading font-medium text-fg-strong">참여 가능한 설문</h1>
@@ -70,7 +61,6 @@ export default function SurveyListPage() {
           })
         )}
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

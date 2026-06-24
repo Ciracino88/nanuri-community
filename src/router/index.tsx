@@ -6,6 +6,7 @@ import MemberBillFormPage from "../pages/bill/MemberBillFormPage";
 import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
 import BillFormPage from "../pages/bill/BillFormPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import AppShell from "../components/AppShell";
 import AccountingReportPage from "../pages/accounting/AccountingReportPage";
 import AccountingListPage from "../pages/accounting/AccountingListPage";
 import AccountingDetailPage from "../pages/accounting/AccountingDetailPage";
@@ -54,12 +55,16 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/home",
     element: (
       <ProtectedRoute memberOnly>
-        <HomePage />
+        <AppShell />
       </ProtectedRoute>
     ),
+    children: [
+      { path: "/home", element: <HomePage /> },
+      { path: "/surveys", element: <SurveyListPage /> },
+      { path: "/vote", element: <VoteListPage /> },
+    ],
   },
   {
     path: "/admin/surveys",
@@ -86,14 +91,6 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/surveys",
-    element: (
-      <ProtectedRoute memberOnly>
-        <SurveyListPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
     path: "/survey/:id",
     element: <SurveyResponsePage />,
   },
@@ -102,14 +99,6 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute memberOnly adminOnly>
         <SurveyResultsPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/vote",
-    element: (
-      <ProtectedRoute memberOnly>
-        <VoteListPage />
       </ProtectedRoute>
     ),
   },

@@ -2,12 +2,10 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
 import ImageCarousel from "../../components/ui/ImageCarousel";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { fetchList } from "../../lib/supabaseList";
 import { uploadReceipt } from "../../lib/uploadReceipt";
@@ -23,7 +21,6 @@ interface Candidate {
 
 export default function VoteListPage() {
   const navigate = useNavigate();
-  const { userProfile, signOut } = useAuthStore();
 
   const queryClient = useQueryClient();
   const { data: candidates = [], isLoading: loading } = useQuery({
@@ -111,14 +108,7 @@ export default function VoteListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={signOut}
-        onProfileEdit={() => navigate("/member/setup")}
-      />
-
-      <PageContainer width="default">
+    <PageContainer width="default">
 
         <div className="flex items-center justify-between">
           <div>
@@ -223,7 +213,6 @@ export default function VoteListPage() {
           </div>
         )}
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

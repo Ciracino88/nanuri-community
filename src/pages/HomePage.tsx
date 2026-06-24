@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
-import Navbar from "../components/Navbar";
 import PageContainer from "../components/PageContainer";
 import { useActiveSurveys } from "../hooks/useActiveSurveys";
 import { useRespondedIds } from "../hooks/useRespondedIds";
@@ -62,7 +61,7 @@ function FeatureCard({ card, delay, onClick }: { card: MenuCard; delay: number; 
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { userProfile, signOut, user } = useAuthStore();
+  const { userProfile, user } = useAuthStore();
   const isAdmin = userProfile?.role === "admin";
   const { surveys } = useActiveSurveys();
   const respondedIds = useRespondedIds(user?.id);
@@ -70,14 +69,7 @@ export default function HomePage() {
   const unrespondedCount = surveys.filter((s) => !respondedIds.has(s.id)).length;
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={signOut}
-        onProfileEdit={() => navigate("/member/setup")}
-      />
-
-      <PageContainer width="default">
+    <PageContainer width="default">
 
         {unrespondedCount > 0 && (
           <div className="bg-info-subtle rounded-xl p-4 border border-info-soft flex items-center justify-between">
@@ -114,7 +106,6 @@ export default function HomePage() {
           </div>
         )}
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }
