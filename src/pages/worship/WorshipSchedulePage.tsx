@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
@@ -26,7 +25,7 @@ function getSundaysInMonth(year: number, month: number): Date[] {
 
 export default function WorshipSchedulePage() {
   const navigate = useNavigate();
-  const { user, userProfile, signOut } = useAuthStore();
+  const { user, userProfile } = useAuthStore();
 
   const today = new Date();
   const { year: viewYear, month: viewMonth, selectedDate, slideDir, slideKey, moveMonth, selectDate } = useCalendar();
@@ -91,14 +90,7 @@ export default function WorshipSchedulePage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={async () => { await signOut(); navigate("/"); }}
-        onProfileEdit={() => navigate("/member/setup")}
-      />
-
-      <PageContainer width="wide">
+    <PageContainer width="wide">
 
         <div className="flex flex-col gap-3">
           <div>
@@ -192,7 +184,6 @@ export default function WorshipSchedulePage() {
           </div>
         )}
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

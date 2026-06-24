@@ -39,14 +39,6 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/member/form",
-    element: (
-      <ProtectedRoute memberOnly>
-        <MemberBillFormPage/>
-      </ProtectedRoute>
-    ),
-  },
-  {
     path: "/guest/form",
     element: (
       <ProtectedRoute>
@@ -64,6 +56,8 @@ export const router = createBrowserRouter([
       { path: "/home", element: <HomePage /> },
       { path: "/surveys", element: <SurveyListPage /> },
       { path: "/vote", element: <VoteListPage /> },
+      { path: "/worship", element: <WorshipSchedulePage /> },
+      { path: "/member/form", element: <MemberBillFormPage /> },
     ],
   },
   {
@@ -105,14 +99,6 @@ export const router = createBrowserRouter([
   {
     path: "/vote/candidate/:candidateId",
     element: <VoteResponsePage />,
-  },
-  {
-    path: "/worship",
-    element: (
-      <ProtectedRoute memberOnly>
-        <WorshipSchedulePage />
-      </ProtectedRoute>
-    ),
   },
   {
     path: "/accounting",

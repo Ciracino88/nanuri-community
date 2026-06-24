@@ -8,7 +8,6 @@ import { useFormSubmit } from "../../hooks/useFormSubmit";
 import Input from "../../components/ui/Input";
 import FileInput from "../../components/ui/FileInput";
 import Button from "../../components/ui/Button";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
 import SuccessScreen from "../../components/SuccessScreen";
 import { supabase } from "../../lib/supabase";
@@ -20,7 +19,7 @@ interface FormValues {
 
 export default function MemberBillFormPage() {
   const navigate = useNavigate();
-  const { user, userProfile, signOut } = useAuthStore();
+  const { user, userProfile } = useAuthStore();
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>();
   const { receiptFile, receiptPreview, handleReceiptChange, reset: resetReceipt } = useReceiptUpload();
   const [receiptError, setReceiptError] = useState<string | null>(null);
@@ -71,13 +70,7 @@ export default function MemberBillFormPage() {
 
   if (!hasAccount) {
     return (
-      <div className="min-h-screen bg-surface">
-        <Navbar
-          userName={userProfile?.name}
-          onLogout={async () => { await signOut(); navigate("/"); }}
-          onProfileEdit={() => navigate("/member/setup")}
-        />
-        <PageContainer width="narrow">
+      <PageContainer width="narrow">
           <div className="mb-6">
             <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
             <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
@@ -112,19 +105,11 @@ export default function MemberBillFormPage() {
             </button>
           </div>
         </PageContainer>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={async () => { await signOut(); navigate("/"); }}
-        onProfileEdit={() => navigate("/member/setup")}
-
-      />
-      <PageContainer width="narrow">
+    <PageContainer width="narrow">
         <div className="mb-6">
           <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
           <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
@@ -181,6 +166,5 @@ export default function MemberBillFormPage() {
           </Button>
         </form>
       </PageContainer>
-    </div>
   );
 }
