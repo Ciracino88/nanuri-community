@@ -1,6 +1,14 @@
+import { Navigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { useAuthStore } from "../../store/authStore";
+import LoadingScreen from "../../components/LoadingScreen";
 
 export default function MemberLoginPage() {
+  const { user, isAnonymous, isLoading } = useAuthStore();
+
+  if (isLoading) return <LoadingScreen />;
+  if (user && !isAnonymous) return <Navigate to="/home" replace />;
+
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
