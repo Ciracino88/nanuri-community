@@ -18,7 +18,10 @@ export default function Navbar({ userName, onLogout, onProfileEdit, isGuest }: P
   };
 
   return (
-    <nav className="w-full border-b border-line-soft bg-card px-5 py-3 flex items-center justify-between">
+    <nav
+      className="w-full border-b border-line-soft bg-card px-5 pb-3 flex items-center justify-between"
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}
+    >
       <button
         onClick={() => navigate("/home")}
         className="flex items-center gap-2 hover:opacity-70 transition"
