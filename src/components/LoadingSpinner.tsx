@@ -1,21 +1,28 @@
 interface Props {
   label?: string;
+  size?: "sm" | "lg";
 }
 
-export default function LoadingSpinner({ label }: Props) {
+const SIZES = {
+  sm: { icon: "text-base", iconGap: "gap-1.5", label: "text-xs text-gray-400", outerGap: "gap-2" },
+  lg: { icon: "text-2xl", iconGap: "gap-2.5", label: "text-sm text-gray-300", outerGap: "gap-4" },
+};
+
+export default function LoadingSpinner({ label, size = "sm" }: Props) {
+  const s = SIZES[size];
   return (
-    <div className="flex flex-col items-center justify-center gap-2 py-10">
-      <div className="flex items-center gap-1.5">
+    <div className={`flex flex-col items-center justify-center py-10 ${s.outerGap}`}>
+      <div className={`flex items-center ${s.iconGap}`}>
         {[0, 1, 2].map((i) => (
           <i
             key={i}
-            className="ti ti-seeding text-base text-gray-300"
+            className={`ti ti-seeding ${s.icon} text-gray-300`}
             style={{ animation: `loadingBounce 1s ease-in-out infinite ${i * 0.2}s` }}
             aria-hidden="true"
           />
         ))}
       </div>
-      {label && <p className="text-xs text-gray-400">{label}</p>}
+      {label && <p className={s.label}>{label}</p>}
     </div>
   );
 }
