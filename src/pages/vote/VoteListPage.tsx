@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
 import ImageCarousel from "../../components/ui/ImageCarousel";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -117,7 +118,7 @@ export default function VoteListPage() {
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
+      <PageContainer width="default">
 
         <div className="flex items-center justify-between">
           <div>
@@ -222,7 +223,7 @@ export default function VoteListPage() {
           </div>
         )}
 
-      </div>
+      </PageContainer>
     </div>
   );
 }
