@@ -167,7 +167,7 @@ export default function AccountingReportPage() {
                         {categoryTotals.length > 0 && (
                             <div className="flex items-center justify-between px-4 py-3 bg-info-subtle rounded-xl border border-info-soft">
                                 <p className="text-body font-medium text-info">잔액</p>
-                                <p className={`text-body font-bold ${totalIncome + totalExpense >= 0 ? "text-info" : "text-danger"}`}>
+                                <p className={`text-body font-medium ${totalIncome + totalExpense >= 0 ? "text-info" : "text-danger"}`}>
                                     {(totalIncome + totalExpense).toLocaleString()}원
                                 </p>
                             </div>
@@ -303,7 +303,7 @@ export default function AccountingReportPage() {
                         </div>
                         <div className="flex items-center justify-between px-4 py-2.5 border-t border-line-soft bg-surface">
                             <p className="text-caption font-medium text-fg">잔액</p>
-                            <p className={`text-caption font-bold ${totalIncome + totalExpense >= 0 ? "text-info" : "text-danger"}`}>
+                            <p className={`text-caption font-medium ${totalIncome + totalExpense >= 0 ? "text-info" : "text-danger"}`}>
                                 {(totalIncome + totalExpense).toLocaleString()}원
                             </p>
                         </div>
