@@ -43,18 +43,18 @@ function FeatureCard({ card, delay, onClick }: { card: MenuCard; delay: number; 
     <button
       ref={ref}
       onClick={onClick}
-      className="bg-white border border-gray-100 rounded-2xl p-6 text-left hover:border-gray-200 hover:shadow-sm transition-all duration-300"
+      className="bg-card border border-line-soft rounded-2xl p-6 text-left hover:border-line hover:shadow-sm transition-all duration-300"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
         transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s, box-shadow 0.2s, border-color 0.2s`,
       }}
     >
-      <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-3">
-        <i className={`ti ${card.icon} text-xl text-gray-500`} aria-hidden="true" />
+      <div className="w-10 h-10 rounded-xl bg-surface border border-line-soft flex items-center justify-center mb-3">
+        <i className={`ti ${card.icon} text-xl text-fg-muted`} aria-hidden="true" />
       </div>
-      <p className="text-sm font-medium text-gray-800 mb-1.5">{card.title}</p>
-      <p className="text-xs text-gray-400 leading-relaxed">{card.description}</p>
+      <p className="text-body font-medium text-fg-strong mb-1.5">{card.title}</p>
+      <p className="text-caption text-fg-faint leading-relaxed">{card.description}</p>
     </button>
   );
 }
@@ -69,7 +69,7 @@ export default function HomePage() {
   const unrespondedCount = surveys.filter((s) => !respondedIds.has(s.id)).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
@@ -79,14 +79,14 @@ export default function HomePage() {
       <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
 
         {unrespondedCount > 0 && (
-          <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 flex items-center justify-between">
+          <div className="bg-info-subtle rounded-xl p-4 border border-info-soft flex items-center justify-between">
             <div>
-              <p className="text-xs text-blue-500 font-medium mb-0.5">진행 중인 설문</p>
-              <p className="text-sm font-medium text-blue-800">참여 가능한 설문이 {unrespondedCount}개 있습니다</p>
+              <p className="text-caption text-info font-medium mb-0.5">진행 중인 설문</p>
+              <p className="text-body font-medium text-fg-strong">참여 가능한 설문이 {unrespondedCount}개 있습니다</p>
             </div>
             <button
               onClick={() => navigate("/surveys")}
-              className="text-sm text-blue-500 font-medium whitespace-nowrap ml-3"
+              className="text-body text-info font-medium whitespace-nowrap ml-3"
             >
               보러가기 →
             </button>
@@ -94,7 +94,7 @@ export default function HomePage() {
         )}
 
         <div className="flex flex-col gap-2.5">
-          <p className="text-xs text-gray-400 font-medium">메뉴</p>
+          <p className="text-caption text-fg-faint font-medium">메뉴</p>
           <div className="flex flex-col gap-2.5">
             {MENU_CARDS.map((card, i) => (
               <FeatureCard key={card.path} card={card} delay={i * 0.1} onClick={() => navigate(card.path)} />
@@ -104,7 +104,7 @@ export default function HomePage() {
 
         {isAdmin && (
           <div className="flex flex-col gap-2.5">
-            <p className="text-xs text-gray-400 font-medium">관리자</p>
+            <p className="text-caption text-fg-faint font-medium">관리자</p>
             <div className="flex flex-col gap-2.5">
               {ADMIN_CARDS.map((card, i) => (
                 <FeatureCard key={card.path} card={card} delay={i * 0.1} onClick={() => navigate(card.path)} />
