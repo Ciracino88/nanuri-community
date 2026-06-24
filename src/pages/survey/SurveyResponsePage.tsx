@@ -133,8 +133,7 @@ export default function SurveyResponsePage() {
   if (submitted) {
     return (
       <SuccessScreen
-        emoji="🎉"
-        message={isEditing ? "응답이 수정되었습니다!" : "참여해주셔서 감사합니다!"}
+        message={isEditing ? "응답이 수정되었습니다" : "참여해주셔서 감사합니다"}
         buttonText="홈으로 돌아가기"
         onButtonClick={() => navigate("/home")}
         navbarProps={navbarProps}

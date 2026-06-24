@@ -142,7 +142,6 @@ export default function VoteResponsePage() {
   if (submitted) {
     return (
       <SuccessScreen
-        emoji="🎉"
         message="메뉴 선택 완료!"
         buttonText="목록으로 돌아가기"
         onButtonClick={() => navigate("/vote")}

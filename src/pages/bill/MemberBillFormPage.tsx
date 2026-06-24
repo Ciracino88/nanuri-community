@@ -9,7 +9,7 @@ import Input from "../../components/ui/Input";
 import FileInput from "../../components/ui/FileInput";
 import Button from "../../components/ui/Button";
 import Navbar from "../../components/Navbar";
-import SuccessView from "../../components/SuccessView";
+import SuccessScreen from "../../components/SuccessScreen";
 import { supabase } from "../../lib/supabase";
 
 interface FormValues {
@@ -52,8 +52,11 @@ export default function MemberBillFormPage() {
 
   if (success) {
     return (
-      <SuccessView
-        onBack={() => {
+      <SuccessScreen
+        message="청구서가 제출되었습니다"
+        subMessage="담당자 확인 후 처리될 예정이에요"
+        buttonText="메인 페이지로 돌아가기"
+        onButtonClick={() => {
           resetForm();
           setReceiptError(null);
           reset();
