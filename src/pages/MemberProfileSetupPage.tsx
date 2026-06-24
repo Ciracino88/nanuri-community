@@ -5,6 +5,7 @@ import { useAuthStore } from "../store/authStore";
 import { useRef, useState } from "react";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
+import PageContainer from "../components/PageContainer";
 import BankSelector from "../components/BankSelector";
 import { uploadReceipt } from "../lib/uploadReceipt";
 import { POSITIONS } from "../constants/worship";
@@ -80,7 +81,8 @@ export default function MemberProfileSetupPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8">
+    <div className="min-h-screen bg-surface">
+      <PageContainer width="narrow">
       <div className="mb-6">
         <button
           type="button"
@@ -212,6 +214,7 @@ export default function MemberProfileSetupPage() {
           저장하기
         </Button>
       </form>
+      </PageContainer>
     </div>
   );
 }

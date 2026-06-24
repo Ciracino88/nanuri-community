@@ -9,6 +9,7 @@ import Input from "../../components/ui/Input";
 import FileInput from "../../components/ui/FileInput";
 import Button from "../../components/ui/Button";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import SuccessScreen from "../../components/SuccessScreen";
 import { supabase } from "../../lib/supabase";
 
@@ -76,7 +77,7 @@ export default function MemberBillFormPage() {
           onLogout={async () => { await signOut(); navigate("/"); }}
           onProfileEdit={() => navigate("/member/setup")}
         />
-        <div className="max-w-md mx-auto px-4 py-8">
+        <PageContainer width="narrow">
           <div className="mb-6">
             <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
             <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
@@ -110,7 +111,7 @@ export default function MemberBillFormPage() {
               <i className="ti ti-chevron-right text-fg-faint text-lg shrink-0" aria-hidden="true" />
             </button>
           </div>
-        </div>
+        </PageContainer>
       </div>
     );
   }
@@ -123,7 +124,7 @@ export default function MemberBillFormPage() {
         onProfileEdit={() => navigate("/member/setup")}
 
       />
-      <div className="max-w-md mx-auto px-4 py-8">
+      <PageContainer width="narrow">
         <div className="mb-6">
           <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
           <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
@@ -179,7 +180,7 @@ export default function MemberBillFormPage() {
             청구서 제출
           </Button>
         </form>
-      </div>
+      </PageContainer>
     </div>
   );
 }
