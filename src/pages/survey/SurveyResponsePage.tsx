@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
 import MoodRating from "../../components/ui/MoodRating";
 import { useAuthStore } from "../../store/authStore";
@@ -145,7 +146,7 @@ export default function SurveyResponsePage() {
     <div className="min-h-screen bg-surface flex flex-col">
       <Navbar {...navbarProps} />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
+      <PageContainer width="default">
 
           <div>
             <h1 className="text-heading font-medium text-fg-strong">{survey.title}</h1>
@@ -182,7 +183,7 @@ export default function SurveyResponsePage() {
             {isEditing ? "수정 완료" : "제출하기"}
           </Button>
 
-      </div>
+      </PageContainer>
     </div>
   );
 }

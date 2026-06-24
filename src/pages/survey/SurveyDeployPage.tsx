@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
@@ -94,7 +95,7 @@ export default function SurveyDeployPage() {
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
+      <PageContainer width="default">
 
         <div className="flex items-center gap-3">
           <button
@@ -168,7 +169,7 @@ export default function SurveyDeployPage() {
           배포하기
         </Button>
 
-      </div>
+      </PageContainer>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
 import { useActiveSurveys } from "../../hooks/useActiveSurveys";
@@ -23,7 +24,7 @@ export default function SurveyListPage() {
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-4">
+      <PageContainer width="default">
 
         <div>
           <h1 className="text-heading font-medium text-fg-strong">참여 가능한 설문</h1>
@@ -69,7 +70,7 @@ export default function SurveyListPage() {
           })
         )}
 
-      </div>
+      </PageContainer>
     </div>
   );
 }

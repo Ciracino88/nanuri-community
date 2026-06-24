@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
@@ -150,7 +151,7 @@ export default function SurveyAdminPage() {
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
+      <PageContainer width="default">
 
         <div className="flex items-center justify-between">
           <div>
@@ -282,7 +283,7 @@ export default function SurveyAdminPage() {
           </>
         )}
 
-      </div>
+      </PageContainer>
     </div>
   );
 }

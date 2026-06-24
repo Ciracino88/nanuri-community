@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 
@@ -100,7 +101,7 @@ export default function SurveyResultsPage() {
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
+      <PageContainer width="default">
 
         <div className="flex items-center gap-3">
           <button
@@ -200,7 +201,7 @@ export default function SurveyResultsPage() {
           </>
         )}
 
-      </div>
+      </PageContainer>
     </div>
   );
 }

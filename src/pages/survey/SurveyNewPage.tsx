@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
@@ -64,7 +65,7 @@ export default function SurveyNewPage() {
         onProfileEdit={() => navigate("/member/setup")}
       />
 
-      <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
+      <PageContainer width="default">
 
         <div>
           <h1 className="text-heading font-medium text-fg-strong">설문 작성</h1>
@@ -141,7 +142,7 @@ export default function SurveyNewPage() {
           저장
         </Button>
 
-      </div>
+      </PageContainer>
     </div>
   );
 }
