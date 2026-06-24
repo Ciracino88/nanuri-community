@@ -141,6 +141,25 @@ export default function WorshipSchedulePage() {
 
   const slideAnimation = slideDir === "right" ? "slideFromRight 0.25s ease" : "slideFromLeft 0.25s ease";
 
+  const renderSlot = (pos: string) => {
+    const confirmed = activeScheduleId ? getConfirmedMember(activeScheduleId, pos) : undefined;
+    const isMine = myPositions.includes(pos);
+    const myAvailForPos = activeScheduleId
+      ? availability.find((a) => a.schedule_id === activeScheduleId && a.user_id === user?.id && a.position === pos)
+      : undefined;
+    return (
+      <PositionSlot
+        key={pos}
+        position={pos}
+        member={confirmed ?? null}
+        isMine={isMine && canToggle}
+        myAvailable={myAvailForPos?.available ?? false}
+        toggling={togglingPosition === pos}
+        onToggle={activeScheduleId && canToggle ? () => toggleAvailability(activeScheduleId, pos) : undefined}
+      />
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar
@@ -236,47 +255,9 @@ export default function WorshipSchedulePage() {
             </div>
 
             <div className="p-4 flex flex-col gap-3">
-              <div className="grid grid-cols-5 gap-2">
-                {POSITIONS.slice(0, 5).map((pos) => {
-                  const confirmed = activeScheduleId ? getConfirmedMember(activeScheduleId, pos) : undefined;
-                  const isMine = myPositions.includes(pos);
-                  const myAvailForPos = activeScheduleId
-                    ? availability.find((a) => a.schedule_id === activeScheduleId && a.user_id === user?.id && a.position === pos)
-                    : undefined;
-                  return (
-                    <PositionSlot
-                      key={pos}
-                      position={pos}
-                      member={confirmed ?? null}
-                      isMine={isMine && canToggle}
-                      myAvailable={myAvailForPos?.available ?? false}
-                      toggling={togglingPosition === pos}
-                      onToggle={activeScheduleId && canToggle ? () => toggleAvailability(activeScheduleId, pos) : undefined}
-                    />
-                  );
-                })}
-              </div>
+              <div className="grid grid-cols-5 gap-2">{POSITIONS.slice(0, 5).map(renderSlot)}</div>
               <div className="border-t border-gray-50" />
-              <div className="grid grid-cols-5 gap-2">
-                {POSITIONS.slice(5).map((pos) => {
-                  const confirmed = activeScheduleId ? getConfirmedMember(activeScheduleId, pos) : undefined;
-                  const isMine = myPositions.includes(pos);
-                  const myAvailForPos = activeScheduleId
-                    ? availability.find((a) => a.schedule_id === activeScheduleId && a.user_id === user?.id && a.position === pos)
-                    : undefined;
-                  return (
-                    <PositionSlot
-                      key={pos}
-                      position={pos}
-                      member={confirmed ?? null}
-                      isMine={isMine && canToggle}
-                      myAvailable={myAvailForPos?.available ?? false}
-                      toggling={togglingPosition === pos}
-                      onToggle={activeScheduleId && canToggle ? () => toggleAvailability(activeScheduleId, pos) : undefined}
-                    />
-                  );
-                })}
-              </div>
+              <div className="grid grid-cols-5 gap-2">{POSITIONS.slice(5).map(renderSlot)}</div>
             </div>
           </div>
         )}
