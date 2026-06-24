@@ -46,7 +46,7 @@ export default function AccountingListPage() {
     if (isLoading) return <LoadingScreen />;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-surface flex flex-col">
             <Navbar
                 userName={userProfile?.name}
                 onLogout={async () => { await signOut(); navigate("/"); }}
@@ -56,32 +56,32 @@ export default function AccountingListPage() {
 
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-xs text-gray-400 mb-0.5">나누리 청년부</p>
-                        <h1 className="text-xl font-medium text-gray-800">회계 장부</h1>
+                        <p className="text-caption text-fg-faint mb-0.5">나누리 청년부</p>
+                        <h1 className="text-title font-medium text-fg-strong">회계 장부</h1>
                     </div>
                     <button
                         onClick={() => navigate("/accounting/new")}
-                        className="flex items-center gap-1.5 text-sm text-blue-500 font-medium"
+                        className="flex items-center gap-1.5 text-body text-info font-medium"
                     >
-                        <i className="ti ti-plus text-base" aria-hidden="true" />
+                        <i className="ti ti-plus text-emphasis" aria-hidden="true" />
                         장부 추가
                     </button>
                 </div>
 
                 {reports.length === 0 ? (
-                    <div className="bg-white border border-gray-100 rounded-xl p-8 text-center text-sm text-gray-300">
+                    <div className="bg-card border border-line-soft rounded-xl p-8 text-center text-body text-fg-faint">
                         저장된 장부가 없습니다
                     </div>
                 ) : (
                     <div className="flex flex-col gap-2.5">
                         {reports.map((r) => (
-                            <div key={r.id} className="bg-white border border-gray-100 rounded-xl px-4 py-3.5 flex items-center justify-between hover:border-gray-200 transition">
+                            <div key={r.id} className="bg-card border border-line-soft rounded-xl px-4 py-3.5 flex items-center justify-between hover:border-line transition">
                                 <button onClick={() => navigate(`/accounting/${r.id}`)} className="flex-1 text-left flex flex-col gap-1">
-                                    <p className="text-sm font-medium text-gray-800">{r.period}</p>
+                                    <p className="text-body font-medium text-fg-strong">{r.period}</p>
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xs text-blue-400">+{r.total_income.toLocaleString()}원</span>
-                                        <span className="text-xs text-red-400">{r.total_expense.toLocaleString()}원</span>
-                                        <span className="text-xs text-gray-400">
+                                        <span className="text-caption text-info">+{r.total_income.toLocaleString()}원</span>
+                                        <span className="text-caption text-danger">{r.total_expense.toLocaleString()}원</span>
+                                        <span className="text-caption text-fg-faint">
                                             잔액 {(r.total_income + r.total_expense).toLocaleString()}원
                                         </span>
                                     </div>
@@ -90,11 +90,11 @@ export default function AccountingListPage() {
                                     <button
                                         onClick={() => handleDelete(r.id)}
                                         disabled={deleteMutation.isPending}
-                                        className="text-gray-300 hover:text-red-400 transition p-1 disabled:opacity-40"
+                                        className="text-fg-faint hover:text-danger transition p-1 disabled:opacity-40"
                                     >
-                                        <i className="ti ti-trash text-base" aria-hidden="true" />
+                                        <i className="ti ti-trash text-emphasis" aria-hidden="true" />
                                     </button>
-                                    <i className="ti ti-chevron-right text-gray-300 text-lg" aria-hidden="true" />
+                                    <i className="ti ti-chevron-right text-fg-faint text-heading" aria-hidden="true" />
                                 </div>
                             </div>
                         ))}

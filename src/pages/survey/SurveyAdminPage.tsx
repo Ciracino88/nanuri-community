@@ -142,7 +142,7 @@ export default function SurveyAdminPage() {
     new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
@@ -154,14 +154,14 @@ export default function SurveyAdminPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-medium text-gray-800">설문 관리</h1>
-            <p className="text-sm text-gray-400 mt-0.5">설문을 작성하고 배포하세요</p>
+            <h1 className="text-heading font-medium text-fg-strong">설문 관리</h1>
+            <p className="text-body text-fg-faint mt-0.5">설문을 작성하고 배포하세요</p>
           </div>
           <button
             onClick={() => navigate("/admin/surveys/new")}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-info text-white text-body font-medium rounded-lg hover:bg-info transition"
           >
-            <i className="ti ti-plus text-sm" aria-hidden="true" />
+            <i className="ti ti-plus text-body" aria-hidden="true" />
             새 설문
           </button>
         </div>
@@ -172,20 +172,20 @@ export default function SurveyAdminPage() {
           <>
             {/* 진행 중인 설문 */}
             <div className="flex flex-col gap-2.5">
-              <p className="text-xs text-gray-400 font-medium">
+              <p className="text-caption text-fg-faint font-medium">
                 진행 중인 설문 {activeSurveys.length > 0 && `(${activeSurveys.length}개)`}
               </p>
 
               {activeSurveys.length === 0 ? (
-                <div className="bg-white border border-gray-100 rounded-xl p-4 text-center text-sm text-gray-300">
+                <div className="bg-card border border-line-soft rounded-xl p-4 text-center text-body text-fg-faint">
                   진행 중인 설문이 없습니다
                 </div>
               ) : (
                 activeSurveys.map((survey) => (
-                  <div key={survey.id} className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                  <div key={survey.id} className="bg-info-subtle border border-info-soft rounded-xl p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <p className="text-sm font-medium text-blue-800">{survey.title}</p>
+                        <p className="text-body font-medium text-fg-strong">{survey.title}</p>
                         {survey.place_name && (
                           <a
                             href={`https://map.kakao.com/link/search/${encodeURIComponent(survey.place_name)}`}
@@ -193,43 +193,43 @@ export default function SurveyAdminPage() {
                             rel="noopener noreferrer"
                             className="flex items-center gap-1 mt-0.5 w-fit"
                           >
-                            <i className="ti ti-map-pin text-xs text-blue-300" aria-hidden="true" />
-                            <span className="text-xs text-blue-400 hover:underline">{survey.place_name}</span>
+                            <i className="ti ti-map-pin text-caption text-info" aria-hidden="true" />
+                            <span className="text-caption text-info hover:underline">{survey.place_name}</span>
                           </a>
                         )}
-                        <p className="text-xs text-blue-400 mt-0.5">
+                        <p className="text-caption text-info mt-0.5">
                           항목 {survey.items?.length ?? 0}개 · {formatDate(survey.created_at)} 배포 · 참여 {survey.responseCount}명
                         </p>
                       </div>
-                      <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-md font-medium">진행 중</span>
+                      <span className="text-caption bg-info text-white px-2 py-0.5 rounded-md font-medium">진행 중</span>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => navigate(`/admin/surveys/${survey.id}/results`)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white border border-blue-100 rounded-lg text-xs text-blue-500 hover:bg-blue-50 transition"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-card border border-info-soft rounded-lg text-caption text-info hover:bg-info-subtle transition"
                       >
-                        <i className="ti ti-chart-bar text-sm" aria-hidden="true" />
+                        <i className="ti ti-chart-bar text-body" aria-hidden="true" />
                         결과 보기
                       </button>
                       <button
                         onClick={() => navigator.clipboard.writeText(`${window.location.origin}/survey/${survey.id}`)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white border border-blue-100 rounded-lg text-xs text-blue-500 hover:bg-blue-50 transition"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-card border border-info-soft rounded-lg text-caption text-info hover:bg-info-subtle transition"
                       >
-                        <i className="ti ti-copy text-sm" aria-hidden="true" />
+                        <i className="ti ti-copy text-body" aria-hidden="true" />
                         링크 복사
                       </button>
                       <button
                         onClick={() => handleCloseSurvey(survey.id)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white border border-blue-100 rounded-lg text-xs text-red-400 hover:bg-red-50 transition"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-card border border-info-soft rounded-lg text-caption text-danger hover:bg-danger-subtle transition"
                       >
-                        <i className="ti ti-player-stop text-sm" aria-hidden="true" />
+                        <i className="ti ti-player-stop text-body" aria-hidden="true" />
                         설문 닫기
                       </button>
                       <button
                         onClick={() => handleDeleteSurvey(survey.id, survey.image_url)}
-                        className="px-3 py-2 bg-white border border-blue-100 rounded-lg text-xs text-gray-300 hover:text-red-400 hover:border-red-100 transition"
+                        className="px-3 py-2 bg-card border border-info-soft rounded-lg text-caption text-fg-faint hover:text-danger hover:border-danger-soft transition"
                       >
-                        <i className="ti ti-trash text-sm" aria-hidden="true" />
+                        <i className="ti ti-trash text-body" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
@@ -239,18 +239,18 @@ export default function SurveyAdminPage() {
 
             {/* 저장된 템플릿 */}
             <div className="flex flex-col gap-2.5">
-              <p className="text-xs text-gray-400 font-medium">저장된 템플릿</p>
+              <p className="text-caption text-fg-faint font-medium">저장된 템플릿</p>
 
               {templates.length === 0 ? (
-                <div className="bg-white border border-gray-100 rounded-xl p-4 text-center text-sm text-gray-300">
+                <div className="bg-card border border-line-soft rounded-xl p-4 text-center text-body text-fg-faint">
                   저장된 템플릿이 없습니다
                 </div>
               ) : (
                 templates.map((template) => (
-                  <div key={template.id} className="bg-white border border-gray-100 rounded-xl p-4">
+                  <div key={template.id} className="bg-card border border-line-soft rounded-xl p-4">
                     <div className="mb-3">
-                      <p className="text-sm font-medium text-gray-800">{template.title}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-body font-medium text-fg-strong">{template.title}</p>
+                      <p className="text-caption text-fg-faint mt-0.5">
                         항목 {template.items?.length ?? 0}개 · {formatDate(template.created_at)}
                       </p>
                     </div>
@@ -261,18 +261,18 @@ export default function SurveyAdminPage() {
                           <button
                             onClick={() => !isDeployed && navigate(`/admin/surveys/${template.id}/deploy`)}
                             disabled={isDeployed}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-50 rounded-lg text-xs text-blue-500 font-medium hover:bg-blue-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-info-subtle rounded-lg text-caption text-info font-medium hover:bg-info-soft transition disabled:opacity-40 disabled:cursor-not-allowed"
                           >
-                            <i className="ti ti-send text-sm" aria-hidden="true" />
+                            <i className="ti ti-send text-body" aria-hidden="true" />
                             {isDeployed ? "배포 중" : "배포하기"}
                           </button>
                         );
                       })()}
                       <button
                         onClick={() => handleDelete(template.id)}
-                        className="px-3 py-2 border border-gray-100 rounded-lg text-xs text-gray-300 hover:text-red-400 hover:border-red-100 transition"
+                        className="px-3 py-2 border border-line-soft rounded-lg text-caption text-fg-faint hover:text-danger hover:border-danger-soft transition"
                       >
-                        <i className="ti ti-trash text-sm" aria-hidden="true" />
+                        <i className="ti ti-trash text-body" aria-hidden="true" />
                       </button>
                     </div>
                   </div>

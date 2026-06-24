@@ -90,7 +90,7 @@ export default function WorshipSchedulePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface">
       <Navbar
         userName={userProfile?.name}
         onLogout={async () => { await signOut(); navigate("/"); }}
@@ -101,18 +101,18 @@ export default function WorshipSchedulePage() {
 
         <div className="flex flex-col gap-3">
           <div>
-            <p className="text-xs text-gray-400 mb-0.5">찬양팀 일정</p>
-            <h1 className="text-xl font-medium text-gray-800">주일 스케줄</h1>
+            <p className="text-caption text-fg-faint mb-0.5">찬양팀 일정</p>
+            <h1 className="text-title font-medium text-fg-strong">주일 스케줄</h1>
           </div>
           <div className="flex gap-2">
             {["나누리", "섬김이"].map((t) => (
               <button
                 key={t}
                 onClick={() => setTeamFilter(t)}
-                className={`px-4 py-1.5 rounded-full text-sm border transition ${
+                className={`px-4 py-1.5 rounded-full text-body border transition ${
                   teamFilter === t
-                    ? "bg-gray-800 text-white border-gray-800"
-                    : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                    ? "bg-inverse text-white border-inverse"
+                    : "bg-card text-fg-muted border-line hover:border-line-strong"
                 }`}
               >
                 {t}
@@ -122,31 +122,31 @@ export default function WorshipSchedulePage() {
         </div>
 
         {myPositions.length === 0 && (
-          <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3.5 flex items-center justify-between gap-3">
+          <div className="bg-warning-subtle border border-warning-soft rounded-xl px-4 py-3.5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <i className="ti ti-alert-circle text-amber-400 text-lg shrink-0" aria-hidden="true" />
-              <p className="text-sm text-amber-700">포지션을 등록해야 일정에 참여할 수 있어요</p>
+              <i className="ti ti-alert-circle text-warning text-heading shrink-0" aria-hidden="true" />
+              <p className="text-body text-warning">포지션을 등록해야 일정에 참여할 수 있어요</p>
             </div>
-            <button onClick={() => navigate("/member/setup")} className="text-sm text-amber-600 font-medium whitespace-nowrap hover:text-amber-800 transition">
+            <button onClick={() => navigate("/member/setup")} className="text-body text-warning font-medium whitespace-nowrap hover:text-warning transition">
               등록하기 →
             </button>
           </div>
         )}
 
         {/* 날짜 셀렉터 */}
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-            <button onClick={() => moveMonth(-1)} className="text-gray-400 hover:text-gray-600 transition p-1 active:scale-90">
-              <i className="ti ti-chevron-left text-base" aria-hidden="true" />
+        <div className="bg-card rounded-xl border border-line-soft overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-line-soft flex items-center justify-between">
+            <button onClick={() => moveMonth(-1)} className="text-fg-faint hover:text-fg transition p-1 active:scale-90">
+              <i className="ti ti-chevron-left text-emphasis" aria-hidden="true" />
             </button>
-            <span className="text-sm font-medium text-gray-700">{viewYear}년 {MONTH_NAMES[viewMonth]}</span>
-            <button onClick={() => moveMonth(1)} className="text-gray-400 hover:text-gray-600 transition p-1 active:scale-90">
-              <i className="ti ti-chevron-right text-base" aria-hidden="true" />
+            <span className="text-body font-medium text-fg">{viewYear}년 {MONTH_NAMES[viewMonth]}</span>
+            <button onClick={() => moveMonth(1)} className="text-fg-faint hover:text-fg transition p-1 active:scale-90">
+              <i className="ti ti-chevron-right text-emphasis" aria-hidden="true" />
             </button>
           </div>
           <div
             key={slideKey}
-            className="grid divide-x divide-gray-100"
+            className="grid divide-x divide-line-soft"
             style={{
               gridTemplateColumns: `repeat(${sundaysInMonth.length}, minmax(0, 1fr))`,
               animation: slideAnimation,
@@ -159,10 +159,10 @@ export default function WorshipSchedulePage() {
                 <button
                   key={dateStr}
                   onClick={() => selectDate(d)}
-                  className={`py-3 flex flex-col items-center gap-0.5 transition ${isActive ? "bg-gray-800" : "hover:bg-gray-50"}`}
+                  className={`py-3 flex flex-col items-center gap-0.5 transition ${isActive ? "bg-inverse" : "hover:bg-surface"}`}
                 >
-                  <span className={`text-xs ${isActive ? "text-white/50" : "text-gray-400"}`}>일</span>
-                  <span className={`text-base font-medium ${isActive ? "text-white" : "text-gray-700"}`}>{d.getDate()}</span>
+                  <span className={`text-caption ${isActive ? "text-white/50" : "text-fg-faint"}`}>일</span>
+                  <span className={`text-emphasis font-medium ${isActive ? "text-white" : "text-fg"}`}>{d.getDate()}</span>
                 </button>
               );
             })}
@@ -173,19 +173,19 @@ export default function WorshipSchedulePage() {
         {activeDate && (
           <div
             key={activeDateStr}
-            className="bg-white rounded-xl border border-gray-100 overflow-hidden"
+            className="bg-card rounded-xl border border-line-soft overflow-hidden"
             style={{ animation: "cardEnter 0.3s ease" }}
           >
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-700">
+            <div className="px-4 py-3 border-b border-line-soft flex items-center justify-between">
+              <p className="text-body font-medium text-fg">
                 {activeDate.getMonth() + 1}월 {activeDate.getDate()}일
               </p>
-              <span className="text-xs text-gray-400">{confirmedCount} / {POSITIONS.length} 확정</span>
+              <span className="text-caption text-fg-faint">{confirmedCount} / {POSITIONS.length} 확정</span>
             </div>
 
             <div className="p-4 flex flex-col gap-3">
               <div className="grid grid-cols-5 gap-2">{POSITIONS.slice(0, 5).map(renderSlot)}</div>
-              <div className="border-t border-gray-50" />
+              <div className="border-t border-line-soft" />
               <div className="grid grid-cols-5 gap-2">{POSITIONS.slice(5).map(renderSlot)}</div>
             </div>
           </div>

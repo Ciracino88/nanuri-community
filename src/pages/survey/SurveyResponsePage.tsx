@@ -102,11 +102,11 @@ export default function SurveyResponsePage() {
 
   if (survey.status === "closed") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-surface flex flex-col">
         <Navbar {...navbarProps} />
         <div className="flex flex-col items-center justify-center flex-1 gap-3 p-6">
           <p className="text-4xl">🔒</p>
-          <p className="text-base font-medium text-gray-600">종료된 설문입니다</p>
+          <p className="text-emphasis font-medium text-fg">종료된 설문입니다</p>
         </div>
       </div>
     );
@@ -114,14 +114,14 @@ export default function SurveyResponsePage() {
 
   if (existingResponseId && !isEditing) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-surface flex flex-col">
         <Navbar {...navbarProps} />
         <div className="flex flex-col items-center justify-center flex-1 gap-3 p-6">
           <p className="text-4xl">✅</p>
-          <p className="text-base font-medium text-gray-600">이미 참여한 설문입니다</p>
+          <p className="text-emphasis font-medium text-fg">이미 참여한 설문입니다</p>
           <button
             onClick={handleStartEdit}
-            className="text-sm text-blue-500 mt-2"
+            className="text-body text-info mt-2"
           >
             응답 수정하기
           </button>
@@ -142,22 +142,22 @@ export default function SurveyResponsePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <Navbar {...navbarProps} />
 
       <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-6">
 
           <div>
-            <h1 className="text-lg font-medium text-gray-800">{survey.title}</h1>
-            <p className="text-sm text-gray-400 mt-1">
+            <h1 className="text-heading font-medium text-fg-strong">{survey.title}</h1>
+            <p className="text-body text-fg-faint mt-1">
               {isEditing ? "응답을 수정하고 다시 제출해주세요" : "아래 항목을 평가해주세요"}
             </p>
           </div>
 
-          <div className="flex flex-col divide-y divide-gray-100">
+          <div className="flex flex-col divide-y divide-line-soft">
             {survey.items.map((item, i) => (
               <div key={i} className="py-4 flex flex-col gap-2.5">
-                <label className="text-sm font-medium text-gray-500">{item.label}</label>
+                <label className="text-body font-medium text-fg-muted">{item.label}</label>
                 {item.isStar ? (
                   <MoodRating
                     value={(answers[i] as number) ?? 0}
@@ -168,7 +168,7 @@ export default function SurveyResponsePage() {
                     rows={3}
                     placeholder="자유롭게 의견을 작성해주세요"
                     value={(answers[i] as string) ?? ""}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition"
+                    className="w-full px-3 py-2.5 text-body border border-line rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-info-soft focus:border-info transition"
                     onChange={(e) => setAnswers((prev) => ({ ...prev, [i]: e.target.value }))}
                   />
                 )}
@@ -176,7 +176,7 @@ export default function SurveyResponsePage() {
             ))}
           </div>
 
-          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+          {error && <p className="text-caption text-danger text-center">{error}</p>}
 
           <Button onClick={handleSubmit} loading={submitting} disabled={!isValid}>
             {isEditing ? "수정 완료" : "제출하기"}

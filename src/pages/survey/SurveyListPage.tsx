@@ -15,7 +15,7 @@ export default function SurveyListPage() {
     new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
@@ -26,21 +26,21 @@ export default function SurveyListPage() {
       <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-4">
 
         <div>
-          <h1 className="text-lg font-medium text-gray-800">참여 가능한 설문</h1>
-          <p className="text-sm text-gray-400 mt-0.5">아래 설문에 참여해주세요</p>
+          <h1 className="text-heading font-medium text-fg-strong">참여 가능한 설문</h1>
+          <p className="text-body text-fg-faint mt-0.5">아래 설문에 참여해주세요</p>
         </div>
 
         {loading ? (
           <LoadingSpinner />
         ) : surveys.length === 0 ? (
-          <div className="bg-white border border-gray-100 rounded-xl p-6 text-center text-sm text-gray-300">
+          <div className="bg-card border border-line-soft rounded-xl p-6 text-center text-body text-fg-faint">
             현재 진행 중인 설문이 없습니다
           </div>
         ) : (
           surveys.map((survey) => {
             const responded = respondedIds.has(survey.id);
             return (
-              <div key={survey.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+              <div key={survey.id} className="bg-card border border-line-soft rounded-xl overflow-hidden">
                 {survey.image_url && (
                   <div className="w-full aspect-video">
                     <img src={survey.image_url} alt="장소 사진" className="w-full h-full object-cover" />
@@ -48,18 +48,18 @@ export default function SurveyListPage() {
                 )}
                 <div className="p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-800">{survey.title}</p>
+                    <p className="text-body font-medium text-fg-strong">{survey.title}</p>
                     {survey.place_name && (
                       <div className="flex items-center gap-1 mt-0.5">
-                        <i className="ti ti-map-pin text-xs text-gray-300" aria-hidden="true" />
-                        <p className="text-xs text-gray-400">{survey.place_name}</p>
+                        <i className="ti ti-map-pin text-caption text-fg-faint" aria-hidden="true" />
+                        <p className="text-caption text-fg-faint">{survey.place_name}</p>
                       </div>
                     )}
-                    <p className="text-xs text-gray-400 mt-0.5">항목 {survey.items?.length ?? 0}개 · {formatDate(survey.created_at)}</p>
+                    <p className="text-caption text-fg-faint mt-0.5">항목 {survey.items?.length ?? 0}개 · {formatDate(survey.created_at)}</p>
                   </div>
                   <button
                     onClick={() => navigate(`/survey/${survey.id}`)}
-                    className={`text-sm font-medium whitespace-nowrap ml-3 ${responded ? "text-gray-300" : "text-blue-500"}`}
+                    className={`text-body font-medium whitespace-nowrap ml-3 ${responded ? "text-fg-faint" : "text-info"}`}
                   >
                     {responded ? "수정하기 →" : "참여하기 →"}
                   </button>

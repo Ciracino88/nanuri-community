@@ -28,10 +28,10 @@ export default function MoodRating({ value, onChange }: MoodRatingProps) {
             onClick={() => onChange(mood.value)}
           >
             <i
-              className={`ti ${mood.icon} text-3xl transition ${active ? "text-blue-500" : "text-gray-200"}`}
+              className={`ti ${mood.icon} text-3xl transition ${active ? "text-info" : "text-fg-faint"}`}
               aria-hidden="true"
             />
-            <span className={`text-xs transition ${active ? "text-blue-500" : "text-gray-300"}`}>
+            <span className={`text-caption transition ${active ? "text-info" : "text-fg-faint"}`}>
               {mood.label}
             </span>
           </button>

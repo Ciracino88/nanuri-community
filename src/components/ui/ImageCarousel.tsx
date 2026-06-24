@@ -45,7 +45,7 @@ export default function ImageCarousel({ images, currentIndex, onIndexChange, onR
               <button
                 key={i}
                 onClick={() => onIndexChange(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? "bg-white" : "bg-white/40"}`}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? "bg-card" : "bg-card/40"}`}
               />
             ))}
           </div>

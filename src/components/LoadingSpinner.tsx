@@ -4,8 +4,8 @@ interface Props {
 }
 
 const SIZES = {
-  sm: { icon: "text-base", iconGap: "gap-1.5", label: "text-xs text-gray-400", outerGap: "gap-2" },
-  lg: { icon: "text-2xl", iconGap: "gap-2.5", label: "text-sm text-gray-300", outerGap: "gap-4" },
+  sm: { icon: "text-emphasis", iconGap: "gap-1.5", label: "text-caption text-fg-faint", outerGap: "gap-2" },
+  lg: { icon: "text-2xl", iconGap: "gap-2.5", label: "text-body text-fg-faint", outerGap: "gap-4" },
 };
 
 export default function LoadingSpinner({ label, size = "sm" }: Props) {
@@ -16,7 +16,7 @@ export default function LoadingSpinner({ label, size = "sm" }: Props) {
         {[0, 1, 2].map((i) => (
           <i
             key={i}
-            className={`ti ti-seeding ${s.icon} text-gray-300`}
+            className={`ti ti-seeding ${s.icon} text-fg-faint`}
             style={{ animation: `loadingBounce 1s ease-in-out infinite ${i * 0.2}s` }}
             aria-hidden="true"
           />

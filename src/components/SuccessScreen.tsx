@@ -117,15 +117,15 @@ export default function SuccessScreen({ message, subMessage, buttonText, onButto
         className="text-center flex flex-col gap-1.5"
         style={{ animation: "fadeUp 0.4s ease 0.3s both", position: "relative", zIndex: 1 }}
       >
-        <p className="text-base font-medium text-gray-800">{message}</p>
-        {subMessage && <p className="text-sm text-gray-400">{subMessage}</p>}
+        <p className="text-emphasis font-medium text-fg-strong">{message}</p>
+        {subMessage && <p className="text-body text-fg-faint">{subMessage}</p>}
       </div>
 
       {buttonText && onButtonClick && (
         <div style={{ animation: "fadeUp 0.4s ease 0.45s both", position: "relative", zIndex: 1, width: "100%", maxWidth: 320 }}>
           <button
             onClick={onButtonClick}
-            className="w-full py-3 px-6 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            className="w-full py-3 px-6 rounded-xl border border-line bg-card text-body font-medium text-fg hover:bg-surface transition"
           >
             {buttonText}
           </button>
@@ -152,7 +152,7 @@ export default function SuccessScreen({ message, subMessage, buttonText, onButto
 
   if (navbarProps) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-surface flex flex-col">
         <Navbar {...navbarProps} />
         {content}
       </div>
@@ -160,7 +160,7 @@ export default function SuccessScreen({ message, subMessage, buttonText, onButto
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center">
       {content}
     </div>
   );

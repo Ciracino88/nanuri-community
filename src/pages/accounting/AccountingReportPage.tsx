@@ -98,7 +98,7 @@ export default function AccountingReportPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-surface">
             <Navbar
                 userName={userProfile?.name}
                 onLogout={async () => { await signOut(); navigate("/"); }}
@@ -107,54 +107,54 @@ export default function AccountingReportPage() {
             <div className="max-w-5xl mx-auto px-4 py-8">
                 <div className="flex items-center gap-4 mb-4">
                     <div className="flex-1 flex flex-col gap-2">
-                        <button onClick={() => navigate("/accounting")} className="text-gray-300 hover:text-gray-500 transition w-fit">
-                            <i className="ti ti-arrow-left text-lg" aria-hidden="true" />
+                        <button onClick={() => navigate("/accounting")} className="text-fg-faint hover:text-fg-muted transition w-fit">
+                            <i className="ti ti-arrow-left text-heading" aria-hidden="true" />
                         </button>
                         <input
                             type="text"
                             placeholder="장부 제목 (예: 2025년 1월)"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="text-xl font-medium text-gray-800 bg-transparent outline-none border-b border-gray-200 focus:border-gray-400 pb-1 transition placeholder:text-gray-300 placeholder:font-normal placeholder:text-base"
+                            className="text-title font-medium text-fg-strong bg-transparent outline-none border-b border-line focus:border-line-strong pb-1 transition placeholder:text-fg-faint placeholder:font-normal placeholder:text-emphasis"
                         />
                     </div>
                 </div>
 
                 {transactions.length === 0 && (
-                    <div className="flex items-center justify-between bg-white rounded-xl border border-gray-100 px-4 py-3 mb-4">
+                    <div className="flex items-center justify-between bg-card rounded-xl border border-line-soft px-4 py-3 mb-4">
                         <div>
-                            <p className="text-sm font-medium text-gray-700">샘플 파일로 먼저 체험해보세요</p>
-                            <p className="text-xs text-gray-400 mt-0.5">토스뱅크 거래내역 형식의 샘플 CSV 파일이에요</p>
+                            <p className="text-body font-medium text-fg">샘플 파일로 먼저 체험해보세요</p>
+                            <p className="text-caption text-fg-faint mt-0.5">토스뱅크 거래내역 형식의 샘플 CSV 파일이에요</p>
                         </div>
-                        <button onClick={handleDownloadSample} className="text-sm text-blue-500 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition whitespace-nowrap">
+                        <button onClick={handleDownloadSample} className="text-body text-info px-3 py-1.5 rounded-lg hover:bg-info-subtle transition whitespace-nowrap">
                             샘플 다운로드 →
                         </button>
                     </div>
                 )}
 
                 {transactions.length === 0 ? (
-                    <label className="flex flex-col items-center justify-center gap-2 w-full py-12 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition">
-                        <p className="text-gray-400 text-sm">토스뱅크 거래내역 CSV 업로드</p>
-                        <p className="text-gray-300 text-xs">CSV 파일만 지원</p>
+                    <label className="flex flex-col items-center justify-center gap-2 w-full py-12 border-2 border-dashed border-line rounded-xl cursor-pointer hover:bg-surface transition">
+                        <p className="text-fg-faint text-body">토스뱅크 거래내역 CSV 업로드</p>
+                        <p className="text-fg-faint text-caption">CSV 파일만 지원</p>
                         <input type="file" accept=".csv" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileUpload(file); }} />
                     </label>
                 ) : (
                     <div className="flex flex-col gap-6">
                         {categoryTotals.length > 0 && (
-                            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                                <div className="px-4 py-3 border-b border-gray-100">
-                                    <p className="text-sm font-medium text-gray-700">카테고리별 합계</p>
+                            <div className="bg-card rounded-xl border border-line-soft overflow-hidden">
+                                <div className="px-4 py-3 border-b border-line-soft">
+                                    <p className="text-body font-medium text-fg">카테고리별 합계</p>
                                 </div>
-                                <div className="divide-y divide-gray-50">
+                                <div className="divide-y divide-line-soft">
                                     {categoryTotals.map((c) => (
                                         <div key={c.id} className="flex items-center justify-between px-4 py-2.5">
                                             <div className="flex items-center gap-2">
-                                                <span className={`text-xs px-2 py-0.5 rounded-full ${c.type === "income" ? "bg-blue-50 text-blue-400" : "bg-red-50 text-red-400"}`}>
+                                                <span className={`text-caption px-2 py-0.5 rounded-full ${c.type === "income" ? "bg-info-subtle text-info" : "bg-danger-subtle text-danger"}`}>
                                                     {c.type === "income" ? "수입" : "지출"}
                                                 </span>
-                                                <p className="text-sm text-gray-600">{c.name}</p>
+                                                <p className="text-body text-fg">{c.name}</p>
                                             </div>
-                                            <p className={`text-sm font-medium ${c.total < 0 ? "text-red-500" : "text-blue-500"}`}>
+                                            <p className={`text-body font-medium ${c.total < 0 ? "text-danger" : "text-info"}`}>
                                                 {c.total.toLocaleString()}원
                                             </p>
                                         </div>
@@ -164,53 +164,53 @@ export default function AccountingReportPage() {
                         )}
 
                         {categoryTotals.length > 0 && (
-                            <div className="flex items-center justify-between px-4 py-3 bg-blue-50 rounded-xl border border-blue-100">
-                                <p className="text-sm font-medium text-blue-700">잔액</p>
-                                <p className={`text-sm font-bold ${totalIncome + totalExpense >= 0 ? "text-blue-600" : "text-red-500"}`}>
+                            <div className="flex items-center justify-between px-4 py-3 bg-info-subtle rounded-xl border border-info-soft">
+                                <p className="text-body font-medium text-info">잔액</p>
+                                <p className={`text-body font-bold ${totalIncome + totalExpense >= 0 ? "text-info" : "text-danger"}`}>
                                     {(totalIncome + totalExpense).toLocaleString()}원
                                 </p>
                             </div>
                         )}
 
-                        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                            <div className="px-4 py-3 border-b border-gray-100">
-                                <p className="text-sm font-medium text-gray-700">거래내역</p>
+                        <div className="bg-card rounded-xl border border-line-soft overflow-hidden">
+                            <div className="px-4 py-3 border-b border-line-soft">
+                                <p className="text-body font-medium text-fg">거래내역</p>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-gray-50">
+                                <table className="w-full text-body">
+                                    <thead className="bg-surface">
                                         <tr>
-                                            <th className="text-left px-4 py-2.5 text-xs text-gray-400 font-medium">날짜</th>
-                                            <th className="text-left px-4 py-2.5 text-xs text-gray-400 font-medium">적요</th>
-                                            <th className="text-left px-4 py-2.5 text-xs text-gray-400 font-medium">메모</th>
-                                            <th className="text-right px-4 py-2.5 text-xs text-gray-400 font-medium">금액</th>
-                                            <th className="text-left px-4 py-2.5 text-xs text-gray-400 font-medium">카테고리</th>
+                                            <th className="text-left px-4 py-2.5 text-caption text-fg-faint font-medium">날짜</th>
+                                            <th className="text-left px-4 py-2.5 text-caption text-fg-faint font-medium">적요</th>
+                                            <th className="text-left px-4 py-2.5 text-caption text-fg-faint font-medium">메모</th>
+                                            <th className="text-right px-4 py-2.5 text-caption text-fg-faint font-medium">금액</th>
+                                            <th className="text-left px-4 py-2.5 text-caption text-fg-faint font-medium">카테고리</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-50">
+                                    <tbody className="divide-y divide-line-soft">
                                         {transactions.map((t, i) => {
                                             const relevantCategories = t.amount >= 0 ? incomeCategories : expenseCategories;
                                             return (
-                                                <tr key={i} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-2.5 text-gray-600 whitespace-nowrap">{t.date.slice(0, 10)}</td>
-                                                    <td className="px-4 py-2.5 text-gray-700">{t.description}</td>
+                                                <tr key={i} className="hover:bg-surface">
+                                                    <td className="px-4 py-2.5 text-fg whitespace-nowrap">{t.date.slice(0, 10)}</td>
+                                                    <td className="px-4 py-2.5 text-fg">{t.description}</td>
                                                     <td className="px-4 py-2.5">
                                                         <input
                                                             type="text"
                                                             value={t.memo}
                                                             onChange={(e) => setTransactions((prev) => prev.map((tx, idx) => idx === i ? { ...tx, memo: e.target.value } : tx))}
-                                                            className="w-full text-sm text-gray-500 bg-transparent outline-none border-b border-transparent hover:border-gray-200 focus:border-gray-400 transition"
+                                                            className="w-full text-body text-fg-muted bg-transparent outline-none border-b border-transparent hover:border-line focus:border-line-strong transition"
                                                         />
                                                     </td>
-                                                    <td className={`px-4 py-2.5 text-right font-medium whitespace-nowrap ${t.amount < 0 ? "text-red-500" : "text-blue-500"}`}>
+                                                    <td className={`px-4 py-2.5 text-right font-medium whitespace-nowrap ${t.amount < 0 ? "text-danger" : "text-info"}`}>
                                                         {t.amount.toLocaleString()}원
                                                     </td>
                                                     <td className="px-4 py-2.5">
-                                                        <span className="hidden print:inline text-xs text-gray-700">{t.category || "-"}</span>
+                                                        <span className="hidden print:inline text-caption text-fg">{t.category || "-"}</span>
                                                         <select
                                                             value={t.category}
                                                             onChange={(e) => updateCategory(i, e.target.value)}
-                                                            className="print:hidden text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:border-blue-400"
+                                                            className="print:hidden text-caption border border-line rounded-lg px-2 py-1 outline-none focus:border-info"
                                                         >
                                                             <option value="">선택</option>
                                                             {relevantCategories.map((cat) => (
@@ -228,7 +228,7 @@ export default function AccountingReportPage() {
 
                         <button
                             onClick={() => { setTransactions([]); setPeriod(""); }}
-                            className="text-sm text-gray-400 hover:text-gray-500 transition text-center"
+                            className="text-body text-fg-faint hover:text-fg-muted transition text-center"
                         >
                             다른 파일 업로드
                         </button>
@@ -250,59 +250,59 @@ export default function AccountingReportPage() {
                 onClick={() => setShowConfirmModal(false)}
             >
                 <div
-                    className="bg-white w-full max-w-lg rounded-2xl p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto"
+                    className="bg-card w-full max-w-lg rounded-2xl p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-800">저장 전 최종 확인</p>
-                        <button onClick={() => setShowConfirmModal(false)} className="text-gray-400 hover:text-gray-600 transition">
-                            <i className="ti ti-x text-lg" aria-hidden="true" />
+                        <p className="text-body font-medium text-fg-strong">저장 전 최종 확인</p>
+                        <button onClick={() => setShowConfirmModal(false)} className="text-fg-faint hover:text-fg transition">
+                            <i className="ti ti-x text-heading" aria-hidden="true" />
                         </button>
                     </div>
 
-                    <div className="rounded-xl border border-gray-100 overflow-hidden">
-                        <div className="px-4 py-2.5 border-b border-gray-100">
-                            <p className="text-xs font-medium text-gray-500">요약</p>
+                    <div className="rounded-xl border border-line-soft overflow-hidden">
+                        <div className="px-4 py-2.5 border-b border-line-soft">
+                            <p className="text-caption font-medium text-fg-muted">요약</p>
                         </div>
-                        <div className="grid grid-cols-2 divide-x divide-gray-100">
+                        <div className="grid grid-cols-2 divide-x divide-line-soft">
                             <div>
-                                <div className="px-3 py-1.5 bg-blue-50 border-b border-gray-100">
-                                    <p className="text-xs font-medium text-blue-500">수입</p>
+                                <div className="px-3 py-1.5 bg-info-subtle border-b border-line-soft">
+                                    <p className="text-caption font-medium text-info">수입</p>
                                 </div>
-                                <div className="divide-y divide-gray-50">
+                                <div className="divide-y divide-line-soft">
                                     {incomeTotals.map((c) => (
                                         <div key={c.id} className="flex items-center justify-between px-3 py-2">
-                                            <p className="text-xs text-gray-600">{c.name}</p>
-                                            <p className="text-xs font-medium text-blue-500">{c.total.toLocaleString()}원</p>
+                                            <p className="text-caption text-fg">{c.name}</p>
+                                            <p className="text-caption font-medium text-info">{c.total.toLocaleString()}원</p>
                                         </div>
                                     ))}
-                                    <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
-                                        <p className="text-xs font-medium text-gray-500">총 수입</p>
-                                        <p className="text-xs font-medium text-blue-600">+{totalIncome.toLocaleString()}원</p>
+                                    <div className="flex items-center justify-between px-3 py-2 bg-surface">
+                                        <p className="text-caption font-medium text-fg-muted">총 수입</p>
+                                        <p className="text-caption font-medium text-info">+{totalIncome.toLocaleString()}원</p>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <div className="px-3 py-1.5 bg-red-50 border-b border-gray-100">
-                                    <p className="text-xs font-medium text-red-400">지출</p>
+                                <div className="px-3 py-1.5 bg-danger-subtle border-b border-line-soft">
+                                    <p className="text-caption font-medium text-danger">지출</p>
                                 </div>
-                                <div className="divide-y divide-gray-50">
+                                <div className="divide-y divide-line-soft">
                                     {expenseTotals.map((c) => (
                                         <div key={c.id} className="flex items-center justify-between px-3 py-2">
-                                            <p className="text-xs text-gray-600">{c.name}</p>
-                                            <p className="text-xs font-medium text-red-500">{c.total.toLocaleString()}원</p>
+                                            <p className="text-caption text-fg">{c.name}</p>
+                                            <p className="text-caption font-medium text-danger">{c.total.toLocaleString()}원</p>
                                         </div>
                                     ))}
-                                    <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
-                                        <p className="text-xs font-medium text-gray-500">총 지출</p>
-                                        <p className="text-xs font-medium text-red-500">{totalExpense.toLocaleString()}원</p>
+                                    <div className="flex items-center justify-between px-3 py-2 bg-surface">
+                                        <p className="text-caption font-medium text-fg-muted">총 지출</p>
+                                        <p className="text-caption font-medium text-danger">{totalExpense.toLocaleString()}원</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 bg-gray-50">
-                            <p className="text-xs font-medium text-gray-700">잔액</p>
-                            <p className={`text-xs font-bold ${totalIncome + totalExpense >= 0 ? "text-blue-600" : "text-red-500"}`}>
+                        <div className="flex items-center justify-between px-4 py-2.5 border-t border-line-soft bg-surface">
+                            <p className="text-caption font-medium text-fg">잔액</p>
+                            <p className={`text-caption font-bold ${totalIncome + totalExpense >= 0 ? "text-info" : "text-danger"}`}>
                                 {(totalIncome + totalExpense).toLocaleString()}원
                             </p>
                         </div>
@@ -311,13 +311,13 @@ export default function AccountingReportPage() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setShowConfirmModal(false)}
-                            className="flex-1 text-sm text-gray-500 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 transition"
+                            className="flex-1 text-body text-fg-muted py-2.5 rounded-xl border border-line hover:bg-surface transition"
                         >
                             취소
                         </button>
                         <button
                             onClick={async () => { setShowConfirmModal(false); await handleSave(); }}
-                            className="flex-1 text-sm text-white bg-gray-800 py-2.5 rounded-xl hover:bg-gray-700 transition font-medium"
+                            className="flex-1 text-body text-white bg-inverse py-2.5 rounded-xl hover:bg-inverse transition font-medium"
                         >
                             저장하기
                         </button>
@@ -329,10 +329,10 @@ export default function AccountingReportPage() {
         {/* 플로팅 버튼 */}
         <button
             onClick={() => setShowCategoryModal(true)}
-            className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-gray-800 text-white flex items-center justify-center shadow-lg hover:bg-gray-700 transition z-30"
+            className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-inverse text-white flex items-center justify-center shadow-lg hover:bg-inverse transition z-30"
             title="카테고리 관리"
         >
-            <i className="ti ti-tag text-xl" aria-hidden="true" />
+            <i className="ti ti-tag text-title" aria-hidden="true" />
         </button>
 
         {/* 카테고리 모달 */}
@@ -342,13 +342,13 @@ export default function AccountingReportPage() {
                 onClick={() => setShowCategoryModal(false)}
             >
                 <div
-                    className="bg-white w-full max-w-lg rounded-2xl p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto"
+                    className="bg-card w-full max-w-lg rounded-2xl p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-800">카테고리 관리</p>
-                        <button onClick={() => setShowCategoryModal(false)} className="text-gray-400 hover:text-gray-600 transition">
-                            <i className="ti ti-x text-lg" aria-hidden="true" />
+                        <p className="text-body font-medium text-fg-strong">카테고리 관리</p>
+                        <button onClick={() => setShowCategoryModal(false)} className="text-fg-faint hover:text-fg transition">
+                            <i className="ti ti-x text-heading" aria-hidden="true" />
                         </button>
                     </div>
 
@@ -356,7 +356,7 @@ export default function AccountingReportPage() {
                         <select
                             value={newCategoryType}
                             onChange={(e) => setNewCategoryType(e.target.value as "income" | "expense")}
-                            className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 outline-none focus:border-blue-400"
+                            className="text-body border border-line rounded-lg px-2 py-1.5 outline-none focus:border-info"
                         >
                             <option value="income">수입</option>
                             <option value="expense">지출</option>
@@ -367,11 +367,11 @@ export default function AccountingReportPage() {
                             value={newCategoryName}
                             onChange={(e) => setNewCategoryName(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") { addCategory(newCategoryName, newCategoryType); setNewCategoryName(""); } }}
-                            className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-1.5 outline-none focus:border-blue-400"
+                            className="flex-1 text-body border border-line rounded-lg px-3 py-1.5 outline-none focus:border-info"
                         />
                         <button
                             onClick={() => { addCategory(newCategoryName, newCategoryType); setNewCategoryName(""); }}
-                            className="text-sm text-blue-500 px-3 py-1.5 rounded-lg border border-blue-200 hover:bg-blue-50 transition"
+                            className="text-body text-info px-3 py-1.5 rounded-lg border border-info-soft hover:bg-info-subtle transition"
                         >
                             추가
                         </button>
@@ -380,13 +380,13 @@ export default function AccountingReportPage() {
                     <div className="grid grid-cols-2 gap-4">
                         {(["income", "expense"] as const).map((type) => (
                             <div key={type}>
-                                <p className="text-xs text-gray-400 mb-2">{type === "income" ? "수입" : "지출"}</p>
+                                <p className="text-caption text-fg-faint mb-2">{type === "income" ? "수입" : "지출"}</p>
                                 <div className="flex flex-col gap-1">
                                     {(type === "income" ? incomeCategories : expenseCategories).map((cat) => (
-                                        <div key={cat.id} className="flex items-center justify-between px-3 py-1.5 bg-gray-50 rounded-lg">
-                                            <span className="text-sm text-gray-700">{cat.name}</span>
-                                            <button onClick={() => deleteCategory(cat.id)} className="text-gray-300 hover:text-red-400 transition">
-                                                <i className="ti ti-x text-xs" aria-hidden="true" />
+                                        <div key={cat.id} className="flex items-center justify-between px-3 py-1.5 bg-surface rounded-lg">
+                                            <span className="text-body text-fg">{cat.name}</span>
+                                            <button onClick={() => deleteCategory(cat.id)} className="text-fg-faint hover:text-danger transition">
+                                                <i className="ti ti-x text-caption" aria-hidden="true" />
                                             </button>
                                         </div>
                                     ))}

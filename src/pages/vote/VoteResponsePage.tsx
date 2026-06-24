@@ -151,16 +151,16 @@ export default function VoteResponsePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <Navbar {...navbarProps} />
 
       <div className="max-w-lg mx-auto w-full p-5 flex flex-col gap-5">
 
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/vote")} className="text-gray-300 hover:text-gray-500 transition">
-            <i className="ti ti-arrow-left text-lg" aria-hidden="true" />
+          <button onClick={() => navigate("/vote")} className="text-fg-faint hover:text-fg-muted transition">
+            <i className="ti ti-arrow-left text-heading" aria-hidden="true" />
           </button>
-          <h1 className="text-lg font-medium text-gray-800">{candidate.name}</h1>
+          <h1 className="text-heading font-medium text-fg-strong">{candidate.name}</h1>
         </div>
 
         {candidate.image_urls?.length > 0 && (
@@ -175,18 +175,18 @@ export default function VoteResponsePage() {
         )}
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-500">메뉴 선택</label>
+          <label className="text-body font-medium text-fg-muted">메뉴 선택</label>
 
           {selected.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {selected.map((item) => (
                 <span
                   key={item.name}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 text-sm rounded-lg"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-info-subtle text-info text-body rounded-lg"
                 >
                   {item.name}{item.option && ` (${item.option})`}
-                  <button onClick={() => removeMenu(item.name)} className="text-blue-400 hover:text-blue-600">
-                    <i className="ti ti-x text-xs" aria-hidden="true" />
+                  <button onClick={() => removeMenu(item.name)} className="text-info hover:text-info">
+                    <i className="ti ti-x text-caption" aria-hidden="true" />
                   </button>
                 </span>
               ))}
@@ -194,21 +194,21 @@ export default function VoteResponsePage() {
           )}
 
           {pendingMenu ? (
-            <div className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col gap-2">
-              <p className="text-sm font-medium text-gray-700">{pendingMenu.name} — 옵션 선택</p>
+            <div className="bg-card border border-line-soft rounded-xl p-4 flex flex-col gap-2">
+              <p className="text-body font-medium text-fg">{pendingMenu.name} — 옵션 선택</p>
               <div className="flex flex-wrap gap-2">
                 {pendingMenu.options?.map((opt) => (
                   <button
                     key={opt.label}
                     onClick={() => handleSelectOption(opt.label)}
-                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition"
+                    className="px-3 py-1.5 border border-line rounded-lg text-body text-fg hover:bg-surface transition"
                   >
-                    {opt.label}{opt.price && <span className="text-xs text-gray-400 ml-1">{opt.price}</span>}
+                    {opt.label}{opt.price && <span className="text-caption text-fg-faint ml-1">{opt.price}</span>}
                   </button>
                 ))}
                 <button
                   onClick={() => { setSelected((prev) => [...prev, { name: pendingMenu.name }]); setPendingMenu(null); }}
-                  className="px-3 py-1.5 border border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:bg-gray-50 transition"
+                  className="px-3 py-1.5 border border-dashed border-line rounded-lg text-body text-fg-faint hover:bg-surface transition"
                 >
                   옵션 없음
                 </button>
@@ -223,29 +223,29 @@ export default function VoteResponsePage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 disabled={candidate.menus.length === 0}
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition"
+                className="w-full px-3 py-2.5 text-body border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-info-soft focus:border-info transition"
               />
               {query && filtered.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden z-10">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-line-soft rounded-xl shadow-sm overflow-hidden z-10">
                   {filtered.slice(0, 8).map((m) => (
                     <button
                       key={m.name}
                       onClick={() => handleSelectMenu(m)}
-                      className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between"
+                      className="w-full px-4 py-2.5 text-left text-body text-fg hover:bg-surface flex items-center justify-between"
                     >
                       <span>{m.name}</span>
                       <div className="flex items-center gap-2">
                         {m.options && m.options.length > 0 && (
-                          <span className="text-xs text-blue-400">{m.options.map((o) => o.label).join(" / ")}</span>
+                          <span className="text-caption text-info">{m.options.map((o) => o.label).join(" / ")}</span>
                         )}
-                        {m.price && <span className="text-xs text-gray-400">{m.price}</span>}
+                        {m.price && <span className="text-caption text-fg-faint">{m.price}</span>}
                       </div>
                     </button>
                   ))}
                 </div>
               )}
               {query && filtered.length === 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm text-gray-300">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-line-soft rounded-xl px-4 py-3 text-body text-fg-faint">
                   검색 결과가 없습니다
                 </div>
               )}
@@ -260,17 +260,17 @@ export default function VoteResponsePage() {
         {sortedMenuCounts.length > 0 && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-500">현재 메뉴 현황</p>
-              <p className="text-xs text-gray-400">{responses.length}명 참여</p>
+              <p className="text-body font-medium text-fg-muted">현재 메뉴 현황</p>
+              <p className="text-caption text-fg-faint">{responses.length}명 참여</p>
             </div>
-            <div className="bg-white border border-gray-100 rounded-xl divide-y divide-gray-100">
+            <div className="bg-card border border-line-soft rounded-xl divide-y divide-line-soft">
               {sortedMenuCounts.map(([menuName, { count, names }]) => (
                 <div key={menuName} className="px-4 py-3 flex items-center justify-between gap-3">
                   <div className="flex flex-col gap-0.5 min-w-0">
-                    <p className="text-sm text-gray-700 truncate">{menuName}</p>
-                    <p className="text-xs text-gray-400 truncate">{names.join(", ")}</p>
+                    <p className="text-body text-fg truncate">{menuName}</p>
+                    <p className="text-caption text-fg-faint truncate">{names.join(", ")}</p>
                   </div>
-                  <span className="text-sm font-medium text-blue-500 shrink-0">{count}명</span>
+                  <span className="text-body font-medium text-info shrink-0">{count}명</span>
                 </div>
               ))}
             </div>

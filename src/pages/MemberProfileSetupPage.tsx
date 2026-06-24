@@ -85,13 +85,13 @@ export default function MemberProfileSetupPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition mb-4"
+          className="flex items-center gap-1 text-body text-fg-faint hover:text-fg transition mb-4"
         >
-          <i className="ti ti-chevron-left text-base" aria-hidden="true" />
+          <i className="ti ti-chevron-left text-emphasis" aria-hidden="true" />
           뒤로
         </button>
-        <h1 className="text-xl font-medium text-gray-800">프로필 설정</h1>
-        <p className="text-sm text-gray-400 mt-1">내 정보를 등록하고 수정할 수 있어요</p>
+        <h1 className="text-title font-medium text-fg-strong">프로필 설정</h1>
+        <p className="text-body text-fg-faint mt-1">내 정보를 등록하고 수정할 수 있어요</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
@@ -104,18 +104,18 @@ export default function MemberProfileSetupPage() {
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200 hover:opacity-80 transition"
+              className="relative w-20 h-20 rounded-full overflow-hidden bg-sunken border border-line hover:opacity-80 transition"
             >
               {avatarPreview ? (
                 <img src={avatarPreview} alt="프로필" className="w-full h-full object-cover" />
               ) : (
-                <i className="ti ti-user text-3xl text-gray-300 absolute inset-0 flex items-center justify-center" style={{ display: "flex", alignItems: "center", justifyContent: "center" }} aria-hidden="true" />
+                <i className="ti ti-user text-3xl text-fg-faint absolute inset-0 flex items-center justify-center" style={{ display: "flex", alignItems: "center", justifyContent: "center" }} aria-hidden="true" />
               )}
               <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                <i className="ti ti-camera text-white text-lg" aria-hidden="true" />
+                <i className="ti ti-camera text-white text-heading" aria-hidden="true" />
               </div>
             </button>
-            <p className="text-xs text-gray-400">프로필 사진</p>
+            <p className="text-caption text-fg-faint">프로필 사진</p>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
           </div>
 
@@ -129,17 +129,17 @@ export default function MemberProfileSetupPage() {
 
           {/* 팀 */}
           <div className="flex flex-col gap-1.5">
-            <p className="text-sm font-medium text-gray-700">팀</p>
+            <p className="text-body font-medium text-fg">팀</p>
             <div className="flex gap-2">
               {["나누리", "섬김이"].map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setTeam(t)}
-                  className={`px-4 py-1.5 rounded-full text-sm border transition ${
+                  className={`px-4 py-1.5 rounded-full text-body border transition ${
                     team === t
-                      ? "bg-gray-800 text-white border-gray-800"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                      ? "bg-inverse text-white border-inverse"
+                      : "bg-card text-fg border-line hover:border-line-strong"
                   }`}
                 >
                   {t}
@@ -153,10 +153,10 @@ export default function MemberProfileSetupPage() {
         <button
           type="button"
           onClick={() => setShowOptional((v) => !v)}
-          className="flex items-center justify-between w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition"
+          className="flex items-center justify-between w-full px-4 py-3 bg-surface rounded-xl border border-line-soft hover:bg-sunken transition"
         >
-          <span className="text-sm text-gray-500">추가 정보 입력</span>
-          <i className={`ti ${showOptional ? "ti-chevron-up" : "ti-chevron-down"} text-gray-400`} aria-hidden="true" />
+          <span className="text-body text-fg-muted">추가 정보 입력</span>
+          <i className={`ti ${showOptional ? "ti-chevron-up" : "ti-chevron-down"} text-fg-faint`} aria-hidden="true" />
         </button>
 
         {/* 선택 입력 */}
@@ -164,17 +164,17 @@ export default function MemberProfileSetupPage() {
 
           {/* 포지션 */}
           <div className="flex flex-col gap-1.5">
-            <p className="text-sm font-medium text-gray-700">포지션</p>
+            <p className="text-body font-medium text-fg">포지션</p>
             <div className="flex flex-wrap gap-2">
               {POSITIONS.map((p) => (
                 <button
                   key={p}
                   type="button"
                   onClick={() => setPositions((prev) => prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p])}
-                  className={`px-3 py-1.5 rounded-lg text-sm border transition ${
+                  className={`px-3 py-1.5 rounded-lg text-body border transition ${
                     positions.includes(p)
-                      ? "bg-gray-800 text-white border-gray-800"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                      ? "bg-inverse text-white border-inverse"
+                      : "bg-card text-fg border-line hover:border-line-strong"
                   }`}
                 >
                   {p}

@@ -87,7 +87,7 @@ export default function SurveyDeployPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <Navbar
         userName={userProfile?.name}
         onLogout={signOut}
@@ -99,19 +99,19 @@ export default function SurveyDeployPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/admin/surveys")}
-            className="text-gray-300 hover:text-gray-500 transition"
+            className="text-fg-faint hover:text-fg-muted transition"
           >
-            <i className="ti ti-arrow-left text-lg" aria-hidden="true" />
+            <i className="ti ti-arrow-left text-heading" aria-hidden="true" />
           </button>
           <div>
-            <h1 className="text-lg font-medium text-gray-800">설문 배포</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{template.title}</p>
+            <h1 className="text-heading font-medium text-fg-strong">설문 배포</h1>
+            <p className="text-body text-fg-faint mt-0.5">{template.title}</p>
           </div>
         </div>
 
         {/* 사진 업로드 */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-500">장소 사진</label>
+          <label className="text-body font-medium text-fg-muted">장소 사진</label>
           {imagePreview ? (
             <div className="relative w-full aspect-square rounded-xl overflow-hidden">
               <img src={imagePreview} alt="장소 사진" className="w-full h-full object-cover" />
@@ -120,40 +120,40 @@ export default function SurveyDeployPage() {
                 onClick={() => { setImageFile(null); setImagePreview(null); setPlaceName(null); }}
                 className="absolute top-2 right-2 bg-black/40 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/60 transition"
               >
-                <i className="ti ti-x text-sm" aria-hidden="true" />
+                <i className="ti ti-x text-body" aria-hidden="true" />
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center gap-1.5 py-5 bg-white border border-dashed border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition">
-              <i className="ti ti-camera text-xl text-gray-300" aria-hidden="true" />
-              <p className="text-sm font-medium text-gray-400">사진 업로드</p>
-              <p className="text-xs text-gray-300">GPS 정보가 포함된 사진 권장</p>
+            <label className="flex flex-col items-center justify-center gap-1.5 py-5 bg-card border border-dashed border-line rounded-xl cursor-pointer hover:bg-surface transition">
+              <i className="ti ti-camera text-title text-fg-faint" aria-hidden="true" />
+              <p className="text-body font-medium text-fg-faint">사진 업로드</p>
+              <p className="text-caption text-fg-faint">GPS 정보가 포함된 사진 권장</p>
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
           )}
 
           {extractingGps && (
-            <p className="text-xs text-blue-400">위치 정보 추출 중...</p>
+            <p className="text-caption text-info">위치 정보 추출 중...</p>
           )}
           {placeName && (
-            <div className="flex items-center gap-1.5 px-3 py-2 bg-blue-50 rounded-lg">
-              <i className="ti ti-map-pin text-sm text-blue-400" aria-hidden="true" />
-              <p className="text-xs text-blue-600">{placeName}</p>
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-info-subtle rounded-lg">
+              <i className="ti ti-map-pin text-body text-info" aria-hidden="true" />
+              <p className="text-caption text-info">{placeName}</p>
             </div>
           )}
           {!extractingGps && imageFile && !placeName && (
-            <p className="text-xs text-gray-300">GPS 정보가 없는 사진입니다</p>
+            <p className="text-caption text-fg-faint">GPS 정보가 없는 사진입니다</p>
           )}
         </div>
 
         {/* 항목 미리보기 */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-500">설문 항목 미리보기</label>
-          <div className="bg-white border border-gray-100 rounded-xl divide-y divide-gray-100">
+          <label className="text-body font-medium text-fg-muted">설문 항목 미리보기</label>
+          <div className="bg-card border border-line-soft rounded-xl divide-y divide-line-soft">
             {template.items.map((item, i) => (
               <div key={i} className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm text-gray-700">{item.label}</span>
-                <span className={`text-xs px-2 py-0.5 rounded-md ${item.isStar ? "bg-blue-50 text-blue-400" : "bg-gray-100 text-gray-400"}`}>
+                <span className="text-body text-fg">{item.label}</span>
+                <span className={`text-caption px-2 py-0.5 rounded-md ${item.isStar ? "bg-info-subtle text-info" : "bg-sunken text-fg-faint"}`}>
                   {item.isStar ? "만족도" : "텍스트"}
                 </span>
               </div>
@@ -161,10 +161,10 @@ export default function SurveyDeployPage() {
           </div>
         </div>
 
-        {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+        {error && <p className="text-caption text-danger text-center">{error}</p>}
 
         <Button onClick={handleDeploy} loading={deploying}>
-          <i className="ti ti-send text-sm mr-1.5" aria-hidden="true" />
+          <i className="ti ti-send text-body mr-1.5" aria-hidden="true" />
           배포하기
         </Button>
 
