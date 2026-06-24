@@ -13,17 +13,17 @@ interface Props {
 export default function BankSelector({ value, onChange }: Props) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-gray-600">은행 선택</label>
+      <label className="text-body font-medium text-fg-muted">은행 선택</label>
       <div className="grid grid-cols-4 gap-1.5">
         {BANKS.map((bank) => (
           <button
             key={bank}
             type="button"
             onClick={() => onChange(bank)}
-            className={`py-2 px-1 text-xs rounded-lg border transition
+            className={`py-2 px-1 text-caption rounded-lg border transition
               ${value === bank
-                ? "bg-blue-50 text-blue-500 border-blue-300 font-medium"
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                ? "bg-info-subtle text-info border-info font-medium"
+                : "bg-card text-fg border-line hover:border-line-strong hover:bg-surface"
               }`}
           >
             {bank}
@@ -31,8 +31,8 @@ export default function BankSelector({ value, onChange }: Props) {
         ))}
       </div>
       {value && (
-        <p className="text-xs text-gray-400">
-          선택됨: <span className="text-gray-600 font-medium">{value}</span>
+        <p className="text-caption text-fg-faint">
+          선택됨: <span className="text-fg font-medium">{value}</span>
         </p>
       )}
     </div>
