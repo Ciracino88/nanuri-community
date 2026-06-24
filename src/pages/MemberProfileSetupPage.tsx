@@ -82,6 +82,14 @@ export default function MemberProfileSetupPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-8">
       <div className="mb-6">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition mb-4"
+        >
+          <i className="ti ti-chevron-left text-base" aria-hidden="true" />
+          뒤로
+        </button>
         <h1 className="text-xl font-medium text-gray-800">프로필 설정</h1>
         <p className="text-sm text-gray-400 mt-1">내 정보를 등록하고 수정할 수 있어요</p>
       </div>

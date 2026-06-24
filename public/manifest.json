@@ -1,0 +1,15 @@
+{
+  "name": "나누리 청년부",
+  "short_name": "나누리",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#1f2937",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.jpg",
+      "sizes": "any",
+      "type": "image/jpeg"
+    }
+  ]
+}
