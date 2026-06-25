@@ -1,9 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
-import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { fetchList } from "../../lib/supabaseList";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -19,7 +17,6 @@ interface Report {
 export default function AccountingListPage() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { userProfile, signOut } = useAuthStore();
 
     const { data: reports = [], isLoading } = useQuery({
         queryKey: ["accounting_reports"],
@@ -47,13 +44,7 @@ export default function AccountingListPage() {
     if (isLoading) return <LoadingScreen />;
 
     return (
-        <div className="min-h-screen bg-surface flex flex-col">
-            <Navbar
-                userName={userProfile?.name}
-                onLogout={async () => { await signOut(); navigate("/"); }}
-                onProfileEdit={() => navigate("/member/setup")}
-            />
-            <PageContainer width="wide">
+        <PageContainer width="wide">
 
                 <div className="flex items-center justify-between">
                     <div>
@@ -102,7 +93,6 @@ export default function AccountingListPage() {
                     </div>
                 )}
 
-            </PageContainer>
-        </div>
+        </PageContainer>
     );
 }

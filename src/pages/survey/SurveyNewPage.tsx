@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
-import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 
 interface SurveyItem {
@@ -14,7 +12,6 @@ interface SurveyItem {
 
 export default function SurveyNewPage() {
   const navigate = useNavigate();
-  const { userProfile, signOut } = useAuthStore();
   const [title, setTitle] = useState("");
   const [items, setItems] = useState<SurveyItem[]>([
     { id: crypto.randomUUID(), label: "", isStar: true },
@@ -57,15 +54,7 @@ export default function SurveyNewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={signOut}
-
-        onProfileEdit={() => navigate("/member/setup")}
-      />
-
-      <PageContainer width="default">
+    <PageContainer width="default">
 
         <div>
           <h1 className="text-heading font-medium text-fg-strong">설문 작성</h1>
@@ -142,7 +131,6 @@ export default function SurveyNewPage() {
           저장
         </Button>
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

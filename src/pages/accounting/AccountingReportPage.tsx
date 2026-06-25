@@ -1,9 +1,7 @@
 import { useState } from "react";
 import Papa from "papaparse";
 import Button from "../../components/ui/Button";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
-import { useAuthStore } from "../../store/authStore";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useAccountingCategories } from "../../hooks/useAccountingCategories";
@@ -22,7 +20,6 @@ interface Transaction {
 
 export default function AccountingReportPage() {
     const navigate = useNavigate();
-    const { userProfile, signOut } = useAuthStore();
     const { categories, incomeCategories, expenseCategories, addCategory, deleteCategory } = useAccountingCategories();
 
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -99,12 +96,7 @@ export default function AccountingReportPage() {
     };
 
     return (
-        <div className="min-h-screen bg-surface">
-            <Navbar
-                userName={userProfile?.name}
-                onLogout={async () => { await signOut(); navigate("/"); }}
-                onProfileEdit={() => navigate("/member/setup")}
-            />
+        <>
             <PageContainer width="full" stack={false}>
                 <div className="flex items-center gap-4 mb-4">
                     <div className="flex-1 flex flex-col gap-2">
@@ -399,6 +391,6 @@ export default function AccountingReportPage() {
             </div>
         )}
 
-        </div>
+        </>
     );
 }

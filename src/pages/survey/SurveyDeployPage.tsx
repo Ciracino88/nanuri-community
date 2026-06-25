@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
 import LoadingScreen from "../../components/LoadingScreen";
-import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { extractGpsFromImage } from "../../lib/extractGps";
@@ -19,7 +17,6 @@ interface Template {
 export default function SurveyDeployPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { userProfile, signOut } = useAuthStore();
 
   const [template, setTemplate] = useState<Template | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -88,14 +85,7 @@ export default function SurveyDeployPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={signOut}
-        onProfileEdit={() => navigate("/member/setup")}
-      />
-
-      <PageContainer width="default">
+    <PageContainer width="default">
 
         <div className="flex items-center gap-3">
           <button
@@ -169,7 +159,6 @@ export default function SurveyDeployPage() {
           배포하기
         </Button>
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

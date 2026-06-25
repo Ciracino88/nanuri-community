@@ -2,9 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
-import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 
 interface Survey {
@@ -47,7 +45,6 @@ export default function SurveyResultsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { userProfile, signOut } = useAuthStore();
 
   const { data, isLoading: loading } = useQuery({
     queryKey: ["survey_results", id],
@@ -94,14 +91,7 @@ export default function SurveyResultsPage() {
   const total = responses.length;
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={signOut}
-        onProfileEdit={() => navigate("/member/setup")}
-      />
-
-      <PageContainer width="default">
+    <PageContainer width="default">
 
         <div className="flex items-center gap-3">
           <button
@@ -201,7 +191,6 @@ export default function SurveyResultsPage() {
           </>
         )}
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

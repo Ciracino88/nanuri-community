@@ -61,67 +61,27 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/admin/surveys",
     element: (
       <ProtectedRoute memberOnly adminOnly>
-        <SurveyAdminPage />
+        <AppShell />
       </ProtectedRoute>
     ),
-  },
-  {
-    path: "/admin/surveys/:id/deploy",
-    element: (
-      <ProtectedRoute memberOnly adminOnly>
-        <SurveyDeployPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/surveys/new",
-    element: (
-      <ProtectedRoute memberOnly adminOnly>
-        <SurveyNewPage />
-      </ProtectedRoute>
-    ),
+    children: [
+      { path: "/admin/surveys", element: <SurveyAdminPage /> },
+      { path: "/admin/surveys/new", element: <SurveyNewPage /> },
+      { path: "/admin/surveys/:id/deploy", element: <SurveyDeployPage /> },
+      { path: "/admin/surveys/:id/results", element: <SurveyResultsPage /> },
+      { path: "/accounting", element: <AccountingListPage /> },
+      { path: "/accounting/new", element: <AccountingReportPage /> },
+      { path: "/accounting/:id", element: <AccountingDetailPage /> },
+    ],
   },
   {
     path: "/survey/:id",
     element: <SurveyResponsePage />,
   },
   {
-    path: "/admin/surveys/:id/results",
-    element: (
-      <ProtectedRoute memberOnly adminOnly>
-        <SurveyResultsPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
     path: "/vote/candidate/:candidateId",
     element: <VoteResponsePage />,
-  },
-  {
-    path: "/accounting",
-    element: (
-      <ProtectedRoute memberOnly adminOnly>
-        <AccountingListPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/accounting/new",
-    element: (
-      <ProtectedRoute memberOnly adminOnly>
-        <AccountingReportPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/accounting/:id",
-    element: (
-      <ProtectedRoute memberOnly adminOnly>
-        <AccountingDetailPage />
-      </ProtectedRoute>
-    ),
   },
 ]);
