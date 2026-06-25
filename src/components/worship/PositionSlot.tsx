@@ -14,7 +14,9 @@ export default function PositionSlot({ position, member, isMine, myAvailable, to
 
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <p className="text-caption text-fg-faint text-center leading-tight">{position}</p>
+      <div className="h-9 flex items-center justify-center">
+        <p className="text-caption text-fg-faint text-center leading-tight">{position}</p>
+      </div>
       <button
         type="button"
         onClick={isClickable ? onToggle : undefined}
