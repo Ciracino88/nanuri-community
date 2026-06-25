@@ -71,9 +71,10 @@ export default function MemberBillFormPage() {
   if (!hasAccount) {
     return (
       <PageContainer width="narrow">
-          <div className="mb-6">
-            <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
-            <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
+          <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden">
+            <i className="ti ti-credit-card absolute text-info" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
+            <h1 className="text-title font-medium text-info-strong">비용 청구서</h1>
+            <p className="text-body text-info mt-1.5">영수증과 함께 제출해주세요</p>
           </div>
 
           <div className="bg-warning-subtle border border-warning-soft rounded-xl px-4 py-3.5 flex items-center gap-3 mb-5">
@@ -110,12 +111,12 @@ export default function MemberBillFormPage() {
 
   return (
     <PageContainer width="narrow">
-        <div className="mb-6">
-          <p className="text-caption text-fg-faint mb-1">나누리 청년부</p>
-          <h1 className="text-title font-medium text-fg-strong">비용 청구서 작성</h1>
-          {userProfile && (
-            <p className="text-body text-fg-muted mt-1">{userProfile.name}님, 안녕하세요</p>
-          )}
+        <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden">
+          <i className="ti ti-credit-card absolute text-info" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
+          <h1 className="text-title font-medium text-info-strong">비용 청구서</h1>
+          <p className="text-body text-info mt-1.5">
+            {userProfile ? `${userProfile.name}님, 영수증과 함께 제출해주세요` : "영수증과 함께 제출해주세요"}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">

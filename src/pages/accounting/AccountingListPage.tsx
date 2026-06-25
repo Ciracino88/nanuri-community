@@ -46,19 +46,19 @@ export default function AccountingListPage() {
     return (
         <PageContainer width="wide">
 
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-caption text-fg-faint mb-0.5">나누리 청년부</p>
-                        <h1 className="text-title font-medium text-fg-strong">회계 장부</h1>
-                    </div>
-                    <button
-                        onClick={() => navigate("/accounting/new")}
-                        className="flex items-center gap-1.5 text-body text-info font-medium"
-                    >
-                        <i className="ti ti-plus text-emphasis" aria-hidden="true" />
-                        장부 추가
-                    </button>
+                <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden">
+                    <i className="ti ti-currency-won absolute text-info" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
+                    <h1 className="text-title font-medium text-info-strong">회계 장부</h1>
+                    <p className="text-body text-info mt-1.5">월별 지출 내역을 관리하세요</p>
                 </div>
+
+                <button
+                    onClick={() => navigate("/accounting/new")}
+                    className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl border border-line bg-card text-body text-info font-medium hover:bg-surface transition"
+                >
+                    <i className="ti ti-plus text-emphasis" aria-hidden="true" />
+                    장부 추가
+                </button>
 
                 {reports.length === 0 ? (
                     <div className="bg-card border border-line-soft rounded-xl p-8 text-center text-body text-fg-faint">

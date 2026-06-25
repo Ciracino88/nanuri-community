@@ -142,19 +142,19 @@ export default function SurveyAdminPage() {
   return (
     <PageContainer width="default">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-heading font-medium text-fg-strong">설문 관리</h1>
-            <p className="text-body text-fg-faint mt-0.5">설문을 작성하고 배포하세요</p>
-          </div>
-          <button
-            onClick={() => navigate("/admin/surveys/new")}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-info text-white text-body font-medium rounded-lg hover:bg-info transition"
-          >
-            <i className="ti ti-plus text-body" aria-hidden="true" />
-            새 설문
-          </button>
+        <div className="relative bg-purple-subtle rounded-2xl p-5 overflow-hidden">
+          <i className="ti ti-chart-bar absolute text-purple" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
+          <h1 className="text-title font-medium text-purple-strong">설문 관리</h1>
+          <p className="text-body text-purple mt-1.5">설문을 작성하고 배포하세요</p>
         </div>
+
+        <button
+          onClick={() => navigate("/admin/surveys/new")}
+          className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl border border-line bg-card text-body text-purple font-medium hover:bg-surface transition"
+        >
+          <i className="ti ti-plus text-emphasis" aria-hidden="true" />
+          새 설문
+        </button>
 
         {loading ? (
           <LoadingSpinner />
