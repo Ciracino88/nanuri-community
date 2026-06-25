@@ -17,7 +17,7 @@ interface MenuCard {
 const MENU_CARDS: MenuCard[] = [
   { icon: "ti-credit-card", title: "청구서 제출", description: "영수증 올리고 송금받기", path: "/member/form", tint: "bg-info-subtle", color: "text-info" },
   { icon: "ti-chart-bar", title: "설문 참여", description: "링크로 바로 참여", path: "/surveys", tint: "bg-purple-subtle", color: "text-purple" },
-  { icon: "ti-salad", title: "메뉴 종합", description: "사진 올리면 AI 정리", path: "/vote", tint: "bg-warning-subtle", color: "text-warning" },
+  { icon: "ti-tools-kitchen-2", title: "메뉴 종합", description: "사진 올리면 AI 정리", path: "/vote", tint: "bg-warning-subtle", color: "text-warning" },
   { icon: "ti-music", title: "찬양팀 일정", description: "주일 포지션 등록", path: "/worship", tint: "bg-teal-subtle", color: "text-teal" },
 ];
 

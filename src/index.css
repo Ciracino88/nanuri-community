@@ -38,11 +38,14 @@
   --color-success-soft: #d1fae5;
   --color-success-subtle: #ecfdf5;
 
-  /* 카테고리 (홈 타일 등 장식용 — 의미 없음) */
+  /* 카테고리 (홈 타일·탭 히어로 장식용). strong = 틴트 배경 위 제목용 진한 색 */
   --color-purple: #534AB7;
   --color-purple-subtle: #EEEDFE;
+  --color-purple-strong: #3C3489;
   --color-teal: #0F6E56;
   --color-teal-subtle: #E1F5EE;
+  --color-teal-strong: #04342C;
+  --color-warning-strong: #633806;
 
   /* 타입 스케일 */
   --text-caption: 0.8125rem;

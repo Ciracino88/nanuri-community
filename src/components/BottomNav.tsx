@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 const TABS = [
   { to: "/home", icon: "ti-home", label: "홈" },
   { to: "/surveys", icon: "ti-chart-bar", label: "설문" },
-  { to: "/vote", icon: "ti-salad", label: "메뉴" },
+  { to: "/vote", icon: "ti-tools-kitchen-2", label: "메뉴" },
   { to: "/worship", icon: "ti-music", label: "찬양팀" },
   { to: "/member/setup", icon: "ti-user", label: "내정보" },
 ];

@@ -93,9 +93,10 @@ export default function WorshipSchedulePage() {
     <PageContainer width="wide">
 
         <div className="flex flex-col gap-3">
-          <div>
-            <p className="text-caption text-fg-faint mb-0.5">찬양팀 일정</p>
-            <h1 className="text-title font-medium text-fg-strong">주일 스케줄</h1>
+          <div className="relative bg-teal-subtle rounded-2xl p-5 overflow-hidden">
+            <i className="ti ti-music absolute text-teal" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
+            <h1 className="text-title font-medium text-teal-strong">찬양팀 일정</h1>
+            <p className="text-body text-teal mt-1.5">주일 포지션을 등록하세요</p>
           </div>
           <div className="flex gap-2">
             {["나누리", "섬김이"].map((t) => (

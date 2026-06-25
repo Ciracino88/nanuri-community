@@ -17,9 +17,10 @@ export default function SurveyListPage() {
   return (
     <PageContainer width="default">
 
-        <div>
-          <h1 className="text-heading font-medium text-fg-strong">참여 가능한 설문</h1>
-          <p className="text-body text-fg-faint mt-0.5">아래 설문에 참여해주세요</p>
+        <div className="relative bg-purple-subtle rounded-2xl p-5 overflow-hidden">
+          <i className="ti ti-chart-bar absolute text-purple" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
+          <h1 className="text-title font-medium text-purple-strong">설문 참여</h1>
+          <p className="text-body text-purple mt-1.5">참여 가능한 설문을 확인하세요</p>
         </div>
 
         {loading ? (

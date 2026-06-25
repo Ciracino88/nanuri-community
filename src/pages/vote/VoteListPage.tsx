@@ -110,19 +110,19 @@ export default function VoteListPage() {
   return (
     <PageContainer width="default">
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-heading font-medium text-fg-strong">메뉴 종합</h1>
-            <p className="text-body text-fg-faint mt-0.5">메뉴판 이미지를 올리고 메뉴를 종합받으세요</p>
-          </div>
-          <button
-            onClick={() => setShowForm((v) => !v)}
-            className="flex items-center gap-1.5 text-body text-info font-medium"
-          >
-            <i className="ti ti-upload text-emphasis" aria-hidden="true" />
-            메뉴판 업로드
-          </button>
+        <div className="relative bg-warning-subtle rounded-2xl p-5 overflow-hidden">
+          <i className="ti ti-tools-kitchen-2 absolute text-warning" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
+          <h1 className="text-title font-medium text-warning-strong">메뉴 종합</h1>
+          <p className="text-body text-warning mt-1.5">메뉴판 사진으로 메뉴를 모아요</p>
         </div>
+
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl border border-line bg-card text-body text-info font-medium hover:bg-surface transition"
+        >
+          <i className="ti ti-upload text-emphasis" aria-hidden="true" />
+          메뉴판 업로드
+        </button>
 
         {showForm && (
           <div className="fixed inset-0 bg-black/60 z-40 flex items-end sm:items-center justify-center" onClick={() => { if (!extracting && !saveMutation.isPending) resetForm(); }}>
