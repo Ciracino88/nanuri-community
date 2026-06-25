@@ -38,6 +38,12 @@
   --color-success-soft: #d1fae5;
   --color-success-subtle: #ecfdf5;
 
+  /* 카테고리 (홈 타일 등 장식용 — 의미 없음) */
+  --color-purple: #534AB7;
+  --color-purple-subtle: #EEEDFE;
+  --color-teal: #0F6E56;
+  --color-teal-subtle: #E1F5EE;
+
   /* 타입 스케일 */
   --text-caption: 0.8125rem;
   --text-caption--line-height: 1.125rem;

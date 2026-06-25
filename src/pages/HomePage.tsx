@@ -10,18 +10,20 @@ interface MenuCard {
   title: string;
   description: string;
   path: string;
+  tint: string;
+  color: string;
 }
 
 const MENU_CARDS: MenuCard[] = [
-  { icon: "ti-credit-card", title: "청구서 제출", description: "청구 내용과 금액, 영수증을 제출하면 관리자가 확인 후 송금해드려요", path: "/member/form" },
-  { icon: "ti-chart-bar", title: "설문 참여", description: "로그인 없이 링크만으로 설문에 참여하고 결과를 실시간으로 확인해요", path: "/surveys" },
-  { icon: "ti-salad", title: "메뉴 종합", description: "메뉴판 사진을 올리면 AI가 메뉴를 추출하고 모두의 선택을 모아줘요", path: "/vote" },
-  { icon: "ti-music", title: "찬양팀 일정", description: "포지션별 주일 참여 가능 여부를 확인하고 내 일정을 등록해요", path: "/worship" },
+  { icon: "ti-credit-card", title: "청구서 제출", description: "영수증 올리고 송금받기", path: "/member/form", tint: "bg-info-subtle", color: "text-info" },
+  { icon: "ti-chart-bar", title: "설문 참여", description: "링크로 바로 참여", path: "/surveys", tint: "bg-purple-subtle", color: "text-purple" },
+  { icon: "ti-salad", title: "메뉴 종합", description: "사진 올리면 AI 정리", path: "/vote", tint: "bg-warning-subtle", color: "text-warning" },
+  { icon: "ti-music", title: "찬양팀 일정", description: "주일 포지션 등록", path: "/worship", tint: "bg-teal-subtle", color: "text-teal" },
 ];
 
 const ADMIN_CARDS: MenuCard[] = [
-  { icon: "ti-currency-won", title: "회계 보고서", description: "지출 내역을 한눈에 조회하고 관리해요", path: "/accounting" },
-  { icon: "ti-chart-bar", title: "설문 관리", description: "설문을 작성하고 링크로 배포해요", path: "/admin/surveys" },
+  { icon: "ti-currency-won", title: "회계 보고서", description: "지출 내역 관리", path: "/accounting", tint: "bg-info-subtle", color: "text-info" },
+  { icon: "ti-chart-bar", title: "설문 관리", description: "설문 작성·배포", path: "/admin/surveys", tint: "bg-purple-subtle", color: "text-purple" },
 ];
 
 function FeatureCard({ card, delay, onClick }: { card: MenuCard; delay: number; onClick: () => void }) {
@@ -43,18 +45,20 @@ function FeatureCard({ card, delay, onClick }: { card: MenuCard; delay: number; 
     <button
       ref={ref}
       onClick={onClick}
-      className="bg-card border border-line-soft rounded-2xl p-6 text-left hover:border-line hover:shadow-sm transition-all duration-300"
+      className="bg-card border border-line-soft rounded-2xl p-4 text-left flex flex-col gap-3 hover:border-line active:scale-95 transition"
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(20px)",
-        transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s, box-shadow 0.2s, border-color 0.2s`,
+        transform: visible ? "translateY(0)" : "translateY(18px)",
+        transition: `opacity 0.45s ease ${delay}s, transform 0.45s ease ${delay}s, border-color 0.2s, scale 0.12s`,
       }}
     >
-      <div className="w-10 h-10 rounded-xl bg-surface border border-line-soft flex items-center justify-center mb-3">
-        <i className={`ti ${card.icon} text-xl text-fg-muted`} aria-hidden="true" />
+      <div className={`w-11 h-11 rounded-xl ${card.tint} flex items-center justify-center`}>
+        <i className={`ti ${card.icon} text-2xl ${card.color}`} aria-hidden="true" />
       </div>
-      <p className="text-body font-medium text-fg-strong mb-1.5">{card.title}</p>
-      <p className="text-caption text-fg-faint leading-relaxed">{card.description}</p>
+      <div>
+        <p className="text-body font-medium text-fg-strong">{card.title}</p>
+        <p className="text-caption text-fg-faint mt-0.5">{card.description}</p>
+      </div>
     </button>
   );
 }
@@ -71,40 +75,56 @@ export default function HomePage() {
   return (
     <PageContainer width="default">
 
-        {unrespondedCount > 0 && (
-          <div className="bg-info-subtle rounded-xl p-4 border border-info-soft flex items-center justify-between">
-            <div>
-              <p className="text-caption text-info font-medium mb-0.5">진행 중인 설문</p>
-              <p className="text-body font-medium text-fg-strong">참여 가능한 설문이 {unrespondedCount}개 있습니다</p>
-            </div>
-            <button
-              onClick={() => navigate("/surveys")}
-              className="text-body text-info font-medium whitespace-nowrap ml-3"
-            >
-              보러가기 →
-            </button>
-          </div>
-        )}
+      {/* 히어로 */}
+      <div
+        className="relative bg-inverse rounded-2xl p-6 overflow-hidden"
+        style={{ animation: "cardEnter 0.4s ease both" }}
+      >
+        <i
+          className="ti ti-seeding absolute"
+          aria-hidden="true"
+          style={{ right: 4, bottom: 0, fontSize: 88, color: "rgba(255,255,255,0.08)", animation: "float 4s ease-in-out infinite" }}
+        />
+        <p className="text-caption mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>나누리 청년부</p>
+        <p className="text-title font-medium text-white leading-snug">
+          우리들의 작은<br />커뮤니티 공간
+        </p>
+      </div>
 
+      {unrespondedCount > 0 && (
+        <div className="bg-info-subtle rounded-2xl p-4 border border-info-soft flex items-center justify-between">
+          <div>
+            <p className="text-caption text-info font-medium mb-0.5">진행 중인 설문</p>
+            <p className="text-body font-medium text-fg-strong">참여 가능한 설문이 {unrespondedCount}개 있습니다</p>
+          </div>
+          <button
+            onClick={() => navigate("/surveys")}
+            className="text-body text-info font-medium whitespace-nowrap ml-3"
+          >
+            보러가기 →
+          </button>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2.5">
+        <p className="text-caption text-fg-faint font-medium">메뉴</p>
+        <div className="grid grid-cols-2 gap-3">
+          {MENU_CARDS.map((card, i) => (
+            <FeatureCard key={card.path} card={card} delay={i * 0.07} onClick={() => navigate(card.path)} />
+          ))}
+        </div>
+      </div>
+
+      {isAdmin && (
         <div className="flex flex-col gap-2.5">
-          <p className="text-caption text-fg-faint font-medium">메뉴</p>
-          <div className="flex flex-col gap-2.5">
-            {MENU_CARDS.map((card, i) => (
-              <FeatureCard key={card.path} card={card} delay={i * 0.1} onClick={() => navigate(card.path)} />
+          <p className="text-caption text-fg-faint font-medium">관리자</p>
+          <div className="grid grid-cols-2 gap-3">
+            {ADMIN_CARDS.map((card, i) => (
+              <FeatureCard key={card.path} card={card} delay={i * 0.07} onClick={() => navigate(card.path)} />
             ))}
           </div>
         </div>
-
-        {isAdmin && (
-          <div className="flex flex-col gap-2.5">
-            <p className="text-caption text-fg-faint font-medium">관리자</p>
-            <div className="flex flex-col gap-2.5">
-              {ADMIN_CARDS.map((card, i) => (
-                <FeatureCard key={card.path} card={card} delay={i * 0.1} onClick={() => navigate(card.path)} />
-              ))}
-            </div>
-          </div>
-        )}
+      )}
 
     </PageContainer>
   );
