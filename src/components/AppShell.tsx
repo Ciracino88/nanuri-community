@@ -1,19 +1,13 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
-import { useAuthStore } from "../store/authStore";
+import { Outlet } from "react-router-dom";
+import BottomNav from "./BottomNav";
 
 export default function AppShell() {
-  const navigate = useNavigate();
-  const { userProfile, signOut } = useAuthStore();
-
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar
-        userName={userProfile?.name}
-        onLogout={async () => { await signOut(); navigate("/"); }}
-        onProfileEdit={() => navigate("/member/setup")}
-      />
-      <Outlet />
+    <div className="min-h-screen mx-auto w-full max-w-md bg-surface flex flex-col">
+      <main className="flex-1 flex flex-col" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+        <Outlet />
+      </main>
+      <BottomNav />
     </div>
   );
 }

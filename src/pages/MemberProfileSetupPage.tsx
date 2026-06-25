@@ -19,7 +19,7 @@ interface FormValues {
 
 export default function MemberProfileSetupPage() {
   const navigate = useNavigate();
-  const { user, userProfile, fetchUserProfile } = useAuthStore();
+  const { user, userProfile, fetchUserProfile, signOut } = useAuthStore();
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
       name: userProfile?.name ?? "",
@@ -214,6 +214,15 @@ export default function MemberProfileSetupPage() {
           저장하기
         </Button>
       </form>
+
+      <button
+        type="button"
+        onClick={async () => { await signOut(); navigate("/"); }}
+        className="mt-2 mx-auto flex items-center gap-1.5 text-body text-fg-faint hover:text-danger transition"
+      >
+        <i className="ti ti-logout text-emphasis" aria-hidden="true" />
+        로그아웃
+      </button>
       </PageContainer>
     </div>
   );
