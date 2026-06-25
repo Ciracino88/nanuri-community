@@ -215,14 +215,9 @@ export default function MemberProfileSetupPage() {
         </Button>
       </form>
 
-      <button
-        type="button"
-        onClick={async () => { await signOut(); navigate("/"); }}
-        className="mt-2 mx-auto flex items-center gap-1.5 text-body text-fg-faint hover:text-danger transition"
-      >
-        <i className="ti ti-logout text-emphasis" aria-hidden="true" />
+      <Button variant="danger" type="button" onClick={async () => { await signOut(); navigate("/"); }}>
         로그아웃
-      </button>
+      </Button>
       </PageContainer>
     </div>
   );
