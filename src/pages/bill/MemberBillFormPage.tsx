@@ -71,18 +71,18 @@ export default function MemberBillFormPage() {
   if (!hasAccount) {
     return (
       <PageContainer width="narrow">
-          <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden">
+          <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden" style={{ animation: "cardEnter 0.4s ease both" }}>
             <i className="ti ti-credit-card absolute text-info" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
             <h1 className="text-title font-medium text-info-strong">비용 청구서</h1>
             <p className="text-body text-info mt-1.5">영수증과 함께 제출해주세요</p>
           </div>
 
-          <div className="bg-warning-subtle border border-warning-soft rounded-xl px-4 py-3.5 flex items-center gap-3 mb-5">
+          <div className="bg-warning-subtle border border-warning-soft rounded-xl px-4 py-3.5 flex items-center gap-3 mb-5" style={{ animation: "fadeUp 0.45s ease 0.1s both" }}>
             <i className="ti ti-alert-circle text-warning text-lg shrink-0" aria-hidden="true" />
             <p className="text-body text-warning">청구서를 제출하려면 입금받을 계좌 정보가 필요해요</p>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3" style={{ animation: "fadeUp 0.45s ease 0.18s both" }}>
             <button
               onClick={() => navigate("/member/setup")}
               className="w-full bg-card border border-line-soft rounded-xl px-4 py-4 flex items-center justify-between hover:border-line transition text-left"
@@ -111,7 +111,7 @@ export default function MemberBillFormPage() {
 
   return (
     <PageContainer width="narrow">
-        <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden">
+        <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden" style={{ animation: "cardEnter 0.4s ease both" }}>
           <i className="ti ti-credit-card absolute text-info" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
           <h1 className="text-title font-medium text-info-strong">비용 청구서</h1>
           <p className="text-body text-info mt-1.5">
@@ -119,22 +119,20 @@ export default function MemberBillFormPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between bg-surface rounded-lg px-4 py-3">
-              <div>
-                <p className="text-caption text-fg-faint">입금 계좌</p>
-                <p className="text-body font-medium text-fg">
-                  {userProfile?.bank_name} {userProfile?.account_number}
-                </p>
-              </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" style={{ animation: "fadeUp 0.45s ease 0.12s both" }}>
+          <div className="flex items-center justify-between bg-surface rounded-lg px-4 py-3">
+            <div>
+              <p className="text-caption text-fg-faint">입금 계좌</p>
+              <p className="text-body font-medium text-fg">
+                {userProfile?.bank_name} {userProfile?.account_number}
+              </p>
             </div>
             <button
               type="button"
               onClick={() => navigate("/member/setup")}
-              className="text-caption text-info hover:text-info transition text-right pr-1"
+              className="text-caption text-info hover:underline transition shrink-0 ml-3"
             >
-              계좌 정보가 다른가요? 수정하기 →
+              수정 →
             </button>
           </div>
 
