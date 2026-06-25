@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import Navbar from "./Navbar";
 
 const CONFETTI_COLORS = ["#7F77DD", "#1D9E75", "#D85A30", "#378ADD", "#EF9F27", "#D4537E", "#639922"];
 
@@ -57,21 +56,14 @@ function launchConfetti(canvas: HTMLCanvasElement) {
   return () => { clearTimeout(timer); cancelAnimationFrame(frame); };
 }
 
-interface NavbarProps {
-  userName?: string;
-  onLogout?: () => void;
-  onProfileEdit?: () => void;
-}
-
 interface Props {
   message: string;
   subMessage?: string;
   buttonText?: string;
   onButtonClick?: () => void;
-  navbarProps?: NavbarProps;
 }
 
-export default function SuccessScreen({ message, subMessage, buttonText, onButtonClick, navbarProps }: Props) {
+export default function SuccessScreen({ message, subMessage, buttonText, onButtonClick }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -149,15 +141,6 @@ export default function SuccessScreen({ message, subMessage, buttonText, onButto
       `}</style>
     </div>
   );
-
-  if (navbarProps) {
-    return (
-      <div className="min-h-screen bg-surface flex flex-col">
-        <Navbar {...navbarProps} />
-        {content}
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-surface flex flex-col items-center justify-center">

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
 import MoodRating from "../../components/ui/MoodRating";
@@ -23,7 +22,7 @@ interface Survey {
 export default function SurveyResponsePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { userProfile, signOut, user } = useAuthStore();
+  const { user } = useAuthStore();
 
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [answers, setAnswers] = useState<Record<number, number | string>>({});
@@ -88,13 +87,6 @@ export default function SurveyResponsePage() {
     item.isStar ? (answers[i] as number) > 0 : true
   );
 
-  const navbarProps = {
-    userName: userProfile?.name,
-    onLogout: signOut,
-    onHome: () => navigate("/home"),
-    onProfileEdit: () => navigate("/member/setup"),
-  };
-
   if (!survey) {
     return (
       <LoadingScreen />
@@ -103,20 +95,15 @@ export default function SurveyResponsePage() {
 
   if (survey.status === "closed") {
     return (
-      <div className="min-h-screen bg-surface flex flex-col">
-        <Navbar {...navbarProps} />
         <div className="flex flex-col items-center justify-center flex-1 gap-3 p-6">
           <p className="text-4xl">🔒</p>
           <p className="text-emphasis font-medium text-fg">종료된 설문입니다</p>
         </div>
-      </div>
     );
   }
 
   if (existingResponseId && !isEditing) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col">
-        <Navbar {...navbarProps} />
         <div className="flex flex-col items-center justify-center flex-1 gap-3 p-6">
           <p className="text-4xl">✅</p>
           <p className="text-emphasis font-medium text-fg">이미 참여한 설문입니다</p>
@@ -127,7 +114,6 @@ export default function SurveyResponsePage() {
             응답 수정하기
           </button>
         </div>
-      </div>
     );
   }
 
@@ -137,16 +123,12 @@ export default function SurveyResponsePage() {
         message={isEditing ? "응답이 수정되었습니다" : "참여해주셔서 감사합니다"}
         buttonText="홈으로 돌아가기"
         onButtonClick={() => navigate("/home")}
-        navbarProps={navbarProps}
       />
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar {...navbarProps} />
-
-      <PageContainer width="default">
+    <PageContainer width="default">
 
           <div>
             <h1 className="text-heading font-medium text-fg-strong">{survey.title}</h1>
@@ -183,7 +165,6 @@ export default function SurveyResponsePage() {
             {isEditing ? "수정 완료" : "제출하기"}
           </Button>
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

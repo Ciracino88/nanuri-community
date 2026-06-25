@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Lightbox from "../../components/ui/Lightbox";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import PageContainer from "../../components/PageContainer";
 import Button from "../../components/ui/Button";
 import ImageCarousel from "../../components/ui/ImageCarousel";
 import SuccessScreen from "../../components/SuccessScreen";
 import LoadingScreen from "../../components/LoadingScreen";
-import { useAuthStore } from "../../store/authStore";
 import { useFormSubmit } from "../../hooks/useFormSubmit";
 import { supabase } from "../../lib/supabase";
 import { generateNickname } from "../../lib/generateNickname";
@@ -34,7 +32,6 @@ interface VoteResponse {
 export default function VoteResponsePage() {
   const { candidateId } = useParams<{ candidateId: string }>();
   const navigate = useNavigate();
-  const { userProfile, signOut } = useAuthStore();
 
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [currentImage, setCurrentImage] = useState(0);
@@ -130,12 +127,6 @@ export default function VoteResponsePage() {
     });
   };
 
-  const navbarProps = {
-    userName: userProfile?.name,
-    onLogout: signOut,
-    onProfileEdit: () => navigate("/member/setup"),
-  };
-
   if (!candidate) {
     return <LoadingScreen />;
   }
@@ -146,16 +137,12 @@ export default function VoteResponsePage() {
         message="메뉴 선택 완료!"
         buttonText="목록으로 돌아가기"
         onButtonClick={() => navigate("/vote")}
-        navbarProps={navbarProps}
       />
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <Navbar {...navbarProps} />
-
-      <PageContainer width="default">
+    <PageContainer width="default">
 
         <div className="flex items-center gap-3">
           <button onClick={() => navigate("/vote")} className="text-fg-faint hover:text-fg-muted transition">
@@ -278,7 +265,6 @@ export default function VoteResponsePage() {
           </div>
         )}
 
-      </PageContainer>
-    </div>
+    </PageContainer>
   );
 }

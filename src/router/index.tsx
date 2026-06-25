@@ -77,11 +77,10 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/survey/:id",
-    element: <SurveyResponsePage />,
-  },
-  {
-    path: "/vote/candidate/:candidateId",
-    element: <VoteResponsePage />,
+    element: <AppShell />,
+    children: [
+      { path: "/survey/:id", element: <SurveyResponsePage /> },
+      { path: "/vote/candidate/:candidateId", element: <VoteResponsePage /> },
+    ],
   },
 ]);
