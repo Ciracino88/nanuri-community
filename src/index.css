@@ -136,6 +136,14 @@ html, body, #root {
   overflow-x: hidden;
 }
 
+/* #root가 뷰포트 높이를 채우게 해, Layout 밖(게이트·로그인·초기 로딩)에서도
+   flex-1 콘텐츠(로딩 스크린 등)가 중앙 정렬되도록 함 */
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
 /* 전역 다크 배경 (앱 캔버스). 페이지·컴포넌트는 배경을 따로 지정하지 않음 */
 body {
   background-color: #0f1117;
