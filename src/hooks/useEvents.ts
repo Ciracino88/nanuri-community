@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 import { totalDuration } from "../lib/eventTime";
 import type { EventRecord, Segment, Evaluation } from "../types/event";
 
-const EVENT_COLUMNS = "id, title, event_date, start_time, place_name, image_url, emoji, description, details, results_public";
+const EVENT_COLUMNS = "id, title, event_date, start_time, place_name, image_url, banner_url, emoji, description, details, results_public";
 
 // ── 쿼리 키 ──────────────────────────────────────────────
 export const eventKeys = {

@@ -12,6 +12,7 @@ export interface EventRecord {
   start_time: string | null;
   place_name: string | null;
   image_url: string | null;
+  banner_url: string | null;
   emoji: string | null;
   description: string | null;
   details: EventDetail[];

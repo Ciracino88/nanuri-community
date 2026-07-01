@@ -30,6 +30,7 @@ interface AdminRowEvent {
   event_date: string;
   place_name: string | null;
   image_url: string | null;
+  banner_url: string | null;
   segmentCount: number;
   _color: string;
   _status: EventStatus;
@@ -40,6 +41,7 @@ function AdminEventRow({ event, index }: { event: AdminRowEvent; index: number }
   const isDone = event._status === "done";
   const color = event._color;
   const meta = STATUS_META[event._status];
+  const thumb = event.banner_url ?? event.image_url;
 
   return (
     <motion.button
@@ -53,9 +55,9 @@ function AdminEventRow({ event, index }: { event: AdminRowEvent; index: number }
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, type: "spring", stiffness: 360, damping: 30 }}
     >
-      {event.image_url ? (
+      {thumb ? (
         <img
-          src={event.image_url}
+          src={thumb}
           alt=""
           className="rounded-xl object-cover shrink-0"
           style={{

@@ -51,9 +51,11 @@ export default function EventBuilderPage() {
   const [location, setLocation] = useState("");
   const [fields, setFields] = useState<CustomField[]>([]);
   const [keepImageUrl, setKeepImageUrl] = useState<string | null>(null);
+  const [keepBannerUrl, setKeepBannerUrl] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const { receiptFile: posterFile, receiptPreview: posterPreview, handleReceiptChange: handlePoster, reset: resetPoster } = useReceiptUpload();
+  const { receiptFile: bannerFile, receiptPreview: bannerPreview, handleReceiptChange: handleBanner, reset: resetBanner } = useReceiptUpload();
 
   // 편집 모드: 기존 행사 값으로 한 번만 프리필
   useEffect(() => {
@@ -77,15 +79,21 @@ export default function EventBuilderPage() {
       .filter((f): f is CustomField => f !== null);
     setFields(restored);
     setKeepImageUrl(ev.image_url ?? null);
+    setKeepBannerUrl(ev.banner_url ?? null);
   }, [existing]);
 
   const shownPoster = posterPreview || keepImageUrl;
+  const shownBanner = bannerPreview || keepBannerUrl;
   const addable = CUSTOM_FIELD_OPTIONS.filter((o) => !fields.find((f) => f.key === o.key));
   const canSave = !!title.trim() && !!date && !!location.trim();
 
   const removePoster = () => {
     resetPoster();
     setKeepImageUrl(null);
+  };
+  const removeBanner = () => {
+    resetBanner();
+    setKeepBannerUrl(null);
   };
 
   const addField = (opt: (typeof CUSTOM_FIELD_OPTIONS)[number]) => {
@@ -104,6 +112,8 @@ export default function EventBuilderPage() {
     try {
       let imageUrl: string | null = keepImageUrl;
       if (posterFile) imageUrl = await uploadReceipt(posterFile, "events");
+      let bannerUrl: string | null = keepBannerUrl;
+      if (bannerFile) bannerUrl = await uploadReceipt(bannerFile, "events");
 
       const details = fields.filter((f) => f.value.trim()).map((f) => ({ label: f.label, value: f.value.trim() }));
 
@@ -116,12 +126,15 @@ export default function EventBuilderPage() {
         start_time: time || null,
         place_name: location.trim(),
         image_url: imageUrl,
+        banner_url: bannerUrl,
         details,
       };
 
       if (editing) {
-        const oldUrl = existing?.event?.image_url ?? null;
-        if (oldUrl && oldUrl !== imageUrl) await deleteImage(oldUrl);
+        const oldPoster = existing?.event?.image_url ?? null;
+        const oldBanner = existing?.event?.banner_url ?? null;
+        if (oldPoster && oldPoster !== imageUrl) await deleteImage(oldPoster);
+        if (oldBanner && oldBanner !== bannerUrl) await deleteImage(oldBanner);
         const { error } = await supabase.from("events").update(payload).eq("id", id);
         if (error) throw error;
         queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) });
@@ -216,9 +229,32 @@ export default function EventBuilderPage() {
           </div>
         </div>
 
+        {/* 배너 (상세 헤더) */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>배너 (상세 헤더)</label>
+          {shownBanner ? (
+            <div className="relative">
+              <label className="block cursor-pointer">
+                <img src={shownBanner} alt="배너 미리보기" className="w-full object-cover rounded-xl" style={{ height: 140, border: "1px solid rgba(255,255,255,0.1)" }} />
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBanner(f); }} />
+              </label>
+              <button type="button" onClick={removeBanner} aria-label="배너 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(0,0,0,0.55)", color: "#fff" }}>
+                <Trash2 size={15} />
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center gap-1.5 w-full py-7 rounded-xl cursor-pointer" style={{ border: "1.5px dashed rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.03)" }}>
+              <Plus size={20} color="#4a5568" />
+              <p className="text-xs font-semibold" style={{ color: "#6b7785" }}>배너 업로드 (가로형)</p>
+              <p className="text-[11px]" style={{ color: "#4a5568" }}>없으면 대표 아이콘으로 표시돼요</p>
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBanner(f); }} />
+            </label>
+          )}
+        </div>
+
         {/* 포스터 */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>포스터</label>
+          <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>포스터 (원본 비율)</label>
           {shownPoster ? (
             <div className="relative">
               <label className="block cursor-pointer">

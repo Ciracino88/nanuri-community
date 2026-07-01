@@ -23,6 +23,7 @@ function EventCard({ event, index, onOpen }: { event: CardEvent; index: number; 
   const meta = STATUS_META[event._status];
   const isDone = event._status === "done";
   const color = event._color;
+  const cardImg = event.banner_url ?? event.image_url;
 
   return (
     <motion.div
@@ -40,9 +41,9 @@ function EventCard({ event, index, onOpen }: { event: CardEvent; index: number; 
         onClick={onOpen}
       >
         <div className="relative w-full overflow-hidden" style={{ height: 90 }}>
-          {event.image_url ? (
+          {cardImg ? (
             <img
-              src={event.image_url}
+              src={cardImg}
               alt=""
               className="w-full h-full object-cover"
               style={{ filter: isDone ? "grayscale(70%) brightness(0.4)" : "brightness(0.5)" }}

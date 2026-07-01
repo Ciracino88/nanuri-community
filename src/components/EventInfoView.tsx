@@ -28,11 +28,11 @@ export default function EventInfoView({ event, backTo, footer }: { event: EventR
 
   return (
     <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
-      {/* 포스터 헤더 */}
+      {/* 배너 헤더 */}
       <div className="relative w-full overflow-hidden shrink-0" style={{ height: 260 }}>
-        {event.image_url ? (
+        {event.banner_url ? (
           <img
-            src={event.image_url}
+            src={event.banner_url}
             alt={event.title}
             className="w-full h-full object-cover"
             style={{ filter: isDone ? "grayscale(60%) brightness(0.5)" : "brightness(0.55)" }}
@@ -98,7 +98,10 @@ export default function EventInfoView({ event, backTo, footer }: { event: EventR
           </div>
         )}
 
-        {!event.image_url && (
+        {/* 포스터 (원본 비율) */}
+        {event.image_url ? (
+          <img src={event.image_url} alt={`${event.title} 포스터`} className="w-full h-auto rounded-2xl" style={{ border: `1px solid ${color}20` }} />
+        ) : (
           <div className="rounded-xl px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px dashed rgba(255,255,255,0.1)" }}>
             <ImageIcon size={16} color="#4a5568" />
             <p className="text-xs" style={{ color: "#4a5568" }}>공식 포스터가 등록되면 여기에 표시돼요</p>
