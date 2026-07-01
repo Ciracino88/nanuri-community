@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronLeft, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
+import BackButton from "../components/BackButton";
 import toast from "react-hot-toast";
 import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../store/authStore";
@@ -103,16 +104,7 @@ export default function MemberProfileSetupPage() {
 
       {/* 헤더 */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-        <motion.button
-          type="button"
-          whileTap={{ scale: 0.88 }}
-          onClick={() => navigate(-1)}
-          className="w-9 h-9 rounded-xl flex items-center justify-center"
-          style={{ background: "rgba(255,255,255,0.07)" }}
-          aria-label="뒤로"
-        >
-          <ChevronLeft size={18} color="#fff" />
-        </motion.button>
+        <BackButton onClick={() => navigate(-1)} />
         <h1 className="text-base font-extrabold text-white flex-1">프로필 편집</h1>
         <div className="w-9" />
       </div>

@@ -1,8 +1,9 @@
 import { useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronLeft, CalendarDays, Clock, MapPin, Users, DollarSign, Star, Pencil, Plus, ChevronDown, Trash2, type LucideIcon } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Users, DollarSign, Star, Pencil, Plus, ChevronDown, Trash2, type LucideIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import BackButton from "../../components/BackButton";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { supabase } from "../../lib/supabase";
@@ -96,15 +97,7 @@ export default function EventBuilderPage() {
     <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
       {/* 헤더 */}
       <div className="flex items-center gap-3 px-4 pt-5 pb-4 sticky top-0 z-10" style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <motion.button
-          className="flex items-center justify-center rounded-full"
-          style={{ width: 36, height: 36, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-          whileTap={{ scale: 0.88 }}
-          onClick={() => navigate(-1)}
-          aria-label="뒤로"
-        >
-          <ChevronLeft size={18} color="#f0f2f8" />
-        </motion.button>
+        <BackButton onClick={() => navigate(-1)} />
         <h1 className="flex-1 text-base font-black" style={{ color: "#f0f2f8" }}>행사 추가</h1>
         <motion.button
           className="px-4 py-2 rounded-xl text-sm font-black"

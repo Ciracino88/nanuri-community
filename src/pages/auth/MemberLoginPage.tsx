@@ -1,6 +1,6 @@
-import { useNavigate, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ChevronLeft } from "lucide-react";
+import BackButton from "../../components/BackButton";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../store/authStore";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -26,7 +26,6 @@ function GoogleLogo() {
 }
 
 export default function MemberLoginPage() {
-  const navigate = useNavigate();
   const { user, isAnonymous, isLoading } = useAuthStore();
 
   if (isLoading) return <LoadingScreen />;
@@ -43,15 +42,7 @@ export default function MemberLoginPage() {
     <div className="min-h-dvh flex flex-col">
       {/* 뒤로 */}
       <div className="px-5 pt-6">
-        <motion.button
-          className="flex items-center justify-center rounded-full"
-          style={{ width: 36, height: 36, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-          whileTap={{ scale: 0.88 }}
-          onClick={() => navigate("/")}
-          aria-label="뒤로"
-        >
-          <ChevronLeft size={18} color="#f0f2f8" />
-        </motion.button>
+        <BackButton to="/" />
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-8 gap-10">
