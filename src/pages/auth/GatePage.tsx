@@ -1,124 +1,82 @@
 import { useNavigate, Navigate } from "react-router-dom";
-import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { motion } from "motion/react";
+import { Star, Users } from "lucide-react";
+import toast from "react-hot-toast";
 import { useAuthStore } from "../../store/authStore";
 import LoadingScreen from "../../components/LoadingScreen";
 
-interface GuestCard {
-  icon: string;
-  title: string;
-  description: string;
-  tint: string;
-  color: string;
-  action: () => void;
-}
+const BLOBS = [
+  { w: 300, left: "-10%", top: "5%", color: "78,205,196", dur: 6, delay: 0 },
+  { w: 260, right: "-5%", top: "30%", color: "199,125,255", dur: 7, delay: 1 },
+  { w: 220, left: "20%", bottom: "10%", color: "255,179,71", dur: 8, delay: 2 },
+];
 
 export default function GatePage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [guestMode, setGuestMode] = useState(false);
   const { user, isAnonymous, isLoading } = useAuthStore();
 
   if (isLoading) return <LoadingScreen />;
   if (user && !isAnonymous) return <Navigate to="/home" replace />;
 
-  const handleBillCard = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInAnonymously();
-    if (!error) navigate("/guest/form");
-    setLoading(false);
-  };
-
-  const GUEST_CARDS: GuestCard[] = [
-    {
-      icon: "ti-credit-card",
-      title: "비용 청구서",
-      description: "영수증 올리고 송금받기",
-      tint: "bg-info-subtle",
-      color: "text-info",
-      action: handleBillCard,
-    },
-  ];
-
-  if (guestMode) {
-    return (
-      <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-        <div className="w-full max-w-sm flex flex-col gap-6 animate-[fadeUp_0.4s_ease_both]">
-
-          <div className="flex flex-col gap-1.5">
-            <p className="text-caption text-fg-faint">외부 방문자</p>
-            <h2 className="text-title font-medium text-fg-strong">무엇을 도와드릴까요?</h2>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {GUEST_CARDS.map((card) => (
-              <button
-                key={card.title}
-                onClick={card.action}
-                disabled={loading}
-                className="bg-card border border-line-soft rounded-2xl p-4 text-left flex flex-col gap-3 hover:border-line active:scale-95 transition disabled:opacity-50"
-              >
-                <div className={`w-11 h-11 rounded-xl ${card.tint} flex items-center justify-center`}>
-                  <i className={`ti ${card.icon} text-2xl ${card.color}`} aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="text-body font-medium text-fg-strong">{card.title}</p>
-                  <p className="text-caption text-fg-faint mt-0.5">{card.description}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => setGuestMode(false)}
-            className="text-body text-fg-faint hover:text-fg transition text-center"
-          >
-            ← 돌아가기
-          </button>
-
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-      <div className="w-full max-w-sm flex flex-col items-center gap-8 animate-[fadeUp_0.5s_ease_both]">
+    <div className="min-h-dvh flex flex-col overflow-hidden relative">
+      {/* Ambient blobs */}
+      <div className="absolute inset-0 pointer-events-none">
+        {BLOBS.map((b, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: b.w, height: b.w,
+              left: b.left, right: b.right, top: b.top, bottom: b.bottom,
+              background: `radial-gradient(circle, rgba(${b.color},0.1) 0%, transparent 70%)`,
+              filter: "blur(48px)",
+            }}
+            animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.85, 0.4] }}
+            transition={{ duration: b.dur, repeat: Infinity, ease: "easeInOut", delay: b.delay }}
+          />
+        ))}
+      </div>
 
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-card border border-line-soft flex items-center justify-center animate-[float_3s_ease-in-out_infinite]">
-            <i className="ti ti-seeding text-3xl text-fg-muted" aria-hidden="true" />
-          </div>
-          <div>
-            <p className="text-body text-fg-faint mb-1.5">나누리 청년부</p>
-            <h1 className="text-display font-medium text-fg-strong mb-2.5 leading-snug">
-              우리들의 작은<br />커뮤니티 공간
-            </h1>
-            <p className="text-body text-fg-faint leading-relaxed">
-              비용 청구부터 설문, 찬양팀 일정까지<br />나누리 활동에 필요한 것들을 모았어요
-            </p>
-          </div>
-        </div>
+      <div className="flex-1 flex flex-col items-center justify-center px-8 gap-12 relative">
+        {/* 로고 */}
+        <motion.div
+          className="flex flex-col items-center gap-1"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 260, damping: 24 }}
+        >
+          <h1 className="text-3xl font-black" style={{ color: "#f0f2f8", letterSpacing: "-0.02em" }}>나누리</h1>
+          <p className="text-xs font-semibold" style={{ color: "#4a5568", letterSpacing: "0.2em" }}>YOUTH COMMUNITY</p>
+        </motion.div>
 
-        <div className="w-full flex flex-col gap-3">
-          <button
+        {/* 버튼 */}
+        <motion.div
+          className="w-full flex flex-col gap-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, type: "spring", stiffness: 280, damping: 26 }}
+        >
+          <motion.button
+            className="w-full py-4 rounded-2xl flex items-center justify-center gap-2"
+            style={{ background: "linear-gradient(135deg, #4ECDC4, #4ECDC499)", boxShadow: "0 8px 28px rgba(78,205,196,0.3)" }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => navigate("/member/login")}
-            className="w-full py-3.5 px-4 rounded-xl bg-inverse text-emphasis font-medium text-white hover:opacity-90 transition flex items-center justify-center gap-2"
           >
-            <i className="ti ti-user text-base" aria-hidden="true" />
-            나누리 멤버입니다
-          </button>
-          <button
-            onClick={() => setGuestMode(true)}
-            className="w-full py-3.5 px-4 rounded-xl bg-card border border-line text-emphasis font-medium text-fg hover:bg-surface transition flex items-center justify-center gap-2"
+            <Star size={17} color="#0f1117" strokeWidth={2.5} />
+            <span className="text-sm font-black" style={{ color: "#0f1117" }}>나누리 멤버입니다</span>
+          </motion.button>
+
+          <motion.button
+            className="w-full py-4 rounded-2xl flex items-center justify-center gap-2"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => toast("외부 사용자 기능은 준비 중이에요", { icon: "🚧" })}
           >
-            <i className="ti ti-user-question text-base" aria-hidden="true" />
-            외부 방문자입니다
-          </button>
-        </div>
-
-        <p className="text-caption text-fg-faint">나누리 회계팀</p>
-
+            <Users size={17} color="#8892a0" strokeWidth={2} />
+            <span className="text-sm font-bold" style={{ color: "#8892a0" }}>외부 사용자입니다</span>
+          </motion.button>
+        </motion.div>
       </div>
     </div>
   );
