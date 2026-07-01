@@ -13,7 +13,9 @@ export default function HomePage() {
         🏠
       </motion.div>
       <p className="font-bold" style={{ color: "#f0f2f8" }}>홈</p>
-      <p className="text-sm" style={{ color: "#8892a0" }}>준비 중이에요</p>
+      <p className="text-sm" style={{ color: "#8892a0" }}>
+        디자인 작업 중입니다.
+      </p>
     </div>
   );
 }
