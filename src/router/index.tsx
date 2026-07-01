@@ -6,6 +6,7 @@ import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Layout from "../components/Layout";
 import HomePage from "../pages/HomePage";
+import MemberBillFormPage from "../pages/bill/MemberBillFormPage";
 import ProfilePage from "../pages/ProfilePage";
 import WorshipSchedulePage from "../pages/worship/WorshipSchedulePage";
 import GalleryPage from "../pages/GalleryPage";
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: "/home", element: <HomePage /> },
+      { path: "/member/bill", element: <MemberBillFormPage /> },
       { path: "/events", element: <EventListPage /> },
       { path: "/event/:id", element: <EventInfoPage /> },
       { path: "/profile", element: <ProfilePage /> },

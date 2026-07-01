@@ -1,31 +1,47 @@
+import { useState, type CSSProperties } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { uploadReceipt } from "../../lib/uploadReceipt";
+import { motion } from "motion/react";
+import { CreditCard, Plus, Trash2, ChevronRight } from "lucide-react";
+import toast from "react-hot-toast";
+import BackButton from "../../components/BackButton";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
-import { useAuthStore } from "../../store/authStore";
-import { useState } from "react";
-import { useFormSubmit } from "../../hooks/useFormSubmit";
-import Input from "../../components/ui/Input";
-import FileInput from "../../components/ui/FileInput";
-import Button from "../../components/ui/Button";
-import { CreditCardIcon } from "@heroicons/react/outline";
-import PageContainer from "../../components/PageContainer";
-import PageHero from "../../components/PageHero";
-import SuccessScreen from "../../components/SuccessScreen";
+import { uploadReceipt } from "../../lib/uploadReceipt";
 import { supabase } from "../../lib/supabase";
+import { useAuthStore } from "../../store/authStore";
+import { TAB_COLORS } from "../../constants/theme";
+
+const ACCENT = TAB_COLORS.home;
+
+const inputStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#f0f2f8",
+  borderRadius: 12,
+  padding: "12px 14px",
+  fontSize: 14,
+  width: "100%",
+  outline: "none",
+};
 
 interface FormValues {
   title: string;
   amount: number;
 }
 
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return <span className="text-xs font-semibold" style={{ color: "#6b7785" }}>{children}</span>;
+}
+
 export default function MemberBillFormPage() {
   const navigate = useNavigate();
   const { user, userProfile } = useAuthStore();
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>();
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
   const { receiptFile, receiptPreview, handleReceiptChange, reset: resetReceipt } = useReceiptUpload();
   const [receiptError, setReceiptError] = useState<string | null>(null);
-  const { submitting, success, error, submit, reset: resetForm } = useFormSubmit();
+  const [submitting, setSubmitting] = useState(false);
+
+  const hasAccount = !!(userProfile?.bank_name && userProfile?.account_number);
 
   const onSubmit = async (values: FormValues) => {
     if (!receiptFile) {
@@ -33,133 +49,134 @@ export default function MemberBillFormPage() {
       return;
     }
     setReceiptError(null);
-    await submit(async () => {
-      if (!user) throw new Error("로그인이 필요합니다");
-
+    if (!user) return;
+    setSubmitting(true);
+    try {
       const receiptUrl = await uploadReceipt(receiptFile);
-
-      const { error: billError } = await supabase.from("bills").insert({
+      const { error } = await supabase.from("bills").insert({
         user_id: user.id,
-        title: values.title,
+        title: values.title.trim(),
         amount: Number(values.amount),
         receipt_url: receiptUrl,
         submitter_name: userProfile?.name,
         account_number: userProfile?.account_number,
         bank_name: userProfile?.bank_name,
       });
-
-      if (billError) throw billError;
-    });
+      if (error) throw error;
+      toast.success("청구서를 제출했어요", { icon: "🧾" });
+      navigate("/home");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "제출에 실패했어요");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  if (success) {
-    return (
-      <SuccessScreen
-        message="청구서가 제출되었습니다"
-        subMessage="담당자 확인 후 처리될 예정이에요"
-        buttonText="메인 페이지로 돌아가기"
-        onButtonClick={() => {
-          resetForm();
-          setReceiptError(null);
-          reset();
-          resetReceipt();
-        }}
-      />
-    );
-  }
-
-  const hasAccount = !!(userProfile?.bank_name && userProfile?.account_number);
-
-  if (!hasAccount) {
-    return (
-      <PageContainer width="narrow">
-          <PageHero Icon={CreditCardIcon} title="비용 청구서" desc={"영수증과 함께\n제출해주세요"} />
-
-          <div className="bg-warning-subtle border border-warning-soft rounded-xl px-4 py-3.5 flex items-center gap-3 mb-5" style={{ animation: "fadeUp 0.45s ease 0.1s both" }}>
-            <i className="ti ti-alert-circle text-warning text-lg shrink-0" aria-hidden="true" />
-            <p className="text-body text-warning">청구서를 제출하려면 입금받을 계좌 정보가 필요해요</p>
-          </div>
-
-          <div className="flex flex-col gap-3" style={{ animation: "fadeUp 0.45s ease 0.18s both" }}>
-            <button
-              onClick={() => navigate("/member/setup")}
-              className="w-full bg-card border border-line-soft rounded-xl px-4 py-4 flex items-center justify-between hover:border-line transition text-left"
-            >
-              <div className="flex flex-col gap-0.5">
-                <p className="text-body font-medium text-fg-strong">프로필에 계좌 등록하기</p>
-                <p className="text-caption text-fg-faint">한 번 등록하면 다음부터 자동으로 입력돼요</p>
-              </div>
-              <i className="ti ti-chevron-right text-fg-faint text-lg shrink-0" aria-hidden="true" />
-            </button>
-
-            <button
-              onClick={() => navigate("/guest/form")}
-              className="w-full bg-card border border-line-soft rounded-xl px-4 py-4 flex items-center justify-between hover:border-line transition text-left"
-            >
-              <div className="flex flex-col gap-0.5">
-                <p className="text-body font-medium text-fg-strong">이번만 계좌 직접 입력하기</p>
-                <p className="text-caption text-fg-faint">등록 없이 이번 청구서에만 계좌를 입력해요</p>
-              </div>
-              <i className="ti ti-chevron-right text-fg-faint text-lg shrink-0" aria-hidden="true" />
-            </button>
-          </div>
-        </PageContainer>
-    );
-  }
-
   return (
-    <PageContainer width="narrow">
-        <PageHero
-          Icon={CreditCardIcon}
-          title="비용 청구서"
-          desc={userProfile ? `${userProfile.name}님\n영수증과 함께 제출해주세요` : "영수증과 함께\n제출해주세요"}
-        />
+    <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
+      {/* 헤더 */}
+      <div className="flex items-center gap-3 px-4 pt-5 pb-4 sticky top-0 z-10" style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <BackButton to="/home" />
+        <h1 className="flex-1 text-base font-black" style={{ color: "#f0f2f8" }}>청구서 작성</h1>
+      </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" style={{ animation: "fadeUp 0.45s ease 0.12s both" }}>
-          <div className="flex items-center justify-between bg-surface rounded-lg px-4 py-3">
-            <div>
-              <p className="text-caption text-fg-faint">입금 계좌</p>
-              <p className="text-body font-medium text-fg">
+      {!hasAccount ? (
+        // 계좌 정보 없음 안내
+        <div className="px-4 pt-6 flex flex-col gap-4">
+          <div className="flex flex-col items-center gap-3 py-6">
+            <div className="w-16 h-16 rounded-3xl flex items-center justify-center" style={{ background: `${ACCENT}18` }}>
+              <CreditCard size={28} color={ACCENT} />
+            </div>
+            <p className="text-sm text-center leading-relaxed" style={{ color: "#8892a0" }}>
+              청구서를 제출하려면<br />입금받을 계좌 정보가 필요해요
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/member/setup")}
+            className="w-full flex items-center gap-3 p-4 rounded-2xl text-left active:scale-[0.99] transition"
+            style={{ background: `${ACCENT}12`, border: `1px solid ${ACCENT}30` }}
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>프로필에 계좌 등록하기</p>
+              <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>한 번 등록하면 다음부터 자동으로 입력돼요</p>
+            </div>
+            <ChevronRight size={18} color={ACCENT} />
+          </button>
+        </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="px-4 pt-5 flex flex-col gap-5"
+          style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}
+        >
+          {/* 입금 계좌 */}
+          <div className="flex items-center justify-between rounded-2xl px-4 py-3.5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="min-w-0">
+              <p className="text-xs" style={{ color: "#6b7785" }}>입금 계좌</p>
+              <p className="text-sm font-bold mt-0.5 truncate" style={{ color: "#f0f2f8" }}>
                 {userProfile?.bank_name} {userProfile?.account_number}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => navigate("/member/setup")}
-              className="text-caption text-info hover:underline transition shrink-0 ml-3"
-            >
-              수정 →
+            <button type="button" onClick={() => navigate("/member/setup")} className="text-xs font-bold shrink-0 ml-3" style={{ color: ACCENT }}>
+              수정
             </button>
           </div>
 
-          <Input
-            label="제목"
-            placeholder="예) 주일 행사 다과 구입"
-            error={errors.title?.message}
-            {...register("title", { required: "제목을 입력해주세요" })}
-          />
+          {/* 제목 */}
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>제목</FieldLabel>
+            <input style={inputStyle} placeholder="예) 주일 행사 다과 구입" {...register("title", { required: "제목을 입력해주세요" })} />
+            {errors.title && <p className="text-xs" style={{ color: "#FF6B6B" }}>{errors.title.message}</p>}
+          </div>
 
-          <Input
-            label="금액"
-            type="number"
-            placeholder="0"
-            inputMode="numeric"
-            error={errors.amount?.message}
-            {...register("amount", { required: "금액을 입력해주세요", min: { value: 1, message: "금액을 입력해주세요" } })}
-          />
+          {/* 금액 */}
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>금액</FieldLabel>
+            <input
+              type="number"
+              inputMode="numeric"
+              style={inputStyle}
+              placeholder="0"
+              {...register("amount", { required: "금액을 입력해주세요", min: { value: 1, message: "금액을 입력해주세요" } })}
+            />
+            {errors.amount && <p className="text-xs" style={{ color: "#FF6B6B" }}>{errors.amount.message}</p>}
+          </div>
 
-          <FileInput
-            label="영수증"
-            preview={receiptPreview}
-            onChange={handleReceiptChange}
-          />
+          {/* 영수증 */}
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>영수증</FieldLabel>
+            {receiptPreview ? (
+              <div className="relative">
+                <label className="block cursor-pointer">
+                  <img src={receiptPreview} alt="영수증 미리보기" className="w-full h-auto rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { handleReceiptChange(f); setReceiptError(null); } }} />
+                </label>
+                <button type="button" onClick={resetReceipt} aria-label="영수증 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(0,0,0,0.55)", color: "#fff" }}>
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center gap-1.5 w-full py-7 rounded-xl cursor-pointer" style={{ border: "1.5px dashed rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.03)" }}>
+                <Plus size={20} color="#4a5568" />
+                <p className="text-xs font-semibold" style={{ color: "#6b7785" }}>영수증 업로드</p>
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { handleReceiptChange(f); setReceiptError(null); } }} />
+              </label>
+            )}
+            {receiptError && <p className="text-xs" style={{ color: "#FF6B6B" }}>{receiptError}</p>}
+          </div>
 
-          {(receiptError || error) && <p className="text-body text-danger text-center">{receiptError ?? error}</p>}
-
-          <Button type="submit" loading={submitting}>
-            청구서 제출
-          </Button>
+          {/* 제출 */}
+          <motion.button
+            type="submit"
+            disabled={submitting}
+            whileTap={{ scale: 0.97 }}
+            className="w-full py-4 rounded-2xl font-black text-sm mt-1 disabled:opacity-60"
+            style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 6px 24px ${ACCENT}44` }}
+          >
+            {submitting ? "제출 중..." : "청구서 제출"}
+          </motion.button>
         </form>
-      </PageContainer>
+      )}
+    </div>
   );
 }
