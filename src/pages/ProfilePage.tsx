@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { Image, CalendarDays, Star, Pencil, LogOut } from "lucide-react";
 import toast from "react-hot-toast";
+import { confirmDialog } from "../components/ConfirmDialog";
 import { useAuthStore } from "../store/authStore";
 
 const ACCENT = "#74C7FF";
@@ -110,7 +111,13 @@ export default function ProfilePage() {
           style={{ background: "rgba(255,107,107,0.12)", color: "#FF6B6B", border: "1px solid rgba(255,107,107,0.2)" }}
           whileTap={{ scale: 0.96 }}
           onClick={async () => {
-            if (!confirm("로그아웃할까요?")) return;
+            const ok = await confirmDialog({
+              title: "로그아웃할까요?",
+              message: "다시 로그인하려면 구글 계정 인증이 필요해요.",
+              confirmLabel: "로그아웃",
+              danger: true,
+            });
+            if (!ok) return;
             await signOut();
             navigate("/");
           }}

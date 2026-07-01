@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { router } from "./router";
 import { useAuthStore } from "./store/authStore";
+import { ConfirmHost } from "./components/ConfirmDialog";
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ function Root() {
   return (
     <>
       <RouterProvider router={router} />
+      <ConfirmHost />
       <Toaster
         position="top-center"
         gutter={8}
