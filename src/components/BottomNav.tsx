@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { motion } from "motion/react";
 import { CreatureIcon, type CreatureKind } from "./nav/creatures";
+import { TAB_COLORS } from "../constants/theme";
 
 const TABS: { to: string; label: string; kind: CreatureKind; color: string }[] = [
-  { to: "/home", label: "홈", kind: "home", color: "#4ECDC4" },
-  { to: "/events", label: "행사", kind: "schedule", color: "#FFB347" },
-  { to: "/gallery", label: "갤러리", kind: "gallery", color: "#C77DFF" },
-  { to: "/worship", label: "찬양팀", kind: "songs", color: "#FF6B6B" },
-  { to: "/profile", label: "내정보", kind: "profile", color: "#74C7FF" },
+  { to: "/home", label: "홈", kind: "home", color: TAB_COLORS.home },
+  { to: "/events", label: "행사", kind: "schedule", color: TAB_COLORS.events },
+  { to: "/gallery", label: "갤러리", kind: "gallery", color: TAB_COLORS.gallery },
+  { to: "/worship", label: "찬양팀", kind: "songs", color: TAB_COLORS.worship },
+  { to: "/profile", label: "내정보", kind: "profile", color: TAB_COLORS.profile },
 ];
 
 export default function BottomNav() {

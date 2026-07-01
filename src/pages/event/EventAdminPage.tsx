@@ -10,6 +10,7 @@ import { deleteImage } from "../../lib/deleteImage";
 import { formatEventDate } from "../../lib/eventTime";
 import { computeEventStatus, EVENT_STATUS_LABEL, type EventStatus } from "../../lib/eventStatus";
 import { useAdminEvents, eventKeys } from "../../hooks/useEvents";
+import { TAB_COLORS } from "../../constants/theme";
 
 const STATUS_STYLE: Record<EventStatus, string> = {
   upcoming: "text-fg-faint bg-surface",
@@ -44,7 +45,7 @@ export default function EventAdminPage() {
       <PageHero Icon={CalendarIcon} title="행사 관리" desc={"행사를 만들고\n순서를 구성하세요"} tint="purple" />
 
       {isLoading ? (
-        <LoadingSpinner />
+        <LoadingSpinner color={TAB_COLORS.events} />
       ) : events.length === 0 ? (
         <div className="bg-card border border-line-soft rounded-xl p-6 text-center text-body text-fg-faint">
           등록된 행사가 없어요

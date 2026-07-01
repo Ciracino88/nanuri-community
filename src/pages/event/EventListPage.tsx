@@ -5,6 +5,7 @@ import PageHero from "../../components/PageHero";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEventList } from "../../hooks/useEvents";
 import { formatEventDate } from "../../lib/eventTime";
+import { TAB_COLORS } from "../../constants/theme";
 
 export default function EventListPage() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function EventListPage() {
       <PageHero Icon={CalendarIcon} title="행사" desc={"일정을 확인하고\n의견을 남겨보세요"} tint="purple" />
 
       {isLoading ? (
-        <LoadingSpinner />
+        <LoadingSpinner color={TAB_COLORS.events} />
       ) : events.length === 0 ? (
         <div className="bg-card border border-line-soft rounded-xl p-6 text-center text-body text-fg-faint">
           예정된 행사가 없어요
