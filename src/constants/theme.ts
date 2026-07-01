@@ -5,4 +5,5 @@ export const TAB_COLORS = {
   gallery: "#C77DFF",
   worship: "#FF6B6B",
   profile: "#74C7FF",
+  admin: "#C77DFF",
 } as const;

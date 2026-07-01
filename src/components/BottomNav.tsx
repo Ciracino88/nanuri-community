@@ -3,16 +3,23 @@ import { NavLink } from "react-router-dom";
 import { motion } from "motion/react";
 import { CreatureIcon, type CreatureKind } from "./nav/creatures";
 import { TAB_COLORS } from "../constants/theme";
+import { useAuthStore } from "../store/authStore";
 
-const TABS: { to: string; label: string; kind: CreatureKind; color: string }[] = [
-  { to: "/home", label: "홈", kind: "home", color: TAB_COLORS.home },
-  { to: "/events", label: "행사", kind: "schedule", color: TAB_COLORS.events },
-  { to: "/gallery", label: "갤러리", kind: "gallery", color: TAB_COLORS.gallery },
-  { to: "/worship", label: "찬양팀", kind: "songs", color: TAB_COLORS.worship },
-  { to: "/profile", label: "내정보", kind: "profile", color: TAB_COLORS.profile },
-];
+type Tab = { to: string; label: string; kind: CreatureKind; color: string };
+
+const HOME: Tab = { to: "/home", label: "홈", kind: "home", color: TAB_COLORS.home };
+const EVENTS: Tab = { to: "/events", label: "행사", kind: "schedule", color: TAB_COLORS.events };
+const GALLERY: Tab = { to: "/gallery", label: "갤러리", kind: "gallery", color: TAB_COLORS.gallery };
+const ADMIN: Tab = { to: "/admin", label: "관리자", kind: "admin", color: TAB_COLORS.admin };
+const WORSHIP: Tab = { to: "/worship", label: "찬양팀", kind: "songs", color: TAB_COLORS.worship };
+const PROFILE: Tab = { to: "/profile", label: "내정보", kind: "profile", color: TAB_COLORS.profile };
 
 export default function BottomNav() {
+  const { userProfile } = useAuthStore();
+  const isAdmin = userProfile?.role === "admin";
+  // 관리자는 갤러리 자리에 관리자 탭
+  const TABS: Tab[] = [HOME, EVENTS, isAdmin ? ADMIN : GALLERY, WORSHIP, PROFILE];
+
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [blink, setBlink] = useState(false);
   const [blinkingTab, setBlinkingTab] = useState<string | null>(null);

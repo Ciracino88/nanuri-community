@@ -20,6 +20,7 @@ import EventDetailPage from "../pages/event/EventDetailPage";
 import EventListPage from "../pages/event/EventListPage";
 import EventTimelinePage from "../pages/event/EventTimelinePage";
 import EventResultsPage from "../pages/event/EventResultsPage";
+import AdminPage from "../pages/AdminPage";
 
 export const router = createBrowserRouter([
   {
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      { path: "/admin", element: <AdminPage /> },
       { path: "/admin/events", element: <EventAdminPage /> },
       { path: "/admin/events/new", element: <EventBuilderPage /> },
       { path: "/admin/events/:id", element: <EventDetailPage /> },

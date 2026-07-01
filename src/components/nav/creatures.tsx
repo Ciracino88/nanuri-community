@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type RefObject } from "react";
 
-export type CreatureKind = "home" | "schedule" | "gallery" | "songs" | "profile";
+export type CreatureKind = "home" | "schedule" | "gallery" | "songs" | "profile" | "admin";
 
 interface EyeBase {
   mousePos: { x: number; y: number } | null;
@@ -152,10 +152,29 @@ function ProfileCreature({ active, mousePos, blink, color }: CreatureProps) {
   );
 }
 
+// 관리자: 톱니(설정) + 눈
+function AdminCreature({ active, mousePos, blink, color }: CreatureProps) {
+  const ref = useRef<SVGSVGElement>(null);
+  const fill = active ? color : "#4a5568";
+  return (
+    <svg ref={ref} viewBox="0 0 40 40" width="40" height="40" fill="none">
+      <path
+        d="M20 4 L22.5 7.5 L26.5 6.5 L28 10.5 L32 11.5 L31.5 15.5 L35 18 L33 21.5 L35 25 L31.5 27 L32 31 L28 32 L26.5 36 L22.5 35 L20 38 L17.5 35 L13.5 36 L12 32 L8 31 L8.5 27 L5 25 L7 21.5 L5 18 L8.5 15.5 L8 11.5 L12 10.5 L13.5 6.5 L17.5 7.5 Z"
+        fill={fill}
+        opacity="0.9"
+      />
+      <circle cx="20" cy="21" r="7" fill="#1a1a2e" />
+      <Eye cx={16} cy={21} r={3.2} pupilR={1.7} mousePos={mousePos} svgRef={ref} blink={blink} color={color} />
+      <Eye cx={24} cy={21} r={3.2} pupilR={1.7} mousePos={mousePos} svgRef={ref} blink={blink} color={color} />
+    </svg>
+  );
+}
+
 export function CreatureIcon({ kind, ...props }: { kind: CreatureKind } & CreatureProps) {
   if (kind === "home") return <HomeCreature {...props} />;
   if (kind === "schedule") return <ScheduleCreature {...props} />;
   if (kind === "gallery") return <GalleryCreature {...props} />;
   if (kind === "songs") return <SongsCreature {...props} />;
+  if (kind === "admin") return <AdminCreature {...props} />;
   return <ProfileCreature {...props} />;
 }
