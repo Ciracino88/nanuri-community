@@ -172,7 +172,7 @@ export default function EventDetailPage() {
     <div className="flex-1 flex flex-col">
       {/* 헤더 */}
       <div className="flex items-center gap-3 px-4 pt-5 pb-3">
-        <BackButton to="/admin/events" />
+        <BackButton to="/admin" />
         <div className="min-w-0 flex-1">
           <h1 className="text-base font-black truncate" style={{ color: "#f0f2f8" }}>{event.title}</h1>
           <p className="text-xs mt-0.5 truncate" style={{ color: "#6b7785" }}>

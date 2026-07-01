@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
-import { CalendarDays, Wallet, Settings, ChevronRight, Plus } from "lucide-react";
+import { CalendarDays, Wallet, Settings, Trash2, Plus } from "lucide-react";
+import toast from "react-hot-toast";
 import LoadingScreen from "../components/LoadingScreen";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { supabase } from "../lib/supabase";
+import { deleteImage } from "../lib/deleteImage";
+import { computeEventStatus, EVENT_STATUS_LABEL, type EventStatus } from "../lib/eventStatus";
+import { useAdminEvents, eventKeys } from "../hooks/useEvents";
 import { TAB_COLORS } from "../constants/theme";
 
 const ACCENT = TAB_COLORS.admin;
@@ -14,24 +21,100 @@ const SUB_TABS = [
 
 type SubTab = (typeof SUB_TABS)[number]["id"];
 
+const STATUS_META: Record<EventStatus, { bg: string; text: string }> = {
+  upcoming: { bg: "rgba(78,205,196,0.15)", text: "#4ECDC4" },
+  live: { bg: "rgba(255,179,71,0.15)", text: "#FFB347" },
+  done: { bg: "rgba(255,255,255,0.07)", text: "#8892a0" },
+};
+
 function EventsAdminSection() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const { data: events = [], isLoading } = useAdminEvents();
+
+  const deleteMutation = useMutation({
+    mutationFn: async ({ id, imageUrl }: { id: string; imageUrl: string | null }) => {
+      if (imageUrl) await deleteImage(imageUrl);
+      const { error } = await supabase.from("events").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: eventKeys.adminList }),
+    onError: () => toast.error("삭제에 실패했어요"),
+  });
+
+  const handleDelete = (id: string, imageUrl: string | null) => {
+    if (!confirm("행사를 삭제할까요? 순서와 평가 데이터도 모두 삭제됩니다.")) return;
+    deleteMutation.mutate({ id, imageUrl });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="px-4 pt-4">
+        <LoadingSpinner color={ACCENT} />
+      </div>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-48 gap-3">
+        <CalendarDays size={32} color="#4a5568" />
+        <p className="text-sm font-semibold" style={{ color: "#4a5568" }}>등록된 행사가 없어요</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="px-4 py-5 flex flex-col gap-3">
-      <button
-        onClick={() => navigate("/admin/events")}
-        className="w-full flex items-center gap-3 p-4 rounded-2xl text-left active:scale-[0.99] transition"
-        style={{ background: `${ACCENT}12`, border: `1px solid ${ACCENT}30` }}
-      >
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}22` }}>
-          <CalendarDays size={20} color={ACCENT} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>행사 관리</p>
-          <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>행사를 만들고 순서를 구성해요</p>
-        </div>
-        <ChevronRight size={18} color="#4a5568" />
-      </button>
+    <div className="px-4 pt-1 pb-24 flex flex-col gap-2.5">
+      {events.map((ev, i) => {
+        const status = computeEventStatus(ev.event_date, ev.start_time, ev.totalDuration);
+        const meta = STATUS_META[status];
+        return (
+          <motion.div
+            key={ev.id}
+            className="rounded-2xl p-3 flex items-center gap-3"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05, type: "spring", stiffness: 360, damping: 30 }}
+          >
+            <button
+              onClick={() => navigate(`/admin/events/${ev.id}`)}
+              className="min-w-0 flex-1 text-left flex items-center gap-3 active:scale-[0.99] transition"
+            >
+              {ev.image_url ? (
+                <img src={ev.image_url} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
+              ) : (
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}22` }}>
+                  <CalendarDays size={18} color={ACCENT} />
+                </div>
+              )}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-bold truncate" style={{ color: "#f0f2f8" }}>{ev.title}</p>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: meta.bg, color: meta.text }}>
+                    {EVENT_STATUS_LABEL[status]}
+                  </span>
+                </div>
+                <p className="text-xs mt-0.5 truncate" style={{ color: "#6b7785" }}>
+                  {ev.event_date}
+                  {ev.place_name && ` · ${ev.place_name}`}
+                  {` · 순서 ${ev.segmentCount}개`}
+                </p>
+              </div>
+            </button>
+            <button
+              onClick={() => handleDelete(ev.id, ev.image_url)}
+              aria-label="삭제"
+              className="w-10 h-10 flex items-center justify-center rounded-lg shrink-0 active:scale-95 transition"
+              style={{ border: "1px solid rgba(255,255,255,0.08)", color: "#8892a0" }}
+            >
+              <Trash2 size={16} />
+            </button>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }

@@ -9,7 +9,6 @@ import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import WorshipSchedulePage from "../pages/worship/WorshipSchedulePage";
 import GalleryPage from "../pages/GalleryPage";
-import EventAdminPage from "../pages/event/EventAdminPage";
 import EventBuilderPage from "../pages/event/EventBuilderPage";
 import EventDetailPage from "../pages/event/EventDetailPage";
 import EventListPage from "../pages/event/EventListPage";
@@ -59,7 +58,6 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: "/admin", element: <AdminPage /> },
-      { path: "/admin/events", element: <EventAdminPage /> },
       { path: "/admin/events/new", element: <EventBuilderPage /> },
       { path: "/admin/events/:id", element: <EventDetailPage /> },
       { path: "/admin/events/:id/results", element: <EventResultsPage /> },
