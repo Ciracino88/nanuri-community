@@ -23,7 +23,7 @@ function EventCard({ event, index, onOpen }: { event: CardEvent; index: number; 
   const meta = STATUS_META[event._status];
   const isDone = event._status === "done";
   const color = event._color;
-  const cardImg = event.banner_url ?? event.image_url;
+  const cardImg = event.banner_url;
 
   return (
     <motion.div
