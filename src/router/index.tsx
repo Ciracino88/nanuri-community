@@ -12,7 +12,7 @@ import GalleryPage from "../pages/GalleryPage";
 import EventBuilderPage from "../pages/event/EventBuilderPage";
 import EventDetailPage from "../pages/event/EventDetailPage";
 import EventListPage from "../pages/event/EventListPage";
-import EventTimelinePage from "../pages/event/EventTimelinePage";
+import EventInfoPage from "../pages/event/EventInfoPage";
 import EventResultsPage from "../pages/event/EventResultsPage";
 import AdminPage from "../pages/AdminPage";
 
@@ -34,7 +34,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "/home", element: <HomePage /> },
       { path: "/events", element: <EventListPage /> },
-      { path: "/event/:id", element: <EventTimelinePage /> },
+      { path: "/event/:id", element: <EventInfoPage /> },
       { path: "/profile", element: <ProfilePage /> },
       { path: "/gallery", element: <GalleryPage /> },
       { path: "/worship", element: <WorshipSchedulePage /> },
