@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Pencil, ListOrdered, BarChart3, Trash2, ChevronRight, type LucideIcon } from "lucide-react";
 import EventInfoView from "../../components/EventInfoView";
 import LoadingScreen from "../../components/LoadingScreen";
+import { confirmDialog } from "../../components/ConfirmDialog";
 import { supabase } from "../../lib/supabase";
 import { deleteImage } from "../../lib/deleteImage";
 import { useEventDetail, eventKeys } from "../../hooks/useEvents";
@@ -52,8 +53,14 @@ export default function EventDetailPage() {
     onError: () => toast.error("삭제에 실패했어요"),
   });
 
-  const handleDeleteEvent = () => {
-    if (!confirm("행사를 삭제할까요? 순서와 평가 데이터도 모두 삭제됩니다.")) return;
+  const handleDeleteEvent = async () => {
+    const ok = await confirmDialog({
+      title: "행사를 삭제할까요?",
+      message: "순서와 평가 데이터도 모두 삭제됩니다.",
+      confirmLabel: "삭제",
+      danger: true,
+    });
+    if (!ok) return;
     deleteEventMutation.mutate();
   };
 

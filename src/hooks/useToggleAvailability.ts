@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
+import { confirmDialog } from "../components/ConfirmDialog";
 import { useAuthStore } from "../store/authStore";
 import type { WorshipData } from "./useWorshipSchedule";
 
@@ -63,7 +64,11 @@ export function useToggleAvailability({ year, month, members, availability, team
       );
 
       if (conflicting) {
-        const ok = confirm(`${conflicting.name}님이 이미 등록되어 있어요. 교체할까요?`);
+        const ok = await confirmDialog({
+          title: "교체할까요?",
+          message: `${conflicting.name}님이 이미 등록되어 있어요.`,
+          confirmLabel: "교체",
+        });
         if (!ok) return;
         updateCache(scheduleId, conflicting.id, position, false);
         const { error } = await supabase.from("worship_availability")
