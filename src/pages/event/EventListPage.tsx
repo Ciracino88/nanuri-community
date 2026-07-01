@@ -4,10 +4,9 @@ import { CalendarDays, ChevronRight } from "lucide-react";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEventList } from "../../hooks/useEvents";
 import { computeEventStatus, type EventStatus } from "../../lib/eventStatus";
+import { colorForEvent } from "../../lib/eventColor";
 import { TAB_COLORS } from "../../constants/theme";
 import type { EventRecord } from "../../types/event";
-
-const COLORS = Object.values(TAB_COLORS);
 
 const STATUS_META: Record<EventStatus, { label: string; bg: string; text: string }> = {
   upcoming: { label: "예정", bg: "rgba(78,205,196,0.15)", text: "#4ECDC4" },
@@ -82,9 +81,9 @@ export default function EventListPage() {
   const navigate = useNavigate();
   const { data: events = [], isLoading } = useEventList();
 
-  const graded: CardEvent[] = events.map((e, i) => ({
+  const graded: CardEvent[] = events.map((e) => ({
     ...e,
-    _color: COLORS[i % COLORS.length],
+    _color: colorForEvent(e.id),
     _status: computeEventStatus(e.event_date, e.start_time, 0),
   }));
   const upcoming = graded.filter((e) => e._status !== "done");

@@ -5,11 +5,11 @@ import { CalendarDays, Wallet, Settings, Plus } from "lucide-react";
 import LoadingScreen from "../components/LoadingScreen";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { computeEventStatus, type EventStatus } from "../lib/eventStatus";
+import { colorForEvent } from "../lib/eventColor";
 import { useAdminEvents } from "../hooks/useEvents";
 import { TAB_COLORS } from "../constants/theme";
 
 const ACCENT = TAB_COLORS.admin;
-const COLORS = Object.values(TAB_COLORS);
 
 const SUB_TABS = [
   { id: "events", label: "행사 관리", Icon: CalendarDays },
@@ -107,9 +107,9 @@ function EventsAdminSection() {
     );
   }
 
-  const graded: AdminRowEvent[] = events.map((e, i) => ({
+  const graded: AdminRowEvent[] = events.map((e) => ({
     ...e,
-    _color: COLORS[i % COLORS.length],
+    _color: colorForEvent(e.id),
     _status: computeEventStatus(e.event_date, e.start_time, e.totalDuration),
   }));
   const upcoming = graded.filter((e) => e._status !== "done");

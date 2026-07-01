@@ -6,22 +6,13 @@ import BackButton from "../../components/BackButton";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useEventDetail } from "../../hooks/useEvents";
 import { computeEventStatus, type EventStatus } from "../../lib/eventStatus";
-import { TAB_COLORS } from "../../constants/theme";
-
-const COLORS = Object.values(TAB_COLORS);
+import { colorForEvent } from "../../lib/eventColor";
 
 const STATUS_META: Record<EventStatus, { label: string; text: string }> = {
   upcoming: { label: "예정", text: "#4ECDC4" },
   live: { label: "진행중", text: "#FFB347" },
   done: { label: "완료", text: "#8892a0" },
 };
-
-// 행사 id로 안정적인 팔레트 색 하나를 고른다
-function colorFor(id: string) {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return COLORS[h % COLORS.length];
-}
 
 export default function EventInfoPage() {
   const { id } = useParams<{ id: string }>();
@@ -38,7 +29,7 @@ export default function EventInfoPage() {
   const status = computeEventStatus(event.event_date, event.start_time, 0);
   const meta = STATUS_META[status];
   const isDone = status === "done";
-  const color = colorFor(event.id);
+  const color = colorForEvent(event.id);
   const details = event.details ?? [];
 
   const handleShare = () => {
