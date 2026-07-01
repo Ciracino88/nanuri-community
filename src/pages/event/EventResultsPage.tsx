@@ -1,20 +1,37 @@
 import { useParams } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import BackButton from "../../components/BackButton";
 import LoadingScreen from "../../components/LoadingScreen";
+import { supabase } from "../../lib/supabase";
 import { buildTimeline, formatClock } from "../../lib/eventTime";
 import { aggregateMoods } from "../../lib/mood";
-import { useEventResults } from "../../hooks/useEvents";
+import { useEventResults, eventKeys } from "../../hooks/useEvents";
 import { TAB_COLORS } from "../../constants/theme";
 
 const ACCENT = TAB_COLORS.admin;
 
 export default function EventResultsPage() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useEventResults(id);
   const event = data?.event ?? null;
   const segments = data?.segments ?? [];
   const evals = data?.evals ?? [];
+
+  const toggleResultsMutation = useMutation({
+    mutationFn: async (next: boolean) => {
+      const { error } = await supabase.from("events").update({ results_public: next }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, next) => {
+      toast.success(next ? "참여자에게 결과를 공개했어요" : "결과를 비공개로 바꿨어요");
+      queryClient.invalidateQueries({ queryKey: eventKeys.results(id) });
+      queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) });
+    },
+    onError: () => toast.error("변경에 실패했어요"),
+  });
 
   if (isLoading || !event) return <LoadingScreen />;
 
@@ -33,6 +50,22 @@ export default function EventResultsPage() {
       </div>
 
       <div className="px-4 pb-8 flex flex-col gap-4" style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}>
+        {/* 결과 공개 */}
+        <div className="rounded-2xl p-4 flex items-center justify-between" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div>
+            <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>결과 공개</p>
+            <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>참여자도 순서별 집계를 볼 수 있어요</p>
+          </div>
+          <button
+            onClick={() => toggleResultsMutation.mutate(!event.results_public)}
+            aria-label="결과 공개 토글"
+            className="relative w-10 h-6 rounded-full transition-colors shrink-0"
+            style={{ background: event.results_public ? ACCENT : "rgba(255,255,255,0.1)" }}
+          >
+            <span className="absolute top-0.5 w-5 h-5 rounded-full transition-all" style={{ background: "#f0f2f8", left: event.results_public ? undefined : 2, right: event.results_public ? 2 : undefined }} />
+          </button>
+        </div>
+
         {/* 요약 */}
         <div className="grid grid-cols-2 gap-3">
           {[

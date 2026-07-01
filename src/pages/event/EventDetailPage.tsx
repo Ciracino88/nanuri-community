@@ -38,18 +38,6 @@ export default function EventDetailPage() {
   const { data, isLoading } = useEventDetail(id);
   const event = data?.event ?? null;
 
-  const toggleResultsMutation = useMutation({
-    mutationFn: async (next: boolean) => {
-      const { error } = await supabase.from("events").update({ results_public: next }).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: (_, next) => {
-      toast.success(next ? "참여자에게 결과를 공개했어요" : "결과를 비공개로 바꿨어요");
-      queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) });
-    },
-    onError: () => toast.error("변경에 실패했어요"),
-  });
-
   const deleteEventMutation = useMutation({
     mutationFn: async () => {
       if (event?.image_url) await deleteImage(event.image_url);
@@ -76,22 +64,6 @@ export default function EventDetailPage() {
 
   const footer = (
     <div className="flex flex-col gap-3">
-      {/* 결과 공개 */}
-      <div className="rounded-2xl p-4 flex items-center justify-between" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-        <div>
-          <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>결과 공개</p>
-          <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>참여자도 순서별 집계를 볼 수 있어요</p>
-        </div>
-        <button
-          onClick={() => toggleResultsMutation.mutate(!event.results_public)}
-          aria-label="결과 공개 토글"
-          className="relative w-10 h-6 rounded-full transition-colors shrink-0"
-          style={{ background: event.results_public ? ACCENT : "rgba(255,255,255,0.1)" }}
-        >
-          <span className="absolute top-0.5 w-5 h-5 rounded-full transition-all" style={{ background: "#f0f2f8", left: event.results_public ? undefined : 2, right: event.results_public ? 2 : undefined }} />
-        </button>
-      </div>
-
       {/* 액션 */}
       <ActionRow Icon={Pencil} label="정보 수정" desc="제목·날짜·장소·상세 정보" onClick={() => navigate(`/admin/events/${event.id}/edit`)} />
       <ActionRow Icon={ListOrdered} label="진행 관리" desc="순서(타임라인) 편집" onClick={() => navigate(`/admin/events/${event.id}/segments`)} />
