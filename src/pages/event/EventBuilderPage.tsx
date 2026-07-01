@@ -1,12 +1,15 @@
-import { useState, type CSSProperties } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { CalendarDays, Clock, MapPin, Users, DollarSign, Star, Pencil, Plus, ChevronDown, Trash2, type LucideIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import BackButton from "../../components/BackButton";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { uploadReceipt } from "../../lib/uploadReceipt";
+import { deleteImage } from "../../lib/deleteImage";
 import { supabase } from "../../lib/supabase";
+import { useEventDetail, eventKeys } from "../../hooks/useEvents";
 import { TAB_COLORS } from "../../constants/theme";
 
 const ACCENT = TAB_COLORS.admin;
@@ -34,6 +37,12 @@ interface CustomField { key: string; label: string; Icon: LucideIcon; value: str
 
 export default function EventBuilderPage() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id?: string }>();
+  const editing = !!id;
+  const queryClient = useQueryClient();
+  const { data: existing } = useEventDetail(id);
+  const prefilled = useRef(false);
+
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -41,12 +50,43 @@ export default function EventBuilderPage() {
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [fields, setFields] = useState<CustomField[]>([]);
+  const [keepImageUrl, setKeepImageUrl] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const { receiptFile: posterFile, receiptPreview: posterPreview, handleReceiptChange: handlePoster, reset: resetPoster } = useReceiptUpload();
 
+  // 편집 모드: 기존 행사 값으로 한 번만 프리필
+  useEffect(() => {
+    const ev = existing?.event;
+    if (!ev || prefilled.current) return;
+    prefilled.current = true;
+    setTitle(ev.title);
+    const [start, end] = ev.event_date.split("~");
+    setDate(start.replace(/\./g, "-"));
+    if (end) {
+      setMultiDay(true);
+      setEndDate(end.replace(/\./g, "-"));
+    }
+    setTime(ev.start_time ? ev.start_time.slice(0, 5) : "");
+    setLocation(ev.place_name ?? "");
+    const restored = (ev.details ?? [])
+      .map((d) => {
+        const opt = CUSTOM_FIELD_OPTIONS.find((o) => o.label === d.label);
+        return opt ? { ...opt, value: d.value } : null;
+      })
+      .filter((f): f is CustomField => f !== null);
+    setFields(restored);
+    setKeepImageUrl(ev.image_url ?? null);
+  }, [existing]);
+
+  const shownPoster = posterPreview || keepImageUrl;
   const addable = CUSTOM_FIELD_OPTIONS.filter((o) => !fields.find((f) => f.key === o.key));
   const canSave = !!title.trim() && !!date && !!location.trim();
+
+  const removePoster = () => {
+    resetPoster();
+    setKeepImageUrl(null);
+  };
 
   const addField = (opt: (typeof CUSTOM_FIELD_OPTIONS)[number]) => {
     setFields((p) => [...p, { ...opt, value: "" }]);
@@ -62,7 +102,7 @@ export default function EventBuilderPage() {
     }
     setSaving(true);
     try {
-      let imageUrl: string | null = null;
+      let imageUrl: string | null = keepImageUrl;
       if (posterFile) imageUrl = await uploadReceipt(posterFile, "events");
 
       const details = fields.filter((f) => f.value.trim()).map((f) => ({ label: f.label, value: f.value.trim() }));
@@ -70,22 +110,30 @@ export default function EventBuilderPage() {
       const dots = (d: string) => d.replace(/-/g, ".");
       const eventDateStr = multiDay && endDate ? `${dots(date)}~${dots(endDate)}` : dots(date);
 
-      const { data: event, error } = await supabase
-        .from("events")
-        .insert({
-          title: title.trim(),
-          event_date: eventDateStr,
-          start_time: time || null,
-          place_name: location.trim(),
-          image_url: imageUrl,
-          details,
-        })
-        .select("id")
-        .single();
-      if (error) throw error;
+      const payload = {
+        title: title.trim(),
+        event_date: eventDateStr,
+        start_time: time || null,
+        place_name: location.trim(),
+        image_url: imageUrl,
+        details,
+      };
 
-      toast.success("행사를 만들었어요. 순서를 추가하세요");
-      navigate(`/admin/events/${event.id}`);
+      if (editing) {
+        const oldUrl = existing?.event?.image_url ?? null;
+        if (oldUrl && oldUrl !== imageUrl) await deleteImage(oldUrl);
+        const { error } = await supabase.from("events").update(payload).eq("id", id);
+        if (error) throw error;
+        queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) });
+        queryClient.invalidateQueries({ queryKey: eventKeys.adminList });
+        toast.success("행사를 수정했어요");
+        navigate(`/admin/events/${id}`);
+      } else {
+        const { data: event, error } = await supabase.from("events").insert(payload).select("id").single();
+        if (error) throw error;
+        toast.success("행사를 만들었어요. 순서를 추가하세요");
+        navigate(`/admin/events/${event.id}`);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "저장에 실패했어요");
     } finally {
@@ -98,7 +146,7 @@ export default function EventBuilderPage() {
       {/* 헤더 */}
       <div className="flex items-center gap-3 px-4 pt-5 pb-4 sticky top-0 z-10" style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <BackButton onClick={() => navigate(-1)} />
-        <h1 className="flex-1 text-base font-black" style={{ color: "#f0f2f8" }}>행사 추가</h1>
+        <h1 className="flex-1 text-base font-black" style={{ color: "#f0f2f8" }}>{editing ? "행사 수정" : "행사 추가"}</h1>
         <motion.button
           className="px-4 py-2 rounded-xl text-sm font-black"
           style={{ background: canSave ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT}99)` : "rgba(255,255,255,0.06)", color: canSave ? "#0f1117" : "#4a5568" }}
@@ -171,13 +219,13 @@ export default function EventBuilderPage() {
         {/* 포스터 */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>포스터</label>
-          {posterPreview ? (
+          {shownPoster ? (
             <div className="relative">
               <label className="block cursor-pointer">
-                <img src={posterPreview} alt="포스터 미리보기" className="w-full h-auto rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
+                <img src={shownPoster} alt="포스터 미리보기" className="w-full h-auto rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePoster(f); }} />
               </label>
-              <button type="button" onClick={resetPoster} aria-label="포스터 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(0,0,0,0.55)", color: "#fff" }}>
+              <button type="button" onClick={removePoster} aria-label="포스터 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(0,0,0,0.55)", color: "#fff" }}>
                 <Trash2 size={15} />
               </button>
             </div>

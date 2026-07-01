@@ -11,6 +11,7 @@ import WorshipSchedulePage from "../pages/worship/WorshipSchedulePage";
 import GalleryPage from "../pages/GalleryPage";
 import EventBuilderPage from "../pages/event/EventBuilderPage";
 import EventDetailPage from "../pages/event/EventDetailPage";
+import EventSegmentsPage from "../pages/event/EventSegmentsPage";
 import EventListPage from "../pages/event/EventListPage";
 import EventInfoPage from "../pages/event/EventInfoPage";
 import EventResultsPage from "../pages/event/EventResultsPage";
@@ -60,6 +61,8 @@ export const router = createBrowserRouter([
       { path: "/admin", element: <AdminPage /> },
       { path: "/admin/events/new", element: <EventBuilderPage /> },
       { path: "/admin/events/:id", element: <EventDetailPage /> },
+      { path: "/admin/events/:id/edit", element: <EventBuilderPage /> },
+      { path: "/admin/events/:id/segments", element: <EventSegmentsPage /> },
       { path: "/admin/events/:id/results", element: <EventResultsPage /> },
     ],
   },
