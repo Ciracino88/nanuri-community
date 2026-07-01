@@ -4,26 +4,82 @@ import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../store/authStore";
 import LoadingScreen from "../../components/LoadingScreen";
 
-const FEATURES = [
-  { icon: "ti-credit-card", label: "청구서 제출" },
-  { icon: "ti-chart-bar", label: "설문 참여" },
-  { icon: "ti-salad", label: "메뉴 종합" },
-];
+interface GuestCard {
+  icon: string;
+  title: string;
+  description: string;
+  tint: string;
+  color: string;
+  action: () => void;
+}
 
 export default function GatePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [guestMode, setGuestMode] = useState(false);
   const { user, isAnonymous, isLoading } = useAuthStore();
 
   if (isLoading) return <LoadingScreen />;
   if (user && !isAnonymous) return <Navigate to="/home" replace />;
 
-  const handleGuest = async () => {
+  const handleBillCard = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signInAnonymously();
     if (!error) navigate("/guest/form");
     setLoading(false);
   };
+
+  const GUEST_CARDS: GuestCard[] = [
+    {
+      icon: "ti-credit-card",
+      title: "비용 청구서",
+      description: "영수증 올리고 송금받기",
+      tint: "bg-info-subtle",
+      color: "text-info",
+      action: handleBillCard,
+    },
+  ];
+
+  if (guestMode) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+        <div className="w-full max-w-sm flex flex-col gap-6 animate-[fadeUp_0.4s_ease_both]">
+
+          <div className="flex flex-col gap-1.5">
+            <p className="text-caption text-fg-faint">외부 방문자</p>
+            <h2 className="text-title font-medium text-fg-strong">무엇을 도와드릴까요?</h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {GUEST_CARDS.map((card) => (
+              <button
+                key={card.title}
+                onClick={card.action}
+                disabled={loading}
+                className="bg-card border border-line-soft rounded-2xl p-4 text-left flex flex-col gap-3 hover:border-line active:scale-95 transition disabled:opacity-50"
+              >
+                <div className={`w-11 h-11 rounded-xl ${card.tint} flex items-center justify-center`}>
+                  <i className={`ti ${card.icon} text-2xl ${card.color}`} aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-body font-medium text-fg-strong">{card.title}</p>
+                  <p className="text-caption text-fg-faint mt-0.5">{card.description}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setGuestMode(false)}
+            className="text-body text-fg-faint hover:text-fg transition text-center"
+          >
+            ← 돌아가기
+          </button>
+
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center px-4">
@@ -39,22 +95,9 @@ export default function GatePage() {
               우리들의 작은<br />커뮤니티 공간
             </h1>
             <p className="text-body text-fg-faint leading-relaxed">
-              비용 청구부터 설문, 메뉴 종합까지<br />나누리 활동에 필요한 것들을 모았어요
+              비용 청구부터 설문, 찬양팀 일정까지<br />나누리 활동에 필요한 것들을 모았어요
             </p>
           </div>
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-2">
-          {FEATURES.map((f, i) => (
-            <span
-              key={f.label}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-card border border-line-soft rounded-full text-caption text-fg-muted"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              <i className={`ti ${f.icon} text-sm`} aria-hidden="true" />
-              {f.label}
-            </span>
-          ))}
         </div>
 
         <div className="w-full flex flex-col gap-3">
@@ -66,15 +109,11 @@ export default function GatePage() {
             나누리 멤버입니다
           </button>
           <button
-            onClick={handleGuest}
-            disabled={loading}
-            className="w-full py-3.5 px-4 rounded-xl bg-card border border-line text-emphasis font-medium text-fg hover:bg-surface transition disabled:opacity-50 flex items-center justify-center gap-2"
+            onClick={() => setGuestMode(true)}
+            className="w-full py-3.5 px-4 rounded-xl bg-card border border-line text-emphasis font-medium text-fg hover:bg-surface transition flex items-center justify-center gap-2"
           >
-            {loading ? (
-              <><i className="ti ti-loader-2 text-base animate-spin" aria-hidden="true" />연결 중...</>
-            ) : (
-              <><i className="ti ti-user-question text-base" aria-hidden="true" />외부 방문자입니다</>
-            )}
+            <i className="ti ti-user-question text-base" aria-hidden="true" />
+            외부 방문자입니다
           </button>
         </div>
 

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useAuthStore } from "../store/authStore";
 import PageContainer from "../components/PageContainer";
-import { useActiveSurveys } from "../hooks/useActiveSurveys";
-import { useRespondedIds } from "../hooks/useRespondedIds";
 
 interface MenuCard {
   icon: string;
@@ -14,17 +13,69 @@ interface MenuCard {
   color: string;
 }
 
-const MENU_CARDS: MenuCard[] = [
-  { icon: "ti-credit-card", title: "청구서 제출", description: "영수증 올리고 송금받기", path: "/member/form", tint: "bg-info-subtle", color: "text-info" },
-  { icon: "ti-chart-bar", title: "설문 참여", description: "링크로 바로 참여", path: "/surveys", tint: "bg-purple-subtle", color: "text-purple" },
-  { icon: "ti-tools-kitchen-2", title: "메뉴 종합", description: "사진 올리면 AI 정리", path: "/vote", tint: "bg-warning-subtle", color: "text-warning" },
-  { icon: "ti-music", title: "찬양팀 일정", description: "주일 포지션 등록", path: "/worship", tint: "bg-teal-subtle", color: "text-teal" },
-];
-
 const ADMIN_CARDS: MenuCard[] = [
   { icon: "ti-currency-won", title: "회계 보고서", description: "지출 내역 관리", path: "/accounting", tint: "bg-info-subtle", color: "text-info" },
-  { icon: "ti-chart-bar", title: "설문 관리", description: "설문 작성·배포", path: "/admin/surveys", tint: "bg-purple-subtle", color: "text-purple" },
+  { icon: "ti-calendar-event", title: "행사 관리", description: "행사·순서 구성", path: "/admin/events", tint: "bg-purple-subtle", color: "text-purple" },
 ];
+
+/** 오늘 기준 다음 주일까지 남은 일수 */
+function daysUntilSunday(): { dday: number; date: Date } {
+  const today = new Date();
+  const day = today.getDay();
+  const diff = day === 0 ? 0 : 7 - day;
+  const date = new Date(today);
+  date.setDate(today.getDate() + diff);
+  return { dday: diff, date };
+}
+
+interface Pill {
+  label: string;
+  className: string;
+}
+
+function ActionRow({
+  icon,
+  iconColor,
+  iconTint,
+  title,
+  sub,
+  pill,
+  delay,
+  onClick,
+}: {
+  icon: string;
+  iconColor: string;
+  iconTint: string;
+  title: string;
+  sub: string;
+  pill?: Pill;
+  delay: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="bg-card border border-line-soft rounded-2xl p-3.5 flex items-center gap-3.5 text-left hover:border-line active:scale-[0.98] transition"
+      style={{ animation: `fadeUp 0.45s ease ${delay}s both` }}
+    >
+      <div className={`w-11 h-11 rounded-xl ${iconTint} flex items-center justify-center shrink-0`}>
+        <i className={`ti ${icon} text-2xl ${iconColor}`} aria-hidden="true" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-body font-medium text-fg-strong">{title}</p>
+        <p className="text-caption text-fg-faint mt-0.5">{sub}</p>
+      </div>
+      <div className="ml-auto flex items-center gap-2 shrink-0">
+        {pill && (
+          <span className={`text-caption font-medium rounded-full px-2.5 py-1 ${pill.className}`}>
+            {pill.label}
+          </span>
+        )}
+        <i className="ti ti-chevron-right text-fg-faint text-emphasis" aria-hidden="true" />
+      </div>
+    </button>
+  );
+}
 
 function FeatureCard({ card, delay, onClick }: { card: MenuCard; delay: number; onClick: () => void }) {
   const ref = useRef<HTMLButtonElement>(null);
@@ -65,12 +116,11 @@ function FeatureCard({ card, delay, onClick }: { card: MenuCard; delay: number; 
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { userProfile, user } = useAuthStore();
+  const { userProfile } = useAuthStore();
   const isAdmin = userProfile?.role === "admin";
-  const { surveys } = useActiveSurveys();
-  const respondedIds = useRespondedIds(user?.id);
 
-  const unrespondedCount = surveys.filter((s) => !respondedIds.has(s.id)).length;
+  const { dday, date: nextSunday } = daysUntilSunday();
+  const ddayLabel = dday === 0 ? "오늘" : `D-${dday}`;
 
   return (
     <PageContainer width="default">
@@ -91,28 +141,41 @@ export default function HomePage() {
         </p>
       </div>
 
-      {unrespondedCount > 0 && (
-        <div className="bg-info-subtle rounded-2xl p-4 border border-info-soft flex items-center justify-between">
-          <div>
-            <p className="text-caption text-info font-medium mb-0.5">진행 중인 설문</p>
-            <p className="text-body font-medium text-fg-strong">참여 가능한 설문이 {unrespondedCount}개 있습니다</p>
-          </div>
-          <button
-            onClick={() => navigate("/surveys")}
-            className="text-body text-info font-medium whitespace-nowrap ml-3"
-          >
-            보러가기 →
-          </button>
-        </div>
-      )}
-
+      {/* 바로 하기 액션 */}
       <div className="flex flex-col gap-2.5">
-        <p className="text-caption text-fg-faint font-medium">메뉴</p>
-        <div className="grid grid-cols-2 gap-3">
-          {MENU_CARDS.map((card, i) => (
-            <FeatureCard key={card.path} card={card} delay={i * 0.07} onClick={() => navigate(card.path)} />
-          ))}
-        </div>
+        <p className="text-caption text-fg-faint font-medium">바로 하기</p>
+
+        <ActionRow
+          icon="ti-music"
+          iconColor="text-teal"
+          iconTint="bg-teal-subtle"
+          title="찬양팀 시트 작성"
+          sub={`${nextSunday.getMonth() + 1}월 ${nextSunday.getDate()}일 주일`}
+          pill={{ label: ddayLabel, className: "text-teal bg-teal-subtle" }}
+          delay={0.08}
+          onClick={() => navigate("/worship")}
+        />
+
+        <ActionRow
+          icon="ti-camera"
+          iconColor="text-pink"
+          iconTint="bg-pink-subtle"
+          title="사진 업로드"
+          sub="갤러리에 추억 남기기"
+          delay={0.14}
+          onClick={() => navigate("/gallery")}
+        />
+
+        <ActionRow
+          icon="ti-message-2"
+          iconColor="text-amber"
+          iconTint="bg-amber-subtle"
+          title="안건·피드백 작성"
+          sub="의견을 남겨주세요"
+          pill={{ label: "준비 중", className: "text-fg-faint bg-surface" }}
+          delay={0.2}
+          onClick={() => toast("곧 만나요! 준비 중인 기능이에요")}
+        />
       </div>
 
       {isAdmin && (

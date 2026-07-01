@@ -11,15 +11,14 @@ import AccountingReportPage from "../pages/accounting/AccountingReportPage";
 import AccountingListPage from "../pages/accounting/AccountingListPage";
 import AccountingDetailPage from "../pages/accounting/AccountingDetailPage";
 import HomePage from "../pages/HomePage";
-import SurveyNewPage from "../pages/survey/SurveyNewPage";
-import SurveyAdminPage from "../pages/survey/SurveyAdminPage";
-import SurveyDeployPage from "../pages/survey/SurveyDeployPage";
-import SurveyResponsePage from "../pages/survey/SurveyResponsePage";
-import SurveyListPage from "../pages/survey/SurveyListPage";
-import SurveyResultsPage from "../pages/survey/SurveyResultsPage";
-import VoteListPage from "../pages/vote/VoteListPage";
-import VoteResponsePage from "../pages/vote/VoteResponsePage";
 import WorshipSchedulePage from "../pages/worship/WorshipSchedulePage";
+import GalleryPage from "../pages/GalleryPage";
+import EventAdminPage from "../pages/event/EventAdminPage";
+import EventBuilderPage from "../pages/event/EventBuilderPage";
+import EventDetailPage from "../pages/event/EventDetailPage";
+import EventListPage from "../pages/event/EventListPage";
+import EventTimelinePage from "../pages/event/EventTimelinePage";
+import EventResultsPage from "../pages/event/EventResultsPage";
 
 export const router = createBrowserRouter([
   {
@@ -29,14 +28,6 @@ export const router = createBrowserRouter([
   {
     path: "/member/login",
     element: <MemberLoginPage />,
-  },
-  {
-    path: "/member/setup",
-    element: (
-      <ProtectedRoute memberOnly setupPage>
-        <MemberProfileSetupPage />
-      </ProtectedRoute>
-    ),
   },
   {
     path: "/guest/form",
@@ -54,10 +45,21 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: "/home", element: <HomePage /> },
-      { path: "/surveys", element: <SurveyListPage /> },
-      { path: "/vote", element: <VoteListPage /> },
+      { path: "/events", element: <EventListPage /> },
+      { path: "/event/:id", element: <EventTimelinePage /> },
+      { path: "/gallery", element: <GalleryPage /> },
       { path: "/worship", element: <WorshipSchedulePage /> },
       { path: "/member/form", element: <MemberBillFormPage /> },
+    ],
+  },
+  {
+    element: (
+      <ProtectedRoute memberOnly setupPage>
+        <AppShell />
+      </ProtectedRoute>
+    ),
+    children: [
+      { path: "/member/setup", element: <MemberProfileSetupPage /> },
     ],
   },
   {
@@ -67,20 +69,13 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { path: "/admin/surveys", element: <SurveyAdminPage /> },
-      { path: "/admin/surveys/new", element: <SurveyNewPage /> },
-      { path: "/admin/surveys/:id/deploy", element: <SurveyDeployPage /> },
-      { path: "/admin/surveys/:id/results", element: <SurveyResultsPage /> },
+      { path: "/admin/events", element: <EventAdminPage /> },
+      { path: "/admin/events/new", element: <EventBuilderPage /> },
+      { path: "/admin/events/:id", element: <EventDetailPage /> },
+      { path: "/admin/events/:id/results", element: <EventResultsPage /> },
       { path: "/accounting", element: <AccountingListPage /> },
       { path: "/accounting/new", element: <AccountingReportPage /> },
       { path: "/accounting/:id", element: <AccountingDetailPage /> },
-    ],
-  },
-  {
-    element: <AppShell />,
-    children: [
-      { path: "/survey/:id", element: <SurveyResponsePage /> },
-      { path: "/vote/candidate/:candidateId", element: <VoteResponsePage /> },
     ],
   },
 ]);

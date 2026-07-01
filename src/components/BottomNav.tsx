@@ -1,33 +1,41 @@
 import { NavLink } from "react-router-dom";
+import { HomeIcon, CalendarIcon, PhotographIcon, MusicNoteIcon, UserIcon } from "@heroicons/react/outline";
+import type { ComponentType, SVGProps } from "react";
 
-const TABS = [
-  { to: "/home", icon: "ti-home", label: "홈" },
-  { to: "/surveys", icon: "ti-chart-bar", label: "설문" },
-  { to: "/vote", icon: "ti-tools-kitchen-2", label: "메뉴" },
-  { to: "/worship", icon: "ti-music", label: "찬양팀" },
-  { to: "/member/setup", icon: "ti-user", label: "내정보" },
+const TABS: { to: string; Icon: ComponentType<SVGProps<SVGSVGElement>>; label: string }[] = [
+  { to: "/home", Icon: HomeIcon, label: "홈" },
+  { to: "/events", Icon: CalendarIcon, label: "행사" },
+  { to: "/gallery", Icon: PhotographIcon, label: "갤러리" },
+  { to: "/worship", Icon: MusicNoteIcon, label: "찬양팀" },
+  { to: "/member/setup", Icon: UserIcon, label: "내정보" },
 ];
 
 export default function BottomNav() {
   return (
     <nav
-      className="sticky bottom-0 bg-card border-t border-line-soft flex"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="sticky bottom-0 bg-card border-t border-line-soft rounded-t-[20px] px-2 pt-3"
+      style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
     >
-      {TABS.map((t) => (
-        <NavLink
-          key={t.to}
-          to={t.to}
-          className={({ isActive }) =>
-            `flex-1 flex flex-col items-center gap-1 py-2 transition ${
-              isActive ? "text-info" : "text-fg-faint hover:text-fg-muted"
-            }`
-          }
-        >
-          <i className={`ti ${t.icon} text-2xl`} aria-hidden="true" />
-          <span className="text-caption font-medium">{t.label}</span>
-        </NavLink>
-      ))}
+      <div className="flex items-center justify-around">
+        {TABS.map(({ to, Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-1 transition ${
+                isActive ? "text-info" : "text-fg-faint"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Icon className="w-6 h-6" aria-hidden="true" />
+                <span className={`text-caption ${isActive ? "font-medium" : ""}`}>{label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
     </nav>
   );
 }
