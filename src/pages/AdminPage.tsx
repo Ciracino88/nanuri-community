@@ -29,8 +29,6 @@ interface AdminRowEvent {
   title: string;
   event_date: string;
   place_name: string | null;
-  image_url: string | null;
-  banner_url: string | null;
   segmentCount: number;
   _color: string;
   _status: EventStatus;
@@ -41,7 +39,6 @@ function AdminEventRow({ event, index }: { event: AdminRowEvent; index: number }
   const isDone = event._status === "done";
   const color = event._color;
   const meta = STATUS_META[event._status];
-  const thumb = event.banner_url ?? event.image_url;
 
   return (
     <motion.button
@@ -55,26 +52,12 @@ function AdminEventRow({ event, index }: { event: AdminRowEvent; index: number }
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, type: "spring", stiffness: 360, damping: 30 }}
     >
-      {thumb ? (
-        <img
-          src={thumb}
-          alt=""
-          className="rounded-xl object-cover shrink-0"
-          style={{
-            width: 40,
-            height: 40,
-            filter: isDone ? "grayscale(70%) brightness(0.6)" : undefined,
-            border: `1px solid ${isDone ? "rgba(255,255,255,0.08)" : `${color}30`}`,
-          }}
-        />
-      ) : (
-        <div
-          className="flex items-center justify-center rounded-xl shrink-0"
-          style={{ width: 40, height: 40, background: isDone ? "rgba(255,255,255,0.05)" : `${color}18` }}
-        >
-          <CalendarDays size={17} color={isDone ? "#4a5568" : color} strokeWidth={2} />
-        </div>
-      )}
+      <div
+        className="flex items-center justify-center rounded-xl shrink-0"
+        style={{ width: 40, height: 40, background: isDone ? "rgba(255,255,255,0.05)" : `${color}18` }}
+      >
+        <CalendarDays size={17} color={isDone ? "#4a5568" : color} strokeWidth={2} />
+      </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold truncate" style={{ color: isDone ? "#4a5568" : "#f0f2f8" }}>{event.title}</p>
         <p className="text-xs flex items-center gap-1 mt-0.5 truncate" style={{ color: isDone ? "#363d47" : "#6b7785" }}>
