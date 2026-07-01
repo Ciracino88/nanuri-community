@@ -11,6 +11,7 @@ import AccountingReportPage from "../pages/accounting/AccountingReportPage";
 import AccountingListPage from "../pages/accounting/AccountingListPage";
 import AccountingDetailPage from "../pages/accounting/AccountingDetailPage";
 import HomePage from "../pages/HomePage";
+import ProfilePage from "../pages/ProfilePage";
 import WorshipSchedulePage from "../pages/worship/WorshipSchedulePage";
 import GalleryPage from "../pages/GalleryPage";
 import EventAdminPage from "../pages/event/EventAdminPage";
@@ -47,6 +48,7 @@ export const router = createBrowserRouter([
       { path: "/home", element: <HomePage /> },
       { path: "/events", element: <EventListPage /> },
       { path: "/event/:id", element: <EventTimelinePage /> },
+      { path: "/profile", element: <ProfilePage /> },
       { path: "/gallery", element: <GalleryPage /> },
       { path: "/worship", element: <WorshipSchedulePage /> },
       { path: "/member/form", element: <MemberBillFormPage /> },

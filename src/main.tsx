@@ -21,7 +21,27 @@ function Root() {
   return (
     <>
       <RouterProvider router={router} />
-      <Toaster position="bottom-center" toastOptions={{ duration: 3000 }} />
+      <Toaster
+        position="top-center"
+        gutter={8}
+        containerStyle={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "rgba(22,25,35,0.92)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(116,199,255,0.25)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: "14px",
+            borderRadius: "16px",
+            padding: "12px 16px",
+            width: "min(92vw, 420px)",
+          },
+        }}
+      />
     </>
   );
 }

@@ -8,7 +8,7 @@ const TABS: { to: string; label: string; kind: CreatureKind; color: string }[] =
   { to: "/events", label: "행사", kind: "schedule", color: "#FFB347" },
   { to: "/gallery", label: "갤러리", kind: "gallery", color: "#C77DFF" },
   { to: "/worship", label: "찬양팀", kind: "songs", color: "#FF6B6B" },
-  { to: "/member/setup", label: "내정보", kind: "profile", color: "#74C7FF" },
+  { to: "/profile", label: "내정보", kind: "profile", color: "#74C7FF" },
 ];
 
 export default function BottomNav() {
@@ -49,7 +49,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="sticky bottom-0 rounded-t-[20px] px-3 pt-3"
+      className="sticky bottom-0 px-3 pt-3"
       style={{
         background: "rgba(20,22,30,0.97)",
         backdropFilter: "blur(20px)",

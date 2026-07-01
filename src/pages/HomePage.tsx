@@ -174,7 +174,7 @@ export default function HomePage() {
           sub="의견을 남겨주세요"
           pill={{ label: "준비 중", className: "text-fg-faint bg-surface" }}
           delay={0.2}
-          onClick={() => toast("곧 만나요! 준비 중인 기능이에요")}
+          onClick={() => toast("곧 만나요! 준비 중인 기능이에요", { icon: "💬" })}
         />
       </div>
 
