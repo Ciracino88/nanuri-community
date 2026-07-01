@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { CalendarDays, Wallet, Settings, Plus } from "lucide-react";
-import LoadingScreen from "../components/LoadingScreen";
+import { CalendarDays, Wallet, Settings, Plus, Receipt, BookText, ChevronRight, type LucideIcon } from "lucide-react";
+import toast from "react-hot-toast";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { computeEventStatus, type EventStatus } from "../lib/eventStatus";
 import { colorForEvent } from "../lib/eventColor";
@@ -122,6 +122,35 @@ function EventsAdminSection() {
   );
 }
 
+function FinanceRow({ Icon, label, desc, onClick }: { Icon: LucideIcon; label: string; desc: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 p-4 rounded-2xl text-left active:scale-[0.99] transition"
+      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+    >
+      <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}18` }}>
+        <Icon size={20} color={ACCENT} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>{label}</p>
+        <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>{desc}</p>
+      </div>
+      <ChevronRight size={18} color="#4a5568" />
+    </button>
+  );
+}
+
+function FinanceAdminSection() {
+  const soon = () => toast("준비 중인 기능이에요", { icon: "🚧" });
+  return (
+    <div className="px-4 pt-1 pb-24 flex flex-col gap-2.5">
+      <FinanceRow Icon={Receipt} label="청구 내역 관리" desc="청구·정산 내역을 관리해요" onClick={soon} />
+      <FinanceRow Icon={BookText} label="회계 장부 관리" desc="월별 수입·지출 장부" onClick={soon} />
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<SubTab>("events");
@@ -172,7 +201,7 @@ export default function AdminPage() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
           >
-            {tab === "events" ? <EventsAdminSection /> : <LoadingScreen />}
+            {tab === "events" ? <EventsAdminSection /> : <FinanceAdminSection />}
           </motion.div>
         </AnimatePresence>
       </div>
