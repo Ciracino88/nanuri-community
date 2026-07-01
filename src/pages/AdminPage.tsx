@@ -40,9 +40,6 @@ function AdminEventRow({ event, index }: { event: AdminRowEvent; index: number }
   const isDone = event._status === "done";
   const color = event._color;
   const meta = STATUS_META[event._status];
-  const dateLine = [event.event_date, event.place_name, `순서 ${event.segmentCount}개`]
-    .filter(Boolean)
-    .join(" · ");
 
   return (
     <motion.button
@@ -80,7 +77,7 @@ function AdminEventRow({ event, index }: { event: AdminRowEvent; index: number }
         <p className="text-sm font-bold truncate" style={{ color: isDone ? "#4a5568" : "#f0f2f8" }}>{event.title}</p>
         <p className="text-xs flex items-center gap-1 mt-0.5 truncate" style={{ color: isDone ? "#363d47" : "#6b7785" }}>
           <CalendarDays size={10} className="shrink-0" />
-          {dateLine}
+          {event.event_date}
         </p>
       </div>
       <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: meta.bg, color: meta.text }}>
