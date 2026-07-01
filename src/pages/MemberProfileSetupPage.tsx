@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "motion/react";
 import { Pencil } from "lucide-react";
 import BackButton from "../components/BackButton";
+import TextField from "../components/ui/TextField";
 import toast from "react-hot-toast";
 import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../store/authStore";
@@ -18,10 +19,10 @@ const BANKS = [
 ];
 
 const inputStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.06)",
+  background: "rgba(255,255,255,0.05)",
   border: "1px solid rgba(255,255,255,0.1)",
-  color: "white",
-  borderRadius: 14,
+  color: "#f0f2f8",
+  borderRadius: 12,
 };
 
 interface FormValues {
@@ -150,13 +151,12 @@ export default function MemberProfileSetupPage() {
         {/* 이름 */}
         <div className="flex flex-col gap-2">
           <FieldLabel>이름</FieldLabel>
-          <input
-            className="w-full px-4 py-3 text-sm outline-none focus:ring-2"
-            style={{ ...inputStyle, outlineColor: ACCENT }}
+          <TextField
             placeholder="이름을 입력하세요"
+            error={errors.name?.message}
+            accent={ACCENT}
             {...register("name", { required: "이름을 입력해주세요" })}
           />
-          {errors.name && <p className="text-xs" style={{ color: "#FF6B6B" }}>{errors.name.message}</p>}
         </div>
 
         {/* 팀 */}
@@ -250,11 +250,10 @@ export default function MemberProfileSetupPage() {
             )}
           </AnimatePresence>
 
-          <input
-            className="w-full px-4 py-3 text-sm outline-none focus:ring-2"
-            style={{ ...inputStyle, outlineColor: ACCENT }}
+          <TextField
             inputMode="numeric"
             placeholder="계좌번호를 입력하세요"
+            accent={ACCENT}
             {...register("account_number")}
           />
         </div>
@@ -262,11 +261,10 @@ export default function MemberProfileSetupPage() {
         {/* 연락처 */}
         <div className="flex flex-col gap-2">
           <FieldLabel>연락처</FieldLabel>
-          <input
-            className="w-full px-4 py-3 text-sm outline-none focus:ring-2"
-            style={{ ...inputStyle, outlineColor: ACCENT }}
+          <TextField
             type="tel"
             placeholder="010-0000-0000"
+            accent={ACCENT}
             {...register("phone")}
           />
         </div>

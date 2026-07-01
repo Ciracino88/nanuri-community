@@ -1,10 +1,11 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { CreditCard, Plus, Trash2, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import BackButton from "../../components/BackButton";
+import TextField from "../../components/ui/TextField";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { supabase } from "../../lib/supabase";
@@ -12,17 +13,6 @@ import { useAuthStore } from "../../store/authStore";
 import { TAB_COLORS } from "../../constants/theme";
 
 const ACCENT = TAB_COLORS.home;
-
-const inputStyle: CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  color: "#f0f2f8",
-  borderRadius: 12,
-  padding: "12px 14px",
-  fontSize: 14,
-  width: "100%",
-  outline: "none",
-};
 
 interface FormValues {
   title: string;
@@ -123,24 +113,24 @@ export default function MemberBillFormPage() {
           </div>
 
           {/* 제목 */}
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>제목</FieldLabel>
-            <input style={inputStyle} placeholder="예) 주일 행사 다과 구입" {...register("title", { required: "제목을 입력해주세요" })} />
-            {errors.title && <p className="text-xs" style={{ color: "#FF6B6B" }}>{errors.title.message}</p>}
-          </div>
+          <TextField
+            label="제목"
+            placeholder="예) 주일 행사 다과 구입"
+            error={errors.title?.message}
+            accent={ACCENT}
+            {...register("title", { required: "제목을 입력해주세요" })}
+          />
 
           {/* 금액 */}
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>금액</FieldLabel>
-            <input
-              type="number"
-              inputMode="numeric"
-              style={inputStyle}
-              placeholder="0"
-              {...register("amount", { required: "금액을 입력해주세요", min: { value: 1, message: "금액을 입력해주세요" } })}
-            />
-            {errors.amount && <p className="text-xs" style={{ color: "#FF6B6B" }}>{errors.amount.message}</p>}
-          </div>
+          <TextField
+            label="금액"
+            type="number"
+            inputMode="numeric"
+            placeholder="0"
+            error={errors.amount?.message}
+            accent={ACCENT}
+            {...register("amount", { required: "금액을 입력해주세요", min: { value: 1, message: "금액을 입력해주세요" } })}
+          />
 
           {/* 영수증 */}
           <div className="flex flex-col gap-1.5">
