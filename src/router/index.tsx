@@ -2,14 +2,9 @@
 import { createBrowserRouter } from "react-router-dom";
 import GatePage from "../pages/auth/GatePage";
 import MemberLoginPage from "../pages/auth/MemberLoginPage";
-import MemberBillFormPage from "../pages/bill/MemberBillFormPage";
 import MemberProfileSetupPage from "../pages/MemberProfileSetupPage";
-import BillFormPage from "../pages/bill/BillFormPage";
 import ProtectedRoute from "../components/ProtectedRoute";
-import AppShell from "../components/AppShell";
-import AccountingReportPage from "../pages/accounting/AccountingReportPage";
-import AccountingListPage from "../pages/accounting/AccountingListPage";
-import AccountingDetailPage from "../pages/accounting/AccountingDetailPage";
+import Layout from "../components/Layout";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import WorshipSchedulePage from "../pages/worship/WorshipSchedulePage";
@@ -32,17 +27,9 @@ export const router = createBrowserRouter([
     element: <MemberLoginPage />,
   },
   {
-    path: "/guest/form",
-    element: (
-      <ProtectedRoute>
-        <BillFormPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
     element: (
       <ProtectedRoute memberOnly>
-        <AppShell />
+        <Layout />
       </ProtectedRoute>
     ),
     children: [
@@ -52,13 +39,12 @@ export const router = createBrowserRouter([
       { path: "/profile", element: <ProfilePage /> },
       { path: "/gallery", element: <GalleryPage /> },
       { path: "/worship", element: <WorshipSchedulePage /> },
-      { path: "/member/form", element: <MemberBillFormPage /> },
     ],
   },
   {
     element: (
       <ProtectedRoute memberOnly setupPage>
-        <AppShell />
+        <Layout />
       </ProtectedRoute>
     ),
     children: [
@@ -68,7 +54,7 @@ export const router = createBrowserRouter([
   {
     element: (
       <ProtectedRoute memberOnly adminOnly>
-        <AppShell />
+        <Layout />
       </ProtectedRoute>
     ),
     children: [
@@ -77,9 +63,6 @@ export const router = createBrowserRouter([
       { path: "/admin/events/new", element: <EventBuilderPage /> },
       { path: "/admin/events/:id", element: <EventDetailPage /> },
       { path: "/admin/events/:id/results", element: <EventResultsPage /> },
-      { path: "/accounting", element: <AccountingListPage /> },
-      { path: "/accounting/new", element: <AccountingReportPage /> },
-      { path: "/accounting/:id", element: <AccountingDetailPage /> },
     ],
   },
 ]);

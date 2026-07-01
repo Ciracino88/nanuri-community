@@ -136,9 +136,9 @@ html, body, #root {
   overflow-x: hidden;
 }
 
-/* 앱 프레임(max-w-md) 바깥 영역 — 데스크톱에서만 보임 */
+/* 전역 다크 배경 (앱 캔버스). 페이지·컴포넌트는 배경을 따로 지정하지 않음 */
 body {
-  background-color: #e8eaed;
+  background-color: #0f1117;
 }
 
 @media print {
