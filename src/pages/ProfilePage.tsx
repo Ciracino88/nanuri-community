@@ -110,6 +110,7 @@ export default function ProfilePage() {
           style={{ background: "rgba(255,107,107,0.12)", color: "#FF6B6B", border: "1px solid rgba(255,107,107,0.2)" }}
           whileTap={{ scale: 0.96 }}
           onClick={async () => {
+            if (!confirm("로그아웃할까요?")) return;
             await signOut();
             navigate("/");
           }}
