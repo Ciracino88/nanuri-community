@@ -122,7 +122,7 @@ function EventsAdminSection() {
   );
 }
 
-function FinanceRow({ Icon, label, desc, onClick }: { Icon: LucideIcon; label: string; desc: string; onClick: () => void }) {
+function FinanceRow({ Icon, label, desc, badge, onClick }: { Icon: LucideIcon; label: string; desc: string; badge?: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -133,7 +133,14 @@ function FinanceRow({ Icon, label, desc, onClick }: { Icon: LucideIcon; label: s
         <Icon size={20} color={ACCENT} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>{label}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>{label}</p>
+          {badge && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: "rgba(255,255,255,0.08)", color: "#8892a0" }}>
+              {badge}
+            </span>
+          )}
+        </div>
         <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>{desc}</p>
       </div>
       <ChevronRight size={18} color="#4a5568" />
@@ -145,7 +152,7 @@ function FinanceAdminSection() {
   const soon = () => toast("준비 중인 기능이에요", { icon: "🚧" });
   return (
     <div className="px-4 pt-1 pb-24 flex flex-col gap-2.5">
-      <FinanceRow Icon={Receipt} label="청구 내역 관리" desc="청구·정산 내역을 관리해요" onClick={soon} />
+      <FinanceRow Icon={Receipt} label="청구 내역 관리" desc="청구·정산 내역을 관리해요" badge="준비 중" onClick={soon} />
       <FinanceRow Icon={BookText} label="회계 장부 관리" desc="월별 수입·지출 장부" onClick={soon} />
     </div>
   );
