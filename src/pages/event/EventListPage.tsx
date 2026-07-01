@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { CalendarDays, ChevronRight } from "lucide-react";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEventList } from "../../hooks/useEvents";
-import { formatEventDate } from "../../lib/eventTime";
 import { computeEventStatus, type EventStatus } from "../../lib/eventStatus";
 import { TAB_COLORS } from "../../constants/theme";
 import type { EventRecord } from "../../types/event";
@@ -26,7 +25,7 @@ function EventCard({ event, index, onOpen }: { event: CardEvent; index: number; 
   const isDone = event._status === "done";
   const color = event._color;
   const dateLine = [
-    formatEventDate(event.event_date),
+    event.event_date,
     event.start_time ? event.start_time.slice(0, 5) : null,
     event.place_name,
   ].filter(Boolean).join(" · ");

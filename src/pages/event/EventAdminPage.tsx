@@ -7,7 +7,6 @@ import PageHero from "../../components/PageHero";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { supabase } from "../../lib/supabase";
 import { deleteImage } from "../../lib/deleteImage";
-import { formatEventDate } from "../../lib/eventTime";
 import { computeEventStatus, EVENT_STATUS_LABEL, type EventStatus } from "../../lib/eventStatus";
 import { useAdminEvents, eventKeys } from "../../hooks/useEvents";
 import { TAB_COLORS } from "../../constants/theme";
@@ -75,7 +74,7 @@ export default function EventAdminPage() {
                       </span>
                     </div>
                     <p className="text-caption text-fg-faint mt-0.5 truncate">
-                      {formatEventDate(ev.event_date)}
+                      {ev.event_date}
                       {ev.place_name && ` · ${ev.place_name}`}
                       {` · 순서 ${ev.segmentCount}개`}
                     </p>

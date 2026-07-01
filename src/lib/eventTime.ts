@@ -6,9 +6,14 @@ export function formatClock(date: Date): string {
   return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
-/** ISO 날짜 문자열 → 한국어 날짜. 기본은 "2026. 06. 30." */
-export function formatEventDate(iso: string, opts?: Intl.DateTimeFormatOptions): string {
-  return new Date(iso).toLocaleDateString("ko-KR", opts ?? { year: "numeric", month: "2-digit", day: "2-digit" });
+/**
+ * 표시용 날짜 문자열("2021.05.20" 또는 "2021.05.20~2021.05.22")에서
+ * 시작 날짜만 "YYYY-MM-DD"로 파싱. 형식이 안 맞으면 null.
+ */
+export function parseStartDate(dateText: string | null | undefined): string | null {
+  if (!dateText) return null;
+  const first = dateText.split("~")[0].trim().replace(/\./g, "-");
+  return /^\d{4}-\d{2}-\d{2}$/.test(first) ? first : null;
 }
 
 /** 순서들의 소요시간 합(분) */
@@ -24,7 +29,7 @@ export type TimelineSegment<T extends Segment> = T & {
 
 /**
  * 모이는 시각 + 앞 순서들 소요시간을 누적해 각 순서의 시작·종료 시각과 상태를 계산.
- * start_time 이 없으면 시각은 null.
+ * event_date 문자열에서 시작 날짜를 파싱. start_time·날짜가 없으면 시각은 null.
  */
 export function buildTimeline<T extends Segment>(
   eventDate: string,
@@ -32,7 +37,8 @@ export function buildTimeline<T extends Segment>(
   segments: T[],
   now: Date = new Date()
 ): TimelineSegment<T>[] {
-  const startBase = startTime ? new Date(`${eventDate}T${startTime}`) : null;
+  const iso = parseStartDate(eventDate);
+  const startBase = startTime && iso ? new Date(`${iso}T${startTime}`) : null;
   let cursor = startBase ? new Date(startBase) : null;
 
   return segments.map((s) => {

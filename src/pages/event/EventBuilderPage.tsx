@@ -1,57 +1,83 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
+import { ChevronLeft, CalendarDays, Clock, MapPin, Users, DollarSign, Star, Pencil, Plus, ChevronDown, Trash2, type LucideIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import PageContainer from "../../components/PageContainer";
-import Input from "../../components/ui/Input";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { supabase } from "../../lib/supabase";
+import { TAB_COLORS } from "../../constants/theme";
 
-interface FormValues {
-  title: string;
-  eventDate: string;
-  startTime: string;
-  placeName: string;
-  description: string;
-}
+const ACCENT = TAB_COLORS.admin;
 
-const EMOJI_PRESETS = ["⛺", "🏃", "🎳", "🙏", "🍽️", "🎵", "🎤", "🎉", "🎁", "📖", "☕", "🕯️", "🌱", "🎪", "🏕️", "💒"];
+const CUSTOM_FIELD_OPTIONS: { key: string; label: string; Icon: LucideIcon }[] = [
+  { key: "target", label: "대상", Icon: Users },
+  { key: "cost", label: "비용", Icon: DollarSign },
+  { key: "contact", label: "담당자", Icon: Star },
+  { key: "note", label: "비고", Icon: Pencil },
+];
 
-const rowInput = "px-3 py-2 text-emphasis rounded-lg border border-line bg-card outline-none focus:ring-2 focus:ring-purple-subtle focus:border-purple transition";
+const inputStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#f0f2f8",
+  borderRadius: 12,
+  padding: "12px 14px",
+  fontSize: 14,
+  width: "100%",
+  outline: "none",
+};
+const dateStyle: CSSProperties = { ...inputStyle, colorScheme: "dark" };
+
+interface CustomField { key: string; label: string; Icon: LucideIcon; value: string }
 
 export default function EventBuilderPage() {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>();
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [multiDay, setMultiDay] = useState(false);
+  const [time, setTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [fields, setFields] = useState<CustomField[]>([]);
+  const [showPicker, setShowPicker] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { receiptFile: posterFile, receiptPreview: posterPreview, handleReceiptChange: handlePoster, reset: resetPoster } = useReceiptUpload();
-  const [emoji, setEmoji] = useState("");
-  const [details, setDetails] = useState<{ label: string; value: string }[]>([]);
 
-  const addDetail = () => setDetails((p) => [...p, { label: "", value: "" }]);
-  const updateDetail = (i: number, key: "label" | "value", val: string) =>
-    setDetails((p) => p.map((d, idx) => (idx === i ? { ...d, [key]: val } : d)));
-  const removeDetail = (i: number) => setDetails((p) => p.filter((_, idx) => idx !== i));
+  const addable = CUSTOM_FIELD_OPTIONS.filter((o) => !fields.find((f) => f.key === o.key));
+  const canSave = !!title.trim() && !!date && !!location.trim();
 
-  const onSubmit = async (values: FormValues) => {
+  const addField = (opt: (typeof CUSTOM_FIELD_OPTIONS)[number]) => {
+    setFields((p) => [...p, { ...opt, value: "" }]);
+    setShowPicker(false);
+  };
+  const updateField = (key: string, value: string) => setFields((p) => p.map((f) => (f.key === key ? { ...f, value } : f)));
+  const removeField = (key: string) => setFields((p) => p.filter((f) => f.key !== key));
+
+  const handleSave = async () => {
+    if (!canSave) {
+      toast.error("제목, 날짜, 장소는 필수예요");
+      return;
+    }
+    setSaving(true);
     try {
       let imageUrl: string | null = null;
       if (posterFile) imageUrl = await uploadReceipt(posterFile, "events");
 
-      const cleanDetails = details
-        .filter((d) => d.label.trim() && d.value.trim())
-        .map((d) => ({ label: d.label.trim(), value: d.value.trim() }));
+      const details = fields.filter((f) => f.value.trim()).map((f) => ({ label: f.label, value: f.value.trim() }));
+
+      const dots = (d: string) => d.replace(/-/g, ".");
+      const eventDateStr = multiDay && endDate ? `${dots(date)}~${dots(endDate)}` : dots(date);
 
       const { data: event, error } = await supabase
         .from("events")
         .insert({
-          title: values.title.trim(),
-          event_date: values.eventDate,
-          start_time: values.startTime,
-          place_name: values.placeName.trim() || null,
+          title: title.trim(),
+          event_date: eventDateStr,
+          start_time: time || null,
+          place_name: location.trim(),
           image_url: imageUrl,
-          emoji: emoji || null,
-          description: values.description.trim() || null,
-          details: cleanDetails,
+          details,
         })
         .select("id")
         .single();
@@ -61,156 +87,177 @@ export default function EventBuilderPage() {
       navigate(`/admin/events/${event.id}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "저장에 실패했어요");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <PageContainer width="default">
-
-      <div className="flex items-center gap-3">
-        <button onClick={() => navigate("/admin/events")} className="text-fg-faint hover:text-fg-muted transition" aria-label="뒤로">
-          <i className="ti ti-arrow-left text-heading" aria-hidden="true" />
-        </button>
-        <div>
-          <h1 className="text-heading font-medium text-fg-strong">행사 만들기</h1>
-          <p className="text-body text-fg-faint mt-0.5">정보를 입력하고 저장하세요</p>
-        </div>
+    <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
+      {/* 헤더 */}
+      <div className="flex items-center gap-3 px-4 pt-5 pb-4 sticky top-0 z-10" style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <motion.button
+          className="flex items-center justify-center rounded-full"
+          style={{ width: 36, height: 36, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+          whileTap={{ scale: 0.88 }}
+          onClick={() => navigate(-1)}
+          aria-label="뒤로"
+        >
+          <ChevronLeft size={18} color="#f0f2f8" />
+        </motion.button>
+        <h1 className="flex-1 text-base font-black" style={{ color: "#f0f2f8" }}>행사 추가</h1>
+        <motion.button
+          className="px-4 py-2 rounded-xl text-sm font-black"
+          style={{ background: canSave ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT}99)` : "rgba(255,255,255,0.06)", color: canSave ? "#0f1117" : "#4a5568" }}
+          whileTap={canSave ? { scale: 0.94 } : {}}
+          onClick={handleSave}
+          disabled={saving}
+        >
+          {saving ? "저장 중..." : "저장"}
+        </motion.button>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4">
-          <Input
-            label="행사 이름"
-            placeholder="예: 여름 수련회"
-            error={errors.title?.message}
-            {...register("title", { required: "행사 이름을 입력해주세요" })}
-          />
-          <Input
-            label="날짜"
-            type="date"
-            error={errors.eventDate?.message}
-            {...register("eventDate", { required: "날짜를 선택해주세요" })}
-          />
-          <Input
-            label="모이는 시각"
-            type="time"
-            error={errors.startTime?.message}
-            {...register("startTime", { required: "모이는 시각을 선택해주세요" })}
-          />
-          <Input label="장소 (선택)" placeholder="예: 양평 수련원" {...register("placeName")} />
-          <Input label="한 줄 설명 (선택)" placeholder="예: 전교인이 함께하는 2박 3일 수련회" {...register("description")} />
+      <div className="px-4 pt-5 pb-10 flex flex-col gap-6" style={{ paddingBottom: "calc(2.5rem + env(safe-area-inset-bottom))" }}>
 
-          {/* 대표 이모지 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-body font-medium text-fg-muted">대표 이모지 (선택)</label>
-            <div className="flex flex-wrap gap-2">
-              {EMOJI_PRESETS.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  onClick={() => setEmoji(emoji === e ? "" : e)}
-                  className={`w-10 h-10 rounded-lg text-xl flex items-center justify-center border transition ${
-                    emoji === e ? "border-purple bg-purple-subtle" : "border-line-soft bg-card hover:border-line"
-                  }`}
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
+        {/* 필수 정보 */}
+        <div className="flex flex-col gap-3">
+          <label className="text-xs font-bold uppercase" style={{ color: ACCENT, letterSpacing: "0.15em" }}>필수 정보</label>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6b7785" }}>행사 제목</span>
+            <input style={inputStyle} placeholder="예) 여름 수련회" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
 
-          {/* 상세 정보 */}
           <div className="flex flex-col gap-2">
-            <label className="text-body font-medium text-fg-muted">상세 정보 (선택)</label>
-            {details.map((d, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <input
-                  placeholder="항목 (예: 대상)"
-                  value={d.label}
-                  onChange={(e) => updateDetail(i, "label", e.target.value)}
-                  className={`w-28 shrink-0 ${rowInput}`}
-                />
-                <input
-                  placeholder="내용 (예: 전교인)"
-                  value={d.value}
-                  onChange={(e) => updateDetail(i, "value", e.target.value)}
-                  className={`flex-1 min-w-0 ${rowInput}`}
-                />
-                <button type="button" onClick={() => removeDetail(i)} aria-label="삭제" className="text-fg-faint hover:text-danger transition shrink-0">
-                  <i className="ti ti-trash text-emphasis" aria-hidden="true" />
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addDetail}
-              className="w-full py-2.5 border border-dashed border-line rounded-lg text-body text-fg-faint hover:bg-surface transition flex items-center justify-center gap-1.5"
-            >
-              <i className="ti ti-plus text-emphasis" aria-hidden="true" />
-              상세 항목 추가
-            </button>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
+                <CalendarDays size={11} /> 날짜
+              </span>
+              <motion.button
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold"
+                style={{
+                  background: multiDay ? `${ACCENT}22` : "rgba(255,255,255,0.06)",
+                  border: multiDay ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.1)",
+                  color: multiDay ? ACCENT : "#4a5568",
+                }}
+                whileTap={{ scale: 0.92 }}
+                onClick={() => { setMultiDay((v) => !v); setEndDate(""); }}
+              >
+                <CalendarDays size={10} />
+                {multiDay ? "기간 선택 중" : "기간 설정"}
+              </motion.button>
+            </div>
+            <AnimatePresence initial={false} mode="wait">
+              {!multiDay ? (
+                <motion.input key="single" type="date" style={dateStyle} value={date} onChange={(e) => setDate(e.target.value)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} />
+              ) : (
+                <motion.div key="range" className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                  <input type="date" style={{ ...dateStyle, flex: 1 }} value={date} onChange={(e) => setDate(e.target.value)} />
+                  <span className="text-xs font-bold shrink-0" style={{ color: "#4a5568" }}>–</span>
+                  <input type="date" style={{ ...dateStyle, flex: 1 }} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* 포스터 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-body font-medium text-fg-muted">포스터 (선택)</label>
-            {posterPreview ? (
-              <div className="relative">
-                <label className="block cursor-pointer">
-                  <img src={posterPreview} alt="포스터 미리보기" className="w-full h-auto rounded-xl border border-line-soft" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handlePoster(file);
-                    }}
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={resetPoster}
-                  aria-label="포스터 삭제"
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full text-white flex items-center justify-center active:scale-90 transition"
-                  style={{ background: "rgba(0,0,0,0.55)" }}
-                >
-                  <i className="ti ti-x text-emphasis" aria-hidden="true" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center gap-2 w-full py-6 border-2 border-dashed border-line rounded-lg cursor-pointer hover:bg-surface transition">
-                <span className="text-display text-fg-faint">📎</span>
-                <p className="text-body text-fg-faint">클릭해서 업로드</p>
-                <p className="text-caption text-fg-faint">JPG, PNG 지원</p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePoster(file);
-                  }}
-                />
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
+              <Clock size={11} /> 모이는 시각 (선택)
+            </span>
+            <input type="time" style={dateStyle} value={time} onChange={(e) => setTime(e.target.value)} />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
+              <MapPin size={11} /> 장소
+            </span>
+            <input style={inputStyle} placeholder="예) 교회 본당" value={location} onChange={(e) => setLocation(e.target.value)} />
+          </div>
+        </div>
+
+        {/* 포스터 */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>포스터</label>
+          {posterPreview ? (
+            <div className="relative">
+              <label className="block cursor-pointer">
+                <img src={posterPreview} alt="포스터 미리보기" className="w-full h-auto rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePoster(f); }} />
               </label>
-            )}
-          </div>
+              <button type="button" onClick={resetPoster} aria-label="포스터 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(0,0,0,0.55)", color: "#fff" }}>
+                <Trash2 size={15} />
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center gap-1.5 w-full py-7 rounded-xl cursor-pointer" style={{ border: "1.5px dashed rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.03)" }}>
+              <Plus size={20} color="#4a5568" />
+              <p className="text-xs font-semibold" style={{ color: "#6b7785" }}>포스터 업로드</p>
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePoster(f); }} />
+            </label>
+          )}
         </div>
 
-        <div className="bg-purple-subtle border border-purple/15 rounded-xl px-4 py-3 flex items-center gap-2.5">
-          <i className="ti ti-info-circle text-purple text-emphasis shrink-0" aria-hidden="true" />
-          <p className="text-caption text-purple">저장하면 순서(프로그램)를 추가하는 화면으로 넘어가요</p>
+        {/* 추가 정보 (커스텀 필드) */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>추가 정보</label>
+
+          <AnimatePresence initial={false}>
+            {fields.map((f) => (
+              <motion.div key={f.key} className="flex flex-col gap-1" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
+                    <f.Icon size={11} /> {f.label}
+                  </span>
+                  <motion.button whileTap={{ scale: 0.85 }} onClick={() => removeField(f.key)} aria-label="삭제">
+                    <Trash2 size={13} color="#4a5568" />
+                  </motion.button>
+                </div>
+                <input style={inputStyle} placeholder={`${f.label} 입력`} value={f.value} onChange={(e) => updateField(f.key, e.target.value)} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {addable.length > 0 && (
+            <div className="relative">
+              <motion.button
+                className="w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-bold"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1.5px dashed rgba(255,255,255,0.12)", color: "#4a5568" }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowPicker((v) => !v)}
+              >
+                <Plus size={15} /> 필드 추가
+                <motion.div animate={{ rotate: showPicker ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronDown size={14} />
+                </motion.div>
+              </motion.button>
+              <AnimatePresence>
+                {showPicker && (
+                  <motion.div
+                    className="absolute left-0 right-0 rounded-xl overflow-hidden mt-1 z-10"
+                    style={{ background: "rgba(22,25,35,0.98)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(20px)" }}
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {addable.map((opt, i) => (
+                      <button
+                        key={opt.key}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left"
+                        style={{ color: "#c0c8d4", borderBottom: i < addable.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}
+                        onClick={() => addField(opt)}
+                      >
+                        <opt.Icon size={15} color="#4a5568" />
+                        {opt.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full py-2.5 px-4 rounded-lg text-emphasis font-medium bg-purple text-white transition hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? "처리 중..." : "저장하고 순서 추가"}
-        </button>
-      </form>
-
-    </PageContainer>
+      </div>
+    </div>
   );
 }

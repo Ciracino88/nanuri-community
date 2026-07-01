@@ -20,7 +20,7 @@ import { CSS } from "@dnd-kit/utilities";
 import PageContainer from "../../components/PageContainer";
 import LoadingScreen from "../../components/LoadingScreen";
 import { supabase } from "../../lib/supabase";
-import { buildTimeline, formatClock, formatEventDate, type TimelineSegment } from "../../lib/eventTime";
+import { buildTimeline, formatClock, type TimelineSegment } from "../../lib/eventTime";
 import { useEventDetail, eventKeys, type EventDetailData } from "../../hooks/useEvents";
 import type { Segment } from "../../types/event";
 
@@ -180,7 +180,7 @@ export default function EventDetailPage() {
         <div className="min-w-0 flex-1">
           <h1 className="text-heading font-medium text-fg-strong truncate">{event.title}</h1>
           <p className="text-caption text-fg-faint mt-0.5">
-            {formatEventDate(event.event_date)}
+            {event.event_date}
             {event.start_time && ` · ${event.start_time.slice(0, 5)} 모임`}
             {event.place_name && ` · ${event.place_name}`}
           </p>

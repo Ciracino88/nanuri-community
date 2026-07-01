@@ -1,3 +1,5 @@
+import { parseStartDate } from "./eventTime";
+
 export type EventStatus = "upcoming" | "live" | "done";
 
 export const EVENT_STATUS_LABEL: Record<EventStatus, string> = {
@@ -19,11 +21,13 @@ export function computeEventStatus(
   totalDurationMin: number,
   now: Date = new Date()
 ): EventStatus {
-  const start = new Date(`${eventDate}T${startTime ?? "00:00"}`);
+  const iso = parseStartDate(eventDate);
+  if (!iso) return "upcoming";
+  const start = new Date(`${iso}T${startTime ?? "00:00"}`);
   const end =
     totalDurationMin > 0
       ? new Date(start.getTime() + totalDurationMin * 60000)
-      : new Date(`${eventDate}T23:59:59`);
+      : new Date(`${iso}T23:59:59`);
 
   if (now < start) return "upcoming";
   if (now > end) return "done";

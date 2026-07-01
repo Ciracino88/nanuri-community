@@ -8,7 +8,7 @@ import MoodRating from "../../components/ui/MoodRating";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { generateNickname } from "../../lib/generateNickname";
-import { buildTimeline, formatClock, formatEventDate } from "../../lib/eventTime";
+import { buildTimeline, formatClock } from "../../lib/eventTime";
 import { MOOD_BY_VALUE, aggregateMoods } from "../../lib/mood";
 import { useEventTimeline, eventKeys } from "../../hooks/useEvents";
 import type { Evaluation } from "../../types/event";
@@ -84,7 +84,7 @@ export default function EventTimelinePage() {
       <div style={{ animation: "fadeUp 0.4s ease both" }}>
         <h1 className="text-heading font-medium text-fg-strong">{event.title}</h1>
         <p className="text-caption text-fg-faint mt-1">
-          {formatEventDate(event.event_date, { month: "long", day: "numeric", weekday: "short" })}
+          {event.event_date}
           {event.start_time && ` · ${event.start_time.slice(0, 5)} 모임`}
           {event.place_name && ` · ${event.place_name}`}
         </p>
