@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import {
   DndContext,
@@ -20,48 +20,11 @@ import { CSS } from "@dnd-kit/utilities";
 import PageContainer from "../../components/PageContainer";
 import LoadingScreen from "../../components/LoadingScreen";
 import { supabase } from "../../lib/supabase";
+import { buildTimeline, formatClock, formatEventDate, type TimelineSegment } from "../../lib/eventTime";
+import { useEventDetail, eventKeys, type EventDetailData } from "../../hooks/useEvents";
+import type { Segment } from "../../types/event";
 
-interface EventInfo {
-  id: string;
-  title: string;
-  event_date: string;
-  start_time: string | null;
-  place_name: string | null;
-  image_url: string | null;
-  results_public: boolean;
-  status: string;
-}
-
-interface Segment {
-  id: string;
-  duration_min: number;
-  title: string;
-  description: string | null;
-  sort: number;
-}
-
-interface TimelineItem extends Segment {
-  clock: Date | null;
-}
-
-interface DetailData {
-  event: EventInfo | null;
-  segments: Segment[];
-}
-
-async function fetchEventDetail(id: string): Promise<DetailData> {
-  const [{ data: event }, { data: segments }] = await Promise.all([
-    supabase.from("events").select("id, title, event_date, start_time, place_name, image_url, results_public, status").eq("id", id).single(),
-    supabase.from("event_segments").select("id, duration_min, title, description, sort").eq("event_id", id).order("sort"),
-  ]);
-  return { event: event as EventInfo | null, segments: (segments ?? []) as Segment[] };
-}
-
-function formatClock(date: Date) {
-  return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
-}
-
-function SortableSegmentRow({ item, onDelete }: { item: TimelineItem; onDelete: () => void }) {
+function SortableSegmentRow({ item, onDelete }: { item: TimelineSegment<Segment>; onDelete: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -88,9 +51,9 @@ function SortableSegmentRow({ item, onDelete }: { item: TimelineItem; onDelete: 
       </button>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          {item.clock && (
+          {item.start && (
             <span className="text-caption font-medium text-purple bg-purple-subtle rounded-md px-1.5 py-0.5 shrink-0">
-              {formatClock(item.clock)}
+              {formatClock(item.start)}
             </span>
           )}
           <p className="text-body font-medium text-fg-strong truncate">{item.title}</p>
@@ -120,11 +83,7 @@ export default function EventDetailPage() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin_event", id],
-    queryFn: () => fetchEventDetail(id!),
-    enabled: !!id,
-  });
+  const { data, isLoading } = useEventDetail(id);
   const event = data?.event ?? null;
   const segments = data?.segments ?? [];
 
@@ -144,7 +103,7 @@ export default function EventDetailPage() {
       setDuration("");
       setTitle("");
       setDescription("");
-      queryClient.invalidateQueries({ queryKey: ["admin_event", id] });
+      queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "순서 추가에 실패했어요"),
   });
@@ -154,7 +113,7 @@ export default function EventDetailPage() {
       const { error } = await supabase.from("event_segments").delete().eq("id", segmentId);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin_event", id] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) }),
     onError: () => toast.error("삭제에 실패했어요"),
   });
 
@@ -165,7 +124,7 @@ export default function EventDetailPage() {
     },
     onSuccess: (_, next) => {
       toast.success(next ? "참여자에게 결과를 공개했어요" : "결과를 비공개로 바꿨어요");
-      queryClient.invalidateQueries({ queryKey: ["admin_event", id] });
+      queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) });
     },
     onError: () => toast.error("변경에 실패했어요"),
   });
@@ -179,10 +138,10 @@ export default function EventDetailPage() {
         })
       );
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin_event", id] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) }),
     onError: () => {
       toast.error("순서 변경에 실패했어요");
-      queryClient.invalidateQueries({ queryKey: ["admin_event", id] });
+      queryClient.invalidateQueries({ queryKey: eventKeys.detail(id) });
     },
   });
 
@@ -195,15 +154,7 @@ export default function EventDetailPage() {
     );
   }
 
-  // 모이는 시각 + 앞 순서들 소요시간을 누적해 각 순서 시작 시각 계산
-  const startBase = event.start_time ? new Date(`${event.event_date}T${event.start_time}`) : null;
-  let cursor = startBase ? new Date(startBase) : null;
-  const timeline: TimelineItem[] = segments.map((s) => {
-    const clock = cursor ? new Date(cursor) : null;
-    if (cursor) cursor = new Date(cursor.getTime() + s.duration_min * 60000);
-    return { ...s, clock };
-  });
-
+  const timeline = buildTimeline(event.event_date, event.start_time, segments);
   const canAdd = !!title.trim() && Number(duration) > 0 && !addMutation.isPending;
 
   const handleDragEnd = (e: DragEndEvent) => {
@@ -213,7 +164,7 @@ export default function EventDetailPage() {
     const newIndex = segments.findIndex((s) => s.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
     const newOrder = arrayMove(segments, oldIndex, newIndex);
-    queryClient.setQueryData(["admin_event", id], (old: DetailData | undefined) =>
+    queryClient.setQueryData(eventKeys.detail(id), (old: EventDetailData | undefined) =>
       old ? { ...old, segments: newOrder } : old
     );
     reorderMutation.mutate(newOrder.map((s) => s.id));
@@ -229,7 +180,7 @@ export default function EventDetailPage() {
         <div className="min-w-0 flex-1">
           <h1 className="text-heading font-medium text-fg-strong truncate">{event.title}</h1>
           <p className="text-caption text-fg-faint mt-0.5">
-            {new Date(event.event_date).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" })}
+            {formatEventDate(event.event_date)}
             {event.start_time && ` · ${event.start_time.slice(0, 5)} 모임`}
             {event.place_name && ` · ${event.place_name}`}
           </p>

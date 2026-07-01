@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import PageContainer from "../../components/PageContainer";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -8,75 +8,10 @@ import MoodRating from "../../components/ui/MoodRating";
 import { useAuthStore } from "../../store/authStore";
 import { supabase } from "../../lib/supabase";
 import { generateNickname } from "../../lib/generateNickname";
-
-interface EventInfo {
-  id: string;
-  title: string;
-  event_date: string;
-  start_time: string | null;
-  place_name: string | null;
-  image_url: string | null;
-  results_public: boolean;
-}
-
-interface AggEval {
-  segment_id: string;
-  mood: number | null;
-  comment: string | null;
-  nickname: string | null;
-}
-
-interface Segment {
-  id: string;
-  duration_min: number;
-  title: string;
-  description: string | null;
-  sort: number;
-}
-
-interface MyEval {
-  id: string;
-  segment_id: string;
-  mood: number | null;
-  comment: string | null;
-}
-
-const MOOD_ICON: Record<number, string> = { 1: "ti-mood-sad", 2: "ti-mood-empty", 3: "ti-mood-happy" };
-const MOOD_LABEL: Record<number, string> = { 1: "불만족", 2: "평범", 3: "만족" };
-const MOOD_COLOR: Record<number, string> = { 1: "text-danger", 2: "text-warning", 3: "text-success" };
-const MOOD_BAR: Record<number, string> = { 1: "bg-danger", 2: "bg-warning", 3: "bg-success" };
-
-async function fetchTimeline(id: string, userId: string | undefined) {
-  const { data: event } = await supabase
-    .from("events").select("id, title, event_date, start_time, place_name, image_url, results_public").eq("id", id).single();
-  const { data: segments } = await supabase
-    .from("event_segments").select("id, duration_min, title, description, sort").eq("event_id", id).order("sort");
-  const segIds = (segments ?? []).map((s) => s.id);
-  let evals: MyEval[] = [];
-  let allEvals: AggEval[] = [];
-  if (segIds.length) {
-    if (userId) {
-      const { data } = await supabase
-        .from("segment_evaluations")
-        .select("id, segment_id, mood, comment")
-        .eq("user_id", userId)
-        .in("segment_id", segIds);
-      evals = (data ?? []) as MyEval[];
-    }
-    if ((event as EventInfo | null)?.results_public) {
-      const { data } = await supabase
-        .from("segment_evaluations")
-        .select("segment_id, mood, comment, nickname")
-        .in("segment_id", segIds);
-      allEvals = (data ?? []) as AggEval[];
-    }
-  }
-  return { event: event as EventInfo | null, segments: (segments ?? []) as Segment[], evals, allEvals };
-}
-
-function formatClock(date: Date) {
-  return date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
-}
+import { buildTimeline, formatClock, formatEventDate } from "../../lib/eventTime";
+import { MOOD_BY_VALUE, aggregateMoods } from "../../lib/mood";
+import { useEventTimeline, eventKeys } from "../../hooks/useEvents";
+import type { Evaluation } from "../../types/event";
 
 export default function EventTimelinePage() {
   const { id } = useParams<{ id: string }>();
@@ -88,18 +23,14 @@ export default function EventTimelinePage() {
   const [draftComment, setDraftComment] = useState("");
   const [statsSegId, setStatsSegId] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["timeline", id, user?.id],
-    queryFn: () => fetchTimeline(id!, user?.id),
-    enabled: !!id,
-  });
+  const { data, isLoading } = useEventTimeline(id, user?.id);
   const event = data?.event ?? null;
   const segments = data?.segments ?? [];
-  const evalBySegment = new Map((data?.evals ?? []).map((e) => [e.segment_id, e]));
+  const evalBySegment = new Map((data?.myEvals ?? []).map((e) => [e.segment_id, e]));
   const allEvals = data?.allEvals ?? [];
 
   const submitMutation = useMutation({
-    mutationFn: async ({ segmentId, existing }: { segmentId: string; existing?: MyEval }) => {
+    mutationFn: async ({ segmentId, existing }: { segmentId: string; existing?: Evaluation }) => {
       if (existing) {
         const { error } = await supabase
           .from("segment_evaluations")
@@ -122,7 +53,7 @@ export default function EventTimelinePage() {
       setDraftMood(0);
       setDraftComment("");
       toast.success("평가가 저장됐어요");
-      queryClient.invalidateQueries({ queryKey: ["timeline", id, user?.id] });
+      queryClient.invalidateQueries({ queryKey: eventKeys.timeline(id, user?.id) });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "저장에 실패했어요"),
   });
@@ -136,23 +67,10 @@ export default function EventTimelinePage() {
     );
   }
 
-  // 각 순서 시작 시각 + 종료 시각 계산
-  const startBase = event.start_time ? new Date(`${event.event_date}T${event.start_time}`) : null;
-  let cursor = startBase ? new Date(startBase) : null;
-  const now = new Date();
-  const timeline = segments.map((s) => {
-    const start = cursor ? new Date(cursor) : null;
-    const end = start ? new Date(start.getTime() + s.duration_min * 60000) : null;
-    if (cursor) cursor = new Date(cursor.getTime() + s.duration_min * 60000);
-    const started = start ? now >= start : true;
-    const ended = end ? now >= end : false;
-    const status = !started ? "upcoming" : ended ? "done" : "live";
-    return { ...s, start, status };
-  });
-
+  const timeline = buildTimeline(event.event_date, event.start_time, segments);
   const statsSeg = statsSegId ? timeline.find((s) => s.id === statsSegId) : null;
 
-  const openEditor = (segmentId: string, existing?: MyEval) => {
+  const openEditor = (segmentId: string, existing?: Evaluation) => {
     setOpenId(segmentId);
     setDraftMood(existing?.mood ?? 0);
     setDraftComment(existing?.comment ?? "");
@@ -165,7 +83,7 @@ export default function EventTimelinePage() {
       <div>
         <h1 className="text-heading font-medium text-fg-strong">{event.title}</h1>
         <p className="text-caption text-fg-faint mt-1">
-          {new Date(event.event_date).toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
+          {formatEventDate(event.event_date, { month: "long", day: "numeric", weekday: "short" })}
           {event.start_time && ` · ${event.start_time.slice(0, 5)} 모임`}
           {event.place_name && ` · ${event.place_name}`}
         </p>
@@ -240,8 +158,8 @@ export default function EventTimelinePage() {
                     <div className="flex items-center gap-2">
                       {myEval.mood && (
                         <span className="flex items-center gap-1.5 text-caption text-fg">
-                          <i className={`ti ${MOOD_ICON[myEval.mood]} text-emphasis text-info`} aria-hidden="true" />
-                          {MOOD_LABEL[myEval.mood]}
+                          <i className={`ti ${MOOD_BY_VALUE[myEval.mood].icon} text-emphasis text-info`} aria-hidden="true" />
+                          {MOOD_BY_VALUE[myEval.mood].label}
                         </span>
                       )}
                       {myEval.comment && <span className="text-caption text-fg-faint truncate">· {myEval.comment}</span>}
@@ -281,7 +199,7 @@ export default function EventTimelinePage() {
       {/* 순서별 통계 모달 */}
       {statsSeg && (() => {
         const segAll = allEvals.filter((e) => e.segment_id === statsSeg.id);
-        const total = segAll.length;
+        const { total, buckets } = aggregateMoods(segAll);
         const comments = segAll.filter((c) => c.comment && c.comment.trim());
         return (
           <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" onClick={() => setStatsSegId(null)}>
@@ -306,19 +224,15 @@ export default function EventTimelinePage() {
                 <p className="text-body text-fg-faint text-center py-4">아직 평가가 없어요</p>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {[1, 2, 3].map((v) => {
-                    const count = segAll.filter((e) => e.mood === v).length;
-                    const pct = total ? Math.round((count / total) * 100) : 0;
-                    return (
-                      <div key={v} className="flex items-center gap-2.5">
-                        <i className={`ti ${MOOD_ICON[v]} text-heading ${MOOD_COLOR[v]} shrink-0`} aria-hidden="true" />
-                        <div className="flex-1 h-2.5 bg-sunken rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${MOOD_BAR[v]}`} style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="text-caption text-fg-faint w-10 text-right shrink-0">{count}명</span>
+                  {buckets.map((m) => (
+                    <div key={m.value} className="flex items-center gap-2.5">
+                      <i className={`ti ${m.icon} text-heading ${m.color} shrink-0`} aria-hidden="true" />
+                      <div className="flex-1 h-2.5 bg-sunken rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${m.bar}`} style={{ width: `${m.pct}%` }} />
                       </div>
-                    );
-                  })}
+                      <span className="text-caption text-fg-faint w-10 text-right shrink-0">{m.count}명</span>
+                    </div>
+                  ))}
                 </div>
               )}
 

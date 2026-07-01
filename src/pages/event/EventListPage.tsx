@@ -1,34 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import PageContainer from "../../components/PageContainer";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { supabase } from "../../lib/supabase";
-
-interface EventRow {
-  id: string;
-  title: string;
-  event_date: string;
-  start_time: string | null;
-  place_name: string | null;
-  image_url: string | null;
-}
-
-async function fetchEvents(): Promise<EventRow[]> {
-  const { data, error } = await supabase
-    .from("events")
-    .select("id, title, event_date, start_time, place_name, image_url")
-    .order("event_date", { ascending: false });
-  if (error) throw error;
-  return data ?? [];
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
-}
+import { useEventList } from "../../hooks/useEvents";
+import { formatEventDate } from "../../lib/eventTime";
 
 export default function EventListPage() {
   const navigate = useNavigate();
-  const { data: events = [], isLoading } = useQuery({ queryKey: ["events"], queryFn: fetchEvents });
+  const { data: events = [], isLoading } = useEventList();
 
   return (
     <PageContainer width="default">
@@ -63,7 +41,7 @@ export default function EventListPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-body font-medium text-fg-strong truncate">{ev.title}</p>
                 <p className="text-caption text-fg-faint mt-0.5 truncate">
-                  {formatDate(ev.event_date)}
+                  {formatEventDate(ev.event_date, { month: "long", day: "numeric", weekday: "short" })}
                   {ev.start_time && ` · ${ev.start_time.slice(0, 5)}`}
                   {ev.place_name && ` · ${ev.place_name}`}
                 </p>
