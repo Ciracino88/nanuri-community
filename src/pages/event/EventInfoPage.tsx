@@ -30,7 +30,13 @@ export default function EventInfoPage() {
   const meta = STATUS_META[status];
   const isDone = status === "done";
   const color = colorForEvent(event.id);
-  const details = event.details ?? [];
+
+  // 일정·장소(별도 컬럼)를 상세표 맨 위에 붙이고, 커스텀 details를 이어붙인다
+  const rows = [
+    { label: "일정", value: [event.event_date, event.start_time ? `${event.start_time.slice(0, 5)} 시작` : null].filter(Boolean).join(" · ") },
+    ...(event.place_name ? [{ label: "장소", value: event.place_name }] : []),
+    ...(event.details ?? []),
+  ];
 
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href).catch(() => {});
@@ -105,13 +111,13 @@ export default function EventInfoPage() {
           <p className="text-sm leading-relaxed" style={{ color: "#8892a0" }}>{event.description}</p>
         )}
 
-        {details.length > 0 && (
+        {rows.length > 0 && (
           <div className="rounded-2xl overflow-hidden flex flex-col" style={{ border: `1px solid ${color}20`, background: "rgba(255,255,255,0.025)" }}>
-            {details.map((d, i) => (
+            {rows.map((d, i) => (
               <div
                 key={i}
                 className="flex items-start gap-4 px-4 py-3"
-                style={{ borderBottom: i < details.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
+                style={{ borderBottom: i < rows.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
               >
                 <span className="text-xs font-bold shrink-0 mt-0.5" style={{ color, minWidth: 64 }}>{d.label}</span>
                 <span className="text-xs leading-relaxed" style={{ color: "#c0c8d4" }}>{d.value}</span>
