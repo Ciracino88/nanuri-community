@@ -24,11 +24,6 @@ function EventCard({ event, index, onOpen }: { event: CardEvent; index: number; 
   const meta = STATUS_META[event._status];
   const isDone = event._status === "done";
   const color = event._color;
-  const dateLine = [
-    event.event_date,
-    event.start_time ? event.start_time.slice(0, 5) : null,
-    event.place_name,
-  ].filter(Boolean).join(" · ");
 
   return (
     <motion.div
@@ -73,7 +68,7 @@ function EventCard({ event, index, onOpen }: { event: CardEvent; index: number; 
                 <span className="text-sm font-black truncate" style={{ color: isDone ? "#6b7785" : "#f0f2f8" }}>{event.title}</span>
                 <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: meta.bg, color: meta.text }}>{meta.label}</span>
               </div>
-              <p className="text-xs truncate" style={{ color: isDone ? "#363d47" : "#6b7785" }}>📅 {dateLine}</p>
+              <p className="text-xs truncate" style={{ color: isDone ? "#363d47" : "#6b7785" }}>📅 {event.event_date}</p>
             </div>
             <ChevronRight size={16} color={isDone ? "#363d47" : "#4a5568"} className="shrink-0" />
           </div>
