@@ -1,5 +1,10 @@
 // 행사 기능 공용 타입
 
+export interface EventDetail {
+  label: string;
+  value: string;
+}
+
 export interface EventRecord {
   id: string;
   title: string;
@@ -7,8 +12,10 @@ export interface EventRecord {
   start_time: string | null;
   place_name: string | null;
   image_url: string | null;
+  emoji: string | null;
+  description: string | null;
+  details: EventDetail[];
   results_public: boolean;
-  status: string;
 }
 
 export interface Segment {

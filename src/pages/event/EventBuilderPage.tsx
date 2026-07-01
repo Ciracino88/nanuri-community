@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -12,17 +13,33 @@ interface FormValues {
   eventDate: string;
   startTime: string;
   placeName: string;
+  description: string;
 }
+
+const EMOJI_PRESETS = ["⛺", "🏃", "🎳", "🙏", "🍽️", "🎵", "🎤", "🎉", "🎁", "📖", "☕", "🕯️", "🌱", "🎪", "🏕️", "💒"];
+
+const rowInput = "px-3 py-2 text-emphasis rounded-lg border border-line bg-card outline-none focus:ring-2 focus:ring-purple-subtle focus:border-purple transition";
 
 export default function EventBuilderPage() {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>();
   const { receiptFile: posterFile, receiptPreview: posterPreview, handleReceiptChange: handlePoster, reset: resetPoster } = useReceiptUpload();
+  const [emoji, setEmoji] = useState("");
+  const [details, setDetails] = useState<{ label: string; value: string }[]>([]);
+
+  const addDetail = () => setDetails((p) => [...p, { label: "", value: "" }]);
+  const updateDetail = (i: number, key: "label" | "value", val: string) =>
+    setDetails((p) => p.map((d, idx) => (idx === i ? { ...d, [key]: val } : d)));
+  const removeDetail = (i: number) => setDetails((p) => p.filter((_, idx) => idx !== i));
 
   const onSubmit = async (values: FormValues) => {
     try {
       let imageUrl: string | null = null;
       if (posterFile) imageUrl = await uploadReceipt(posterFile, "events");
+
+      const cleanDetails = details
+        .filter((d) => d.label.trim() && d.value.trim())
+        .map((d) => ({ label: d.label.trim(), value: d.value.trim() }));
 
       const { data: event, error } = await supabase
         .from("events")
@@ -32,7 +49,9 @@ export default function EventBuilderPage() {
           start_time: values.startTime,
           place_name: values.placeName.trim() || null,
           image_url: imageUrl,
-          status: "upcoming",
+          emoji: emoji || null,
+          description: values.description.trim() || null,
+          details: cleanDetails,
         })
         .select("id")
         .single();
@@ -54,7 +73,7 @@ export default function EventBuilderPage() {
         </button>
         <div>
           <h1 className="text-heading font-medium text-fg-strong">행사 만들기</h1>
-          <p className="text-body text-fg-faint mt-0.5">먼저 기본 정보만 입력하세요</p>
+          <p className="text-body text-fg-faint mt-0.5">정보를 입력하고 저장하세요</p>
         </div>
       </div>
 
@@ -79,7 +98,60 @@ export default function EventBuilderPage() {
             {...register("startTime", { required: "모이는 시각을 선택해주세요" })}
           />
           <Input label="장소 (선택)" placeholder="예: 양평 수련원" {...register("placeName")} />
+          <Input label="한 줄 설명 (선택)" placeholder="예: 전교인이 함께하는 2박 3일 수련회" {...register("description")} />
 
+          {/* 대표 이모지 */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-body font-medium text-fg-muted">대표 이모지 (선택)</label>
+            <div className="flex flex-wrap gap-2">
+              {EMOJI_PRESETS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  onClick={() => setEmoji(emoji === e ? "" : e)}
+                  className={`w-10 h-10 rounded-lg text-xl flex items-center justify-center border transition ${
+                    emoji === e ? "border-purple bg-purple-subtle" : "border-line-soft bg-card hover:border-line"
+                  }`}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 상세 정보 */}
+          <div className="flex flex-col gap-2">
+            <label className="text-body font-medium text-fg-muted">상세 정보 (선택)</label>
+            {details.map((d, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  placeholder="항목 (예: 대상)"
+                  value={d.label}
+                  onChange={(e) => updateDetail(i, "label", e.target.value)}
+                  className={`w-28 shrink-0 ${rowInput}`}
+                />
+                <input
+                  placeholder="내용 (예: 전교인)"
+                  value={d.value}
+                  onChange={(e) => updateDetail(i, "value", e.target.value)}
+                  className={`flex-1 min-w-0 ${rowInput}`}
+                />
+                <button type="button" onClick={() => removeDetail(i)} aria-label="삭제" className="text-fg-faint hover:text-danger transition shrink-0">
+                  <i className="ti ti-trash text-emphasis" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addDetail}
+              className="w-full py-2.5 border border-dashed border-line rounded-lg text-body text-fg-faint hover:bg-surface transition flex items-center justify-center gap-1.5"
+            >
+              <i className="ti ti-plus text-emphasis" aria-hidden="true" />
+              상세 항목 추가
+            </button>
+          </div>
+
+          {/* 포스터 */}
           <div className="flex flex-col gap-1.5">
             <label className="text-body font-medium text-fg-muted">포스터 (선택)</label>
             {posterPreview ? (
