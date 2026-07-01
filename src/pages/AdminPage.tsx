@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
-import { CalendarDays, Wallet, Settings, Trash2, Plus } from "lucide-react";
-import toast from "react-hot-toast";
+import { CalendarDays, Wallet, Settings, Plus } from "lucide-react";
 import LoadingScreen from "../components/LoadingScreen";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { supabase } from "../lib/supabase";
-import { deleteImage } from "../lib/deleteImage";
-import { computeEventStatus, EVENT_STATUS_LABEL, type EventStatus } from "../lib/eventStatus";
-import { useAdminEvents, eventKeys } from "../hooks/useEvents";
+import { computeEventStatus, type EventStatus } from "../lib/eventStatus";
+import { useAdminEvents } from "../hooks/useEvents";
 import { TAB_COLORS } from "../constants/theme";
 
 const ACCENT = TAB_COLORS.admin;
+const COLORS = Object.values(TAB_COLORS);
 
 const SUB_TABS = [
   { id: "events", label: "행사 관리", Icon: CalendarDays },
@@ -21,32 +18,80 @@ const SUB_TABS = [
 
 type SubTab = (typeof SUB_TABS)[number]["id"];
 
-const STATUS_META: Record<EventStatus, { bg: string; text: string }> = {
-  upcoming: { bg: "rgba(78,205,196,0.15)", text: "#4ECDC4" },
-  live: { bg: "rgba(255,179,71,0.15)", text: "#FFB347" },
-  done: { bg: "rgba(255,255,255,0.07)", text: "#8892a0" },
+const STATUS_META: Record<EventStatus, { label: string; bg: string; text: string }> = {
+  upcoming: { label: "예정", bg: "rgba(78,205,196,0.15)", text: "#4ECDC4" },
+  live: { label: "진행중", bg: "rgba(255,179,71,0.15)", text: "#FFB347" },
+  done: { label: "완료", bg: "rgba(255,255,255,0.07)", text: "#8892a0" },
 };
 
-function EventsAdminSection() {
+interface AdminRowEvent {
+  id: string;
+  title: string;
+  event_date: string;
+  place_name: string | null;
+  image_url: string | null;
+  segmentCount: number;
+  _color: string;
+  _status: EventStatus;
+}
+
+function AdminEventRow({ event, index }: { event: AdminRowEvent; index: number }) {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const isDone = event._status === "done";
+  const color = event._color;
+  const meta = STATUS_META[event._status];
+  const dateLine = [event.event_date, event.place_name, `순서 ${event.segmentCount}개`]
+    .filter(Boolean)
+    .join(" · ");
 
+  return (
+    <motion.button
+      onClick={() => navigate(`/admin/events/${event.id}`)}
+      className="flex items-center gap-3 px-4 py-3 rounded-2xl text-left active:scale-[0.99] transition"
+      style={{
+        background: isDone ? "rgba(255,255,255,0.03)" : `${color}10`,
+        border: `1px solid ${isDone ? "rgba(255,255,255,0.07)" : `${color}25`}`,
+      }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, type: "spring", stiffness: 360, damping: 30 }}
+    >
+      {event.image_url ? (
+        <img
+          src={event.image_url}
+          alt=""
+          className="rounded-xl object-cover shrink-0"
+          style={{
+            width: 40,
+            height: 40,
+            filter: isDone ? "grayscale(70%) brightness(0.6)" : undefined,
+            border: `1px solid ${isDone ? "rgba(255,255,255,0.08)" : `${color}30`}`,
+          }}
+        />
+      ) : (
+        <div
+          className="flex items-center justify-center rounded-xl shrink-0"
+          style={{ width: 40, height: 40, background: isDone ? "rgba(255,255,255,0.05)" : `${color}18` }}
+        >
+          <CalendarDays size={17} color={isDone ? "#4a5568" : color} strokeWidth={2} />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold truncate" style={{ color: isDone ? "#4a5568" : "#f0f2f8" }}>{event.title}</p>
+        <p className="text-xs flex items-center gap-1 mt-0.5 truncate" style={{ color: isDone ? "#363d47" : "#6b7785" }}>
+          <CalendarDays size={10} className="shrink-0" />
+          {dateLine}
+        </p>
+      </div>
+      <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: meta.bg, color: meta.text }}>
+        {meta.label}
+      </span>
+    </motion.button>
+  );
+}
+
+function EventsAdminSection() {
   const { data: events = [], isLoading } = useAdminEvents();
-
-  const deleteMutation = useMutation({
-    mutationFn: async ({ id, imageUrl }: { id: string; imageUrl: string | null }) => {
-      if (imageUrl) await deleteImage(imageUrl);
-      const { error } = await supabase.from("events").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: eventKeys.adminList }),
-    onError: () => toast.error("삭제에 실패했어요"),
-  });
-
-  const handleDelete = (id: string, imageUrl: string | null) => {
-    if (!confirm("행사를 삭제할까요? 순서와 평가 데이터도 모두 삭제됩니다.")) return;
-    deleteMutation.mutate({ id, imageUrl });
-  };
 
   if (isLoading) {
     return (
@@ -65,56 +110,32 @@ function EventsAdminSection() {
     );
   }
 
+  const graded: AdminRowEvent[] = events.map((e, i) => ({
+    ...e,
+    _color: COLORS[i % COLORS.length],
+    _status: computeEventStatus(e.event_date, e.start_time, e.totalDuration),
+  }));
+  const upcoming = graded.filter((e) => e._status !== "done");
+  const done = graded.filter((e) => e._status === "done");
+
   return (
-    <div className="px-4 pt-1 pb-24 flex flex-col gap-2.5">
-      {events.map((ev, i) => {
-        const status = computeEventStatus(ev.event_date, ev.start_time, ev.totalDuration);
-        const meta = STATUS_META[status];
-        return (
-          <motion.div
-            key={ev.id}
-            className="rounded-2xl p-3 flex items-center gap-3"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05, type: "spring", stiffness: 360, damping: 30 }}
-          >
-            <button
-              onClick={() => navigate(`/admin/events/${ev.id}`)}
-              className="min-w-0 flex-1 text-left flex items-center gap-3 active:scale-[0.99] transition"
-            >
-              {ev.image_url ? (
-                <img src={ev.image_url} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
-              ) : (
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}22` }}>
-                  <CalendarDays size={18} color={ACCENT} />
-                </div>
-              )}
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-bold truncate" style={{ color: "#f0f2f8" }}>{ev.title}</p>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: meta.bg, color: meta.text }}>
-                    {EVENT_STATUS_LABEL[status]}
-                  </span>
-                </div>
-                <p className="text-xs mt-0.5 truncate" style={{ color: "#6b7785" }}>
-                  {ev.event_date}
-                  {ev.place_name && ` · ${ev.place_name}`}
-                  {` · 순서 ${ev.segmentCount}개`}
-                </p>
-              </div>
-            </button>
-            <button
-              onClick={() => handleDelete(ev.id, ev.image_url)}
-              aria-label="삭제"
-              className="w-10 h-10 flex items-center justify-center rounded-lg shrink-0 active:scale-95 transition"
-              style={{ border: "1px solid rgba(255,255,255,0.08)", color: "#8892a0" }}
-            >
-              <Trash2 size={16} />
-            </button>
-          </motion.div>
-        );
-      })}
+    <div className="px-4 pt-1 pb-24 flex flex-col gap-5">
+      {upcoming.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-bold uppercase" style={{ color: ACCENT, letterSpacing: "0.15em" }}>진행 · 예정</p>
+          {upcoming.map((e, i) => (
+            <AdminEventRow key={e.id} event={e} index={i} />
+          ))}
+        </div>
+      )}
+      {done.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>완료</p>
+          {done.map((e, i) => (
+            <AdminEventRow key={e.id} event={e} index={upcoming.length + i} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ import { CSS } from "@dnd-kit/utilities";
 import BackButton from "../../components/BackButton";
 import LoadingScreen from "../../components/LoadingScreen";
 import { supabase } from "../../lib/supabase";
+import { deleteImage } from "../../lib/deleteImage";
 import { buildTimeline, formatClock, type TimelineSegment } from "../../lib/eventTime";
 import { useEventDetail, eventKeys, type EventDetailData } from "../../hooks/useEvents";
 import { TAB_COLORS } from "../../constants/theme";
@@ -130,6 +131,25 @@ export default function EventDetailPage() {
     },
     onError: () => toast.error("변경에 실패했어요"),
   });
+
+  const deleteEventMutation = useMutation({
+    mutationFn: async () => {
+      if (event?.image_url) await deleteImage(event.image_url);
+      const { error } = await supabase.from("events").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: eventKeys.adminList });
+      toast.success("행사를 삭제했어요");
+      navigate("/admin");
+    },
+    onError: () => toast.error("삭제에 실패했어요"),
+  });
+
+  const handleDeleteEvent = () => {
+    if (!confirm("행사를 삭제할까요? 순서와 평가 데이터도 모두 삭제됩니다.")) return;
+    deleteEventMutation.mutate();
+  };
 
   const reorderMutation = useMutation({
     mutationFn: async (orderedIds: string[]) => {
@@ -255,6 +275,17 @@ export default function EventDetailPage() {
             순서 추가
           </button>
         </div>
+
+        {/* 행사 삭제 */}
+        <button
+          onClick={handleDeleteEvent}
+          disabled={deleteEventMutation.isPending}
+          className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 active:scale-95 transition disabled:opacity-50"
+          style={{ color: "#FF6B6B", background: "rgba(255,107,107,0.1)", border: "1px solid rgba(255,107,107,0.2)" }}
+        >
+          <Trash2 size={15} />
+          행사 삭제
+        </button>
       </div>
     </div>
   );
