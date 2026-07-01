@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { CalendarIcon } from "@heroicons/react/outline";
 import PageContainer from "../../components/PageContainer";
+import PageHero from "../../components/PageHero";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { supabase } from "../../lib/supabase";
 import { deleteImage } from "../../lib/deleteImage";
@@ -39,11 +41,7 @@ export default function EventAdminPage() {
   return (
     <PageContainer width="default">
 
-      <div className="relative bg-purple-subtle rounded-2xl p-5 overflow-hidden">
-        <i className="ti ti-calendar-event absolute text-purple" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
-        <h1 className="text-title font-medium text-purple-strong">행사 관리</h1>
-        <p className="text-body text-purple mt-1.5">행사를 만들고 순서를 구성하세요</p>
-      </div>
+      <PageHero Icon={CalendarIcon} title="행사 관리" desc={"행사를 만들고\n순서를 구성하세요"} tint="purple" />
 
       {isLoading ? (
         <LoadingSpinner />

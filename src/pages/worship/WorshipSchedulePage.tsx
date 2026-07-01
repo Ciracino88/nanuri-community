@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MusicNoteIcon } from "@heroicons/react/outline";
 import PageContainer from "../../components/PageContainer";
+import PageHero from "../../components/PageHero";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
 import { useWorshipSchedule } from "../../hooks/useWorshipSchedule";
@@ -93,11 +95,7 @@ export default function WorshipSchedulePage() {
     <PageContainer width="wide">
 
         <div className="flex flex-col gap-3">
-          <div className="relative bg-teal-subtle rounded-2xl p-5 overflow-hidden">
-            <i className="ti ti-music absolute text-teal" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
-            <h1 className="text-title font-medium text-teal-strong">찬양팀 일정</h1>
-            <p className="text-body text-teal mt-1.5">주일 포지션을 등록하세요</p>
-          </div>
+          <PageHero Icon={MusicNoteIcon} title="찬양팀 일정" desc={"주일 포지션을\n등록해보세요"} tint="teal" />
           <div className="flex gap-2">
             {["나누리", "섬김이"].map((t) => (
               <button

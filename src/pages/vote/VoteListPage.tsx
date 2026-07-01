@@ -2,7 +2,9 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { ClipboardListIcon } from "@heroicons/react/outline";
 import PageContainer from "../../components/PageContainer";
+import PageHero from "../../components/PageHero";
 import Button from "../../components/ui/Button";
 import ImageCarousel from "../../components/ui/ImageCarousel";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -110,11 +112,7 @@ export default function VoteListPage() {
   return (
     <PageContainer width="default">
 
-        <div className="relative bg-warning-subtle rounded-2xl p-5 overflow-hidden">
-          <i className="ti ti-tools-kitchen-2 absolute text-warning" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
-          <h1 className="text-title font-medium text-warning-strong">메뉴 종합</h1>
-          <p className="text-body text-warning mt-1.5">메뉴판 사진으로 메뉴를 모아요</p>
-        </div>
+        <PageHero Icon={ClipboardListIcon} title="메뉴 종합" desc={"메뉴판 사진으로\n메뉴를 모아요"} tint="warning" />
 
         <button
           onClick={() => setShowForm((v) => !v)}

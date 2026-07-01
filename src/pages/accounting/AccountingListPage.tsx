@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { CalculatorIcon } from "@heroicons/react/outline";
 import PageContainer from "../../components/PageContainer";
+import PageHero from "../../components/PageHero";
 import { supabase } from "../../lib/supabase";
 import { fetchList } from "../../lib/supabaseList";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -46,11 +48,7 @@ export default function AccountingListPage() {
     return (
         <PageContainer width="wide">
 
-                <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden">
-                    <i className="ti ti-currency-won absolute text-info" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
-                    <h1 className="text-title font-medium text-info-strong">회계 장부</h1>
-                    <p className="text-body text-info mt-1.5">월별 지출 내역을 관리하세요</p>
-                </div>
+                <PageHero Icon={CalculatorIcon} title="회계 장부" desc={"월별 지출 내역을\n관리해보세요"} tint="info" />
 
                 <button
                     onClick={() => navigate("/accounting/new")}

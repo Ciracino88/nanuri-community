@@ -69,6 +69,7 @@ export default function EventTimelinePage() {
 
   const timeline = buildTimeline(event.event_date, event.start_time, segments);
   const statsSeg = statsSegId ? timeline.find((s) => s.id === statsSegId) : null;
+  const editSeg = openId ? timeline.find((s) => s.id === openId) : null;
 
   const openEditor = (segmentId: string, existing?: Evaluation) => {
     setOpenId(segmentId);
@@ -80,7 +81,7 @@ export default function EventTimelinePage() {
     <PageContainer width="default">
 
       {/* 행사 헤더 */}
-      <div>
+      <div style={{ animation: "fadeUp 0.4s ease both" }}>
         <h1 className="text-heading font-medium text-fg-strong">{event.title}</h1>
         <p className="text-caption text-fg-faint mt-1">
           {formatEventDate(event.event_date, { month: "long", day: "numeric", weekday: "short" })}
@@ -90,18 +91,26 @@ export default function EventTimelinePage() {
       </div>
 
       {event.image_url && (
-        <img src={event.image_url} alt={`${event.title} 포스터`} className="w-full h-auto rounded-2xl border border-line-soft" />
+        <img
+          src={event.image_url}
+          alt={`${event.title} 포스터`}
+          className="w-full h-auto rounded-2xl border border-line-soft"
+          style={{ animation: "fadeUp 0.45s ease 0.06s both" }}
+        />
       )}
 
       {/* 타임라인 */}
       <div className="relative flex flex-col gap-3 pl-6">
-        <div className="absolute left-[7px] top-3 bottom-3 w-0.5 bg-line" aria-hidden="true" />
-        {timeline.map((s) => {
+        <div
+          className="absolute left-[7px] top-3 bottom-3 w-0.5 bg-line"
+          style={{ transformOrigin: "top", animation: "growDown 0.5s ease 0.12s both" }}
+          aria-hidden="true"
+        />
+        {timeline.map((s, i) => {
           const myEval = evalBySegment.get(s.id);
-          const isOpen = openId === s.id;
           const dotColor = s.status === "live" ? "bg-purple" : s.status === "done" ? "bg-teal" : "bg-line-strong";
           return (
-            <div key={s.id} className="relative">
+            <div key={s.id} className="relative" style={{ animation: `fadeUp 0.45s ease ${0.15 + i * 0.07}s both` }}>
               <span
                 className={`absolute -left-[23px] top-4 w-3 h-3 rounded-full border-2 border-surface ${dotColor}`}
                 style={s.status === "live" ? { animation: "softPulse 1.6s ease-in-out infinite" } : undefined}
@@ -128,32 +137,6 @@ export default function EventTimelinePage() {
                       <i className="ti ti-lock" aria-hidden="true" />
                       시작되면 평가할 수 있어요
                     </p>
-                  ) : isOpen ? (
-                    <div className="flex flex-col gap-3">
-                      <MoodRating value={draftMood} onChange={setDraftMood} />
-                      <textarea
-                        rows={2}
-                        placeholder="한마디 남겨주세요 (선택)"
-                        value={draftComment}
-                        onChange={(e) => setDraftComment(e.target.value)}
-                        className="w-full px-3 py-2 text-body border border-line rounded-lg resize-none outline-none focus:ring-2 focus:ring-purple-subtle focus:border-purple transition"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => submitMutation.mutate({ segmentId: s.id, existing: myEval })}
-                          disabled={draftMood === 0 || submitMutation.isPending}
-                          className="flex-1 py-2 rounded-lg text-caption font-medium bg-purple text-white transition hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
-                        >
-                          {submitMutation.isPending ? "저장 중..." : "평가 제출"}
-                        </button>
-                        <button
-                          onClick={() => setOpenId(null)}
-                          className="px-4 py-2 rounded-lg text-caption text-fg-muted bg-surface hover:bg-sunken transition"
-                        >
-                          취소
-                        </button>
-                      </div>
-                    </div>
                   ) : myEval ? (
                     <div className="flex items-center gap-2">
                       {myEval.mood && (
@@ -173,7 +156,7 @@ export default function EventTimelinePage() {
                       className="w-full py-2 rounded-lg text-caption font-medium bg-purple-subtle text-purple transition hover:opacity-80 active:scale-95 flex items-center justify-center gap-1.5"
                     >
                       <i className="ti ti-star text-emphasis" aria-hidden="true" />
-                      이 순서 평가하기
+                      평가하기
                     </button>
                   )}
                   {event.results_public && s.status !== "upcoming" && (
@@ -196,14 +179,58 @@ export default function EventTimelinePage() {
         <p className="text-body text-fg-faint text-center py-10">아직 순서가 등록되지 않았어요</p>
       )}
 
+      {/* 평가 입력 모달 */}
+      {editSeg && (() => {
+        const existing = evalBySegment.get(editSeg.id);
+        return (
+          <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" style={{ animation: "fadeIn 0.15s ease" }} onClick={() => setOpenId(null)}>
+            <div className="bg-card w-full max-w-sm rounded-2xl p-5 flex flex-col gap-4" style={{ animation: "modalIn 0.2s ease both" }} onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {editSeg.start && (
+                    <span className="text-caption font-medium text-purple bg-purple-subtle rounded-md px-1.5 py-0.5 shrink-0">
+                      {formatClock(editSeg.start)}
+                    </span>
+                  )}
+                  <p className="text-body font-medium text-fg-strong truncate">{editSeg.title}</p>
+                </div>
+                <button onClick={() => setOpenId(null)} aria-label="닫기" className="text-fg-faint hover:text-fg transition shrink-0">
+                  <i className="ti ti-x text-heading" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="flex justify-center py-1">
+                <MoodRating value={draftMood} onChange={setDraftMood} />
+              </div>
+
+              <textarea
+                rows={3}
+                placeholder="한마디 남겨주세요 (선택)"
+                value={draftComment}
+                onChange={(e) => setDraftComment(e.target.value)}
+                className="w-full px-3 py-2 text-body border border-line rounded-lg resize-none outline-none focus:ring-2 focus:ring-purple-subtle focus:border-purple transition"
+              />
+
+              <button
+                onClick={() => submitMutation.mutate({ segmentId: editSeg.id, existing })}
+                disabled={draftMood === 0 || submitMutation.isPending}
+                className="w-full py-2.5 rounded-lg text-emphasis font-medium bg-purple text-white transition hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+              >
+                {submitMutation.isPending ? "저장 중..." : "평가 제출"}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 순서별 통계 모달 */}
       {statsSeg && (() => {
         const segAll = allEvals.filter((e) => e.segment_id === statsSeg.id);
         const { total, buckets } = aggregateMoods(segAll);
         const comments = segAll.filter((c) => c.comment && c.comment.trim());
         return (
-          <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" onClick={() => setStatsSegId(null)}>
-            <div className="bg-card w-full max-w-sm rounded-2xl p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" style={{ animation: "fadeIn 0.15s ease" }} onClick={() => setStatsSegId(null)}>
+            <div className="bg-card w-full max-w-sm rounded-2xl p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto" style={{ animation: "modalIn 0.2s ease both" }} onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   {statsSeg.start && (

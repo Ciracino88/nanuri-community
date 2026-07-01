@@ -8,7 +8,9 @@ import { useFormSubmit } from "../../hooks/useFormSubmit";
 import Input from "../../components/ui/Input";
 import FileInput from "../../components/ui/FileInput";
 import Button from "../../components/ui/Button";
+import { CreditCardIcon } from "@heroicons/react/outline";
 import PageContainer from "../../components/PageContainer";
+import PageHero from "../../components/PageHero";
 import SuccessScreen from "../../components/SuccessScreen";
 import { supabase } from "../../lib/supabase";
 
@@ -71,11 +73,7 @@ export default function MemberBillFormPage() {
   if (!hasAccount) {
     return (
       <PageContainer width="narrow">
-          <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden" style={{ animation: "cardEnter 0.4s ease both" }}>
-            <i className="ti ti-credit-card absolute text-info" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
-            <h1 className="text-title font-medium text-info-strong">비용 청구서</h1>
-            <p className="text-body text-info mt-1.5">영수증과 함께 제출해주세요</p>
-          </div>
+          <PageHero Icon={CreditCardIcon} title="비용 청구서" desc={"영수증과 함께\n제출해주세요"} />
 
           <div className="bg-warning-subtle border border-warning-soft rounded-xl px-4 py-3.5 flex items-center gap-3 mb-5" style={{ animation: "fadeUp 0.45s ease 0.1s both" }}>
             <i className="ti ti-alert-circle text-warning text-lg shrink-0" aria-hidden="true" />
@@ -111,13 +109,11 @@ export default function MemberBillFormPage() {
 
   return (
     <PageContainer width="narrow">
-        <div className="relative bg-info-subtle rounded-2xl p-5 overflow-hidden" style={{ animation: "cardEnter 0.4s ease both" }}>
-          <i className="ti ti-credit-card absolute text-info" style={{ right: 8, bottom: -6, fontSize: 76, opacity: 0.14 }} aria-hidden="true" />
-          <h1 className="text-title font-medium text-info-strong">비용 청구서</h1>
-          <p className="text-body text-info mt-1.5">
-            {userProfile ? `${userProfile.name}님, 영수증과 함께 제출해주세요` : "영수증과 함께 제출해주세요"}
-          </p>
-        </div>
+        <PageHero
+          Icon={CreditCardIcon}
+          title="비용 청구서"
+          desc={userProfile ? `${userProfile.name}님\n영수증과 함께 제출해주세요` : "영수증과 함께\n제출해주세요"}
+        />
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" style={{ animation: "fadeUp 0.45s ease 0.12s both" }}>
           <div className="flex items-center justify-between bg-surface rounded-lg px-4 py-3">
