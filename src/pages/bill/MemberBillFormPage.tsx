@@ -1,10 +1,11 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { Upload, X, Landmark, Pencil, Info, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import BackButton from "../../components/BackButton";
 import TextField from "../../components/ui/TextField";
+import SelectField from "../../components/ui/SelectField";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { supabase } from "../../lib/supabase";
@@ -17,17 +18,6 @@ const BANKS = [
   "하나은행", "우리은행", "IBK기업은행", "NH농협은행",
   "새마을금고", "신협", "K뱅크", "iM뱅크",
 ];
-
-const fieldStyle: CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  color: "#f0f2f8",
-  borderRadius: 12,
-  padding: "12px 14px",
-  fontSize: 14,
-  width: "100%",
-  outline: "none",
-};
 
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
@@ -148,23 +138,15 @@ export default function MemberBillFormPage() {
 
       <form onSubmit={handleSubmit} className="px-4 pt-5 flex flex-col gap-5" style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}>
         {/* 제목 */}
-        <TextField label="제목" required placeholder="예) 7월 찬양팀 식사비" accent={ACCENT} value={title} onChange={(e) => setTitle(e.target.value)} />
+        <div className="flex flex-col gap-2">
+          <FieldLabel required>제목</FieldLabel>
+          <TextField placeholder="예) 7월 찬양팀 식사비" accent={ACCENT} value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
 
         {/* 금액 */}
         <div className="flex flex-col gap-2">
           <FieldLabel required>금액</FieldLabel>
-          <div className="relative">
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              placeholder="0"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              style={{ ...fieldStyle, paddingRight: 40 }}
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold" style={{ color: "#6b7785" }}>원</span>
-          </div>
+          <TextField type="number" inputMode="numeric" min={1} placeholder="0" suffix="원" accent={ACCENT} value={amount} onChange={(e) => setAmount(e.target.value)} />
           {Number(amount) > 0 && (
             <p className="text-xs pl-1" style={{ color: ACCENT }}>{Number(amount).toLocaleString()}원</p>
           )}
@@ -225,18 +207,7 @@ export default function MemberBillFormPage() {
             ) : (
               <>
                 <p className="text-xs pl-0.5" style={{ color: "#8892a0" }}>입금 받을 계좌 정보를 입력해 주세요.</p>
-                <div className="relative">
-                  <select
-                    value={bank}
-                    onChange={(e) => setBank(e.target.value)}
-                    className="appearance-none"
-                    style={{ ...fieldStyle, colorScheme: "dark", color: bank ? "#f0f2f8" : "#6b7785" }}
-                  >
-                    <option value="" disabled>은행 선택</option>
-                    {BANKS.map((b) => <option key={b} value={b}>{b}</option>)}
-                  </select>
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style={{ color: "#6b7785" }}>▼</span>
-                </div>
+                <SelectField placeholder="은행 선택" options={BANKS} accent={ACCENT} value={bank} onChange={(e) => setBank(e.target.value)} />
                 <TextField placeholder="계좌번호 (- 없이 입력)" inputMode="numeric" accent={ACCENT} value={accountNumber} onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ""))} />
                 <label className="flex items-center gap-2.5 cursor-pointer mt-0.5">
                   <div
