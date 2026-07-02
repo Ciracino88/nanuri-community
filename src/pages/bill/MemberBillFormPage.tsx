@@ -11,13 +11,9 @@ import { uploadReceipt } from "../../lib/uploadReceipt";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../store/authStore";
 import { TAB_COLORS } from "../../constants/theme";
+import { BANKS } from "../../constants/banks";
 
 const ACCENT = TAB_COLORS.home;
-const BANKS = [
-  "카카오뱅크", "토스뱅크", "신한은행", "KB국민은행",
-  "하나은행", "우리은행", "IBK기업은행", "NH농협은행",
-  "새마을금고", "K뱅크",
-];
 
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (

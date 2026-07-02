@@ -11,13 +11,9 @@ import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../store/authStore";
 import { uploadReceipt } from "../lib/uploadReceipt";
 import { POSITIONS } from "../constants/worship";
+import { BANKS } from "../constants/banks";
 
 const ACCENT = "#74C7FF";
-const BANKS = [
-  "카카오뱅크", "토스뱅크", "신한은행", "KB국민은행",
-  "하나은행", "우리은행", "IBK기업은행", "NH농협은행",
-  "새마을금고", "신협", "K뱅크", "iM뱅크",
-];
 
 interface FormValues {
   name: string;
