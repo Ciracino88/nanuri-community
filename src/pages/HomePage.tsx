@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { Bell, ChevronRight, Plus, Receipt, CalendarDays, Image as ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import { useAuthStore } from "../store/authStore";
 import { useEventList } from "../hooks/useEvents";
 import { computeEventStatus } from "../lib/eventStatus";
 import { colorForEvent } from "../lib/eventColor";
@@ -25,7 +24,6 @@ function QuickAction({ Icon, label, tint, onClick }: { Icon: typeof Receipt; lab
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { userProfile } = useAuthStore();
   const { data: events = [] } = useEventList();
 
   const featured = events.find((e) => computeEventStatus(e.event_date, e.start_time, 0) !== "done");
@@ -39,9 +37,7 @@ export default function HomePage() {
         <div className="px-5 pt-6 pb-4 flex items-center justify-between">
           <div>
             <p className="text-sm" style={{ color: "#8892a0" }}>안녕하세요 👋</p>
-            <h1 className="text-xl font-black mt-0.5" style={{ color: "#f0f2f8" }}>
-              {userProfile?.name ? `${userProfile.name}님` : "나누리 청년부"}
-            </h1>
+            <h1 className="text-xl font-black mt-0.5" style={{ color: "#f0f2f8" }}>나누리</h1>
           </div>
           <button
             onClick={() => toast("준비 중이에요", { icon: "🔔" })}
