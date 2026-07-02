@@ -7,11 +7,13 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   accent?: string;
   /** 오른쪽 고정 접미 (예: "원") */
   suffix?: ReactNode;
+  /** 바깥 래퍼 className (레이아웃용, 예: "flex-1" / "w-24") */
+  wrapperClassName?: string;
 }
 
 // 다크 공용 입력창. label·error·suffix·react-hook-form register(spread)를 지원한다.
 const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, error, accent = "#74C7FF", suffix, style, ...rest },
+  { label, error, accent = "#74C7FF", suffix, wrapperClassName, style, ...rest },
   ref
 ) {
   const [focused, setFocused] = useState(false);
@@ -32,7 +34,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextFiel
   };
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={`flex flex-col gap-1.5${wrapperClassName ? ` ${wrapperClassName}` : ""}`}>
       {label && <span className="text-xs font-semibold" style={{ color: "#6b7785" }}>{label}</span>}
       <div style={{ position: "relative" }}>
         <input

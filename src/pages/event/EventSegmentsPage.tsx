@@ -19,6 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import BackButton from "../../components/BackButton";
+import TextField from "../../components/ui/TextField";
 import LoadingScreen from "../../components/LoadingScreen";
 import { supabase } from "../../lib/supabase";
 import { buildTimeline, formatClock, type TimelineSegment } from "../../lib/eventTime";
@@ -27,16 +28,6 @@ import { TAB_COLORS } from "../../constants/theme";
 import type { Segment } from "../../types/event";
 
 const ACCENT = TAB_COLORS.admin;
-
-const inputStyle: CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  color: "#f0f2f8",
-  borderRadius: 10,
-  padding: "10px 12px",
-  fontSize: 14,
-  outline: "none",
-};
 
 function SortableSegmentRow({ item, onDelete }: { item: TimelineSegment<Segment>; onDelete: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
@@ -192,14 +183,11 @@ export default function EventSegmentsPage() {
         {/* 순서 추가 */}
         <div className="rounded-xl p-4 flex flex-col gap-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <p className="text-sm font-bold" style={{ color: "#8892a0" }}>순서 추가</p>
-          <div className="flex items-center gap-2">
-            <input type="text" placeholder="순서 이름 (예: 예배)" value={title} onChange={(e) => setTitle(e.target.value)} className="flex-1 min-w-0" style={inputStyle} />
-            <div className="flex items-center gap-1.5 shrink-0">
-              <input type="number" inputMode="numeric" min={1} placeholder="30" value={duration} onChange={(e) => setDuration(e.target.value)} className="w-16 text-center" style={inputStyle} />
-              <span className="text-sm" style={{ color: "#6b7785" }}>분</span>
-            </div>
+          <div className="flex items-start gap-2">
+            <TextField wrapperClassName="flex-1 min-w-0" accent={ACCENT} placeholder="순서 이름 (예: 예배)" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <TextField wrapperClassName="w-24 shrink-0" accent={ACCENT} type="number" inputMode="numeric" min={1} suffix="분" placeholder="30" value={duration} onChange={(e) => setDuration(e.target.value)} />
           </div>
-          <input type="text" placeholder="설명 (선택)" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full" style={inputStyle} />
+          <TextField accent={ACCENT} placeholder="설명 (선택)" value={description} onChange={(e) => setDescription(e.target.value)} />
           <button
             onClick={() => addMutation.mutate()}
             disabled={!canAdd}

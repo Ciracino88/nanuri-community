@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef, type CSSProperties } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { CalendarDays, Clock, MapPin, Users, DollarSign, Star, Pencil, Plus, ChevronDown, Trash2, type LucideIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import BackButton from "../../components/BackButton";
+import TextField from "../../components/ui/TextField";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { deleteImage } from "../../lib/deleteImage";
@@ -21,17 +22,6 @@ const CUSTOM_FIELD_OPTIONS: { key: string; label: string; Icon: LucideIcon }[] =
   { key: "note", label: "비고", Icon: Pencil },
 ];
 
-const inputStyle: CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  color: "#f0f2f8",
-  borderRadius: 12,
-  padding: "12px 14px",
-  fontSize: 14,
-  width: "100%",
-  outline: "none",
-};
-const dateStyle: CSSProperties = { ...inputStyle, colorScheme: "dark" };
 
 interface CustomField { key: string; label: string; Icon: LucideIcon; value: string }
 
@@ -179,7 +169,7 @@ export default function EventBuilderPage() {
 
           <div className="flex flex-col gap-1">
             <span className="text-xs font-semibold" style={{ color: "#6b7785" }}>행사 제목</span>
-            <input style={inputStyle} placeholder="예) 여름 수련회" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <TextField accent={ACCENT} placeholder="예) 여름 수련회" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -203,12 +193,14 @@ export default function EventBuilderPage() {
             </div>
             <AnimatePresence initial={false} mode="wait">
               {!multiDay ? (
-                <motion.input key="single" type="date" style={dateStyle} value={date} onChange={(e) => setDate(e.target.value)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} />
+                <motion.div key="single" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                  <TextField type="date" accent={ACCENT} style={{ colorScheme: "dark" }} value={date} onChange={(e) => setDate(e.target.value)} />
+                </motion.div>
               ) : (
                 <motion.div key="range" className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                  <input type="date" style={{ ...dateStyle, flex: 1 }} value={date} onChange={(e) => setDate(e.target.value)} />
+                  <TextField type="date" accent={ACCENT} wrapperClassName="flex-1" style={{ colorScheme: "dark" }} value={date} onChange={(e) => setDate(e.target.value)} />
                   <span className="text-xs font-bold shrink-0" style={{ color: "#4a5568" }}>–</span>
-                  <input type="date" style={{ ...dateStyle, flex: 1 }} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                  <TextField type="date" accent={ACCENT} wrapperClassName="flex-1" style={{ colorScheme: "dark" }} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -218,14 +210,14 @@ export default function EventBuilderPage() {
             <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
               <Clock size={11} /> 모이는 시각 (선택)
             </span>
-            <input type="time" style={dateStyle} value={time} onChange={(e) => setTime(e.target.value)} />
+            <TextField type="time" accent={ACCENT} style={{ colorScheme: "dark" }} value={time} onChange={(e) => setTime(e.target.value)} />
           </div>
 
           <div className="flex flex-col gap-1">
             <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
               <MapPin size={11} /> 장소
             </span>
-            <input style={inputStyle} placeholder="예) 교회 본당" value={location} onChange={(e) => setLocation(e.target.value)} />
+            <TextField accent={ACCENT} placeholder="예) 교회 본당" value={location} onChange={(e) => setLocation(e.target.value)} />
           </div>
         </div>
 
@@ -289,7 +281,7 @@ export default function EventBuilderPage() {
                     <Trash2 size={13} color="#4a5568" />
                   </motion.button>
                 </div>
-                <input style={inputStyle} placeholder={`${f.label} 입력`} value={f.value} onChange={(e) => updateField(f.key, e.target.value)} />
+                <TextField accent={ACCENT} placeholder={`${f.label} 입력`} value={f.value} onChange={(e) => updateField(f.key, e.target.value)} />
               </motion.div>
             ))}
           </AnimatePresence>
