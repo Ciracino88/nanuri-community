@@ -59,7 +59,6 @@ export default function MemberBillFormPage() {
   const [editingAccount, setEditingAccount] = useState(!hasAccount);
   const [bank, setBank] = useState(userProfile?.bank_name ?? "");
   const [accountNumber, setAccountNumber] = useState(userProfile?.account_number ?? "");
-  const [holder, setHolder] = useState(userProfile?.account_holder ?? userProfile?.name ?? "");
   const [saveForLater, setSaveForLater] = useState(true);
 
   const [submitting, setSubmitting] = useState(false);
@@ -69,7 +68,7 @@ export default function MemberBillFormPage() {
     !!title.trim() &&
     Number(amount) > 0 &&
     !!receiptFile &&
-    (editingAccount ? !!bank && !!accountNumber.trim() && !!holder.trim() : hasAccount);
+    (editingAccount ? !!bank && !!accountNumber.trim() : hasAccount);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,14 +82,13 @@ export default function MemberBillFormPage() {
       const receiptUrl = await uploadReceipt(receiptFile!);
       const useBank = editingAccount ? bank : userProfile!.bank_name;
       const useNumber = editingAccount ? accountNumber.trim() : userProfile!.account_number;
-      const useHolder = editingAccount ? holder.trim() : (userProfile?.account_holder ?? userProfile?.name ?? "");
 
       const { error } = await supabase.from("bills").insert({
         user_id: user.id,
         title: title.trim(),
         amount: Number(amount),
         receipt_url: receiptUrl,
-        submitter_name: useHolder,
+        submitter_name: userProfile?.name,
         account_number: useNumber,
         bank_name: useBank,
       });
@@ -100,7 +98,6 @@ export default function MemberBillFormPage() {
         await supabase.from("user_profiles").update({
           bank_name: useBank,
           account_number: useNumber,
-          account_holder: useHolder,
         }).eq("id", user.id);
         await fetchUserProfile().catch(() => {});
       }
@@ -220,7 +217,6 @@ export default function MemberBillFormPage() {
               <>
                 <InfoRow label="은행" value={userProfile!.bank_name} />
                 <InfoRow label="계좌번호" value={userProfile!.account_number} />
-                <InfoRow label="예금주" value={userProfile?.account_holder ?? userProfile?.name ?? ""} />
                 <div className="flex items-center gap-1.5 mt-1">
                   <Info size={13} color={ACCENT} className="shrink-0" />
                   <p className="text-xs" style={{ color: "#6b7785" }}>저장된 계좌 정보를 사용해요.</p>
@@ -242,7 +238,6 @@ export default function MemberBillFormPage() {
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs pointer-events-none" style={{ color: "#6b7785" }}>▼</span>
                 </div>
                 <TextField placeholder="계좌번호 (- 없이 입력)" inputMode="numeric" accent={ACCENT} value={accountNumber} onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ""))} />
-                <TextField placeholder="예금주 이름" accent={ACCENT} value={holder} onChange={(e) => setHolder(e.target.value)} />
                 <label className="flex items-center gap-2.5 cursor-pointer mt-0.5">
                   <div
                     onClick={() => setSaveForLater((v) => !v)}

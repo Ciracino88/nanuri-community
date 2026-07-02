@@ -4,21 +4,9 @@ import { Bell, ChevronRight, Plus, Receipt, CalendarDays, Image as ImageIcon } f
 import toast from "react-hot-toast";
 import { useAuthStore } from "../store/authStore";
 import { useEventList } from "../hooks/useEvents";
-import { useMyRecentBills } from "../hooks/useMyRecentBills";
 import { computeEventStatus } from "../lib/eventStatus";
 import { colorForEvent } from "../lib/eventColor";
 import { TAB_COLORS } from "../constants/theme";
-
-function StatusChip({ status }: { status: string | null }) {
-  const approved = status === "승인" || status === "approved";
-  const color = approved ? TAB_COLORS.home : "#FFB347";
-  const label = approved ? "승인" : "대기";
-  return (
-    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${color}22`, color }}>
-      {label}
-    </span>
-  );
-}
 
 function QuickAction({ Icon, label, tint, onClick }: { Icon: typeof Receipt; label: string; tint: string; onClick: () => void }) {
   return (
@@ -37,15 +25,11 @@ function QuickAction({ Icon, label, tint, onClick }: { Icon: typeof Receipt; lab
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user, userProfile } = useAuthStore();
+  const { userProfile } = useAuthStore();
   const { data: events = [] } = useEventList();
-  const { data: recentBills = [] } = useMyRecentBills(user?.id);
 
   const featured = events.find((e) => computeEventStatus(e.event_date, e.start_time, 0) !== "done");
   const featuredColor = featured ? colorForEvent(featured.id) : TAB_COLORS.events;
-
-  const today = new Date();
-  const dateLabel = `${today.getMonth() + 1}월 ${today.getDate()}일 기준`;
 
   return (
     <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
@@ -102,38 +86,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 최근 비용 청구 */}
-        <div className="px-5 mb-3 flex items-center justify-between">
-          <h3 className="font-bold" style={{ color: "#f0f2f8" }}>최근 비용 청구</h3>
-          <span className="text-xs" style={{ color: "#6b7785" }}>{dateLabel}</span>
-        </div>
-
-        <div className="px-5 flex flex-col gap-3">
-          {recentBills.length === 0 ? (
-            <div className="rounded-2xl px-4 py-6 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <p className="text-sm" style={{ color: "#6b7785" }}>아직 청구 내역이 없어요</p>
-            </div>
-          ) : (
-            recentBills.map((bill) => (
-              <div key={bill.id} className="flex items-center gap-3 rounded-2xl px-4 py-3.5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${TAB_COLORS.home}1f` }}>
-                  <Receipt size={18} color={TAB_COLORS.home} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate" style={{ color: "#f0f2f8" }}>{bill.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>{new Date(bill.created_at).toLocaleDateString("ko-KR").replace(/\.$/, "")}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  <span className="text-sm font-black" style={{ color: "#f0f2f8" }}>{(bill.amount ?? 0).toLocaleString()}원</span>
-                  <StatusChip status={bill.status} />
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
         {/* CTA */}
-        <div className="px-5 mt-5">
+        <div className="px-5">
           <motion.button
             onClick={() => navigate("/member/bill")}
             whileTap={{ scale: 0.98 }}
