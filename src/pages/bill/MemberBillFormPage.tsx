@@ -16,7 +16,7 @@ const ACCENT = TAB_COLORS.home;
 const BANKS = [
   "카카오뱅크", "토스뱅크", "신한은행", "KB국민은행",
   "하나은행", "우리은행", "IBK기업은행", "NH농협은행",
-  "새마을금고", "신협", "K뱅크", "iM뱅크",
+  "새마을금고", "K뱅크",
 ];
 
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
@@ -207,7 +207,7 @@ export default function MemberBillFormPage() {
             ) : (
               <>
                 <p className="text-xs pl-0.5" style={{ color: "#8892a0" }}>입금 받을 계좌 정보를 입력해 주세요.</p>
-                <SelectField placeholder="은행 선택" options={BANKS} accent={ACCENT} value={bank} onChange={(e) => setBank(e.target.value)} />
+                <SelectField placeholder="은행 선택" options={BANKS} accent={ACCENT} value={bank} onChange={setBank} />
                 <TextField placeholder="계좌번호 (- 없이 입력)" inputMode="numeric" accent={ACCENT} value={accountNumber} onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ""))} />
                 <label className="flex items-center gap-2.5 cursor-pointer mt-0.5">
                   <div

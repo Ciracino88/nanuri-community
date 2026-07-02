@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { Pencil } from "lucide-react";
 import BackButton from "../components/BackButton";
 import TextField from "../components/ui/TextField";
+import SelectField from "../components/ui/SelectField";
 import toast from "react-hot-toast";
 import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../store/authStore";
@@ -17,13 +18,6 @@ const BANKS = [
   "하나은행", "우리은행", "IBK기업은행", "NH농협은행",
   "새마을금고", "신협", "K뱅크", "iM뱅크",
 ];
-
-const inputStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  color: "#f0f2f8",
-  borderRadius: 12,
-};
 
 interface FormValues {
   name: string;
@@ -54,7 +48,6 @@ export default function MemberProfileSetupPage() {
   const [positions, setPositions] = useState<string[]>(userProfile?.position ?? []);
   const [team, setTeam] = useState<string>(userProfile?.team ?? "나누리");
   const [bank, setBank] = useState<string>(userProfile?.bank_name ?? "");
-  const [showBankPicker, setShowBankPicker] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(userProfile?.avatar_url ?? null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -213,43 +206,7 @@ export default function MemberProfileSetupPage() {
         {/* 은행 정보 */}
         <div className="flex flex-col gap-2">
           <FieldLabel>은행 정보</FieldLabel>
-          <motion.button
-            type="button"
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowBankPicker((v) => !v)}
-            className="w-full px-4 py-3 text-sm font-bold text-left flex items-center justify-between"
-            style={inputStyle}
-          >
-            <span style={{ color: bank ? "white" : "#8892a0" }}>{bank || "은행 선택"}</span>
-            <motion.span animate={{ rotate: showBankPicker ? 180 : 0 }} transition={{ duration: 0.2 }} style={{ color: "#8892a0" }}>▾</motion.span>
-          </motion.button>
-
-          <AnimatePresence>
-            {showBankPicker && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.22 }}
-                className="overflow-hidden rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
-              >
-                {BANKS.map((b, i) => (
-                  <button
-                    key={b}
-                    type="button"
-                    className="w-full px-4 py-2.5 text-sm font-semibold text-left"
-                    style={{ color: bank === b ? ACCENT : "#c0c8d8", borderBottom: i < BANKS.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none" }}
-                    onClick={() => { setBank(b); setShowBankPicker(false); }}
-                  >
-                    {bank === b && <span className="mr-2">✓</span>}
-                    {b}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
+          <SelectField value={bank} onChange={setBank} options={BANKS} placeholder="은행 선택" accent={ACCENT} />
           <TextField
             inputMode="numeric"
             placeholder="계좌번호를 입력하세요"
