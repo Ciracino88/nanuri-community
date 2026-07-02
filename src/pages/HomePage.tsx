@@ -35,10 +35,7 @@ export default function HomePage() {
 
         {/* 헤더 */}
         <div className="px-5 pt-6 pb-4 flex items-center justify-between">
-          <div>
-            <p className="text-sm" style={{ color: "#8892a0" }}>안녕하세요 👋</p>
-            <h1 className="text-xl font-black mt-0.5" style={{ color: "#f0f2f8" }}>나누리</h1>
-          </div>
+          <h1 className="text-xl font-black" style={{ color: "#f0f2f8" }}>나누리</h1>
           <button
             onClick={() => toast("준비 중이에요", { icon: "🔔" })}
             className="w-10 h-10 rounded-xl flex items-center justify-center"
