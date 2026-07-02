@@ -1,35 +1,14 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Pencil, ListOrdered, BarChart3, Trash2, ChevronRight, type LucideIcon } from "lucide-react";
+import { Pencil, ListOrdered, BarChart3, Trash2 } from "lucide-react";
 import EventInfoView from "../../components/EventInfoView";
 import LoadingScreen from "../../components/LoadingScreen";
+import ActionRow from "../../components/ui/ActionRow";
 import { confirmDialog } from "../../components/ConfirmDialog";
 import { supabase } from "../../lib/supabase";
 import { deleteImage } from "../../lib/deleteImage";
 import { useEventDetail, eventKeys } from "../../hooks/useEvents";
-import { TAB_COLORS } from "../../constants/theme";
-
-const ACCENT = TAB_COLORS.admin;
-
-function ActionRow({ Icon, label, desc, onClick }: { Icon: LucideIcon; label: string; desc?: string; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3 p-4 rounded-2xl text-left active:scale-[0.99] transition"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
-    >
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}18` }}>
-        <Icon size={18} color={ACCENT} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>{label}</p>
-        {desc && <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>{desc}</p>}
-      </div>
-      <ChevronRight size={18} color="#4a5568" />
-    </button>
-  );
-}
 
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
