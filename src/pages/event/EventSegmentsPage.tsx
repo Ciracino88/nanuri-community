@@ -207,23 +207,24 @@ export default function EventSegmentsPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col relative overflow-hidden">
       {/* 헤더 */}
-      <div className="flex items-center gap-3 px-4 pt-5 pb-3">
+      <div className="px-5 pt-5 pb-4 shrink-0">
         <BackButton to={`/admin/events/${event.id}`} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: ACCENT }}>진행 관리</span>
+        <div className="mt-3">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: ACCENT }}>관리자</span>
+            <span className="text-[11px]" style={{ color: "#6b7785" }}>· 진행 관리</span>
           </div>
-          <h1 className="text-base font-black truncate" style={{ color: "#f0f2f8" }}>{event.title}</h1>
-          <div className="flex items-center gap-4 mt-1">
+          <h1 className="text-2xl font-black leading-snug truncate" style={{ color: "#f0f2f8" }}>{event.title}</h1>
+          <div className="flex items-center gap-4 mt-3">
             <span className="flex items-center gap-1 text-xs" style={{ color: "#6b7785" }}><Clock size={12} /> 총 {fmtDuration(totalDuration(segments))}</span>
             <span className="flex items-center gap-1 text-xs" style={{ color: "#6b7785" }}><ListOrdered size={12} /> {segments.length}개 순서</span>
           </div>
         </div>
       </div>
 
-      <div className="px-4 pb-8 flex flex-col gap-3" style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}>
+      <div className="flex-1 overflow-y-auto px-4 pb-28 flex flex-col gap-3">
         {timeline.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
             <div className="w-16 h-16 rounded-3xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)" }}>
@@ -252,14 +253,20 @@ export default function EventSegmentsPage() {
           </>
         )}
 
-        <button
-          onClick={() => setModal({ open: true, editing: null })}
-          className="w-full py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 active:scale-[0.98] transition mt-1"
-          style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 6px 24px ${ACCENT}44` }}
-        >
-          <Plus size={18} strokeWidth={2.5} /> 타임라인 추가
-        </button>
       </div>
+
+      {/* 플로팅 추가 버튼 */}
+      <motion.button
+        onClick={() => setModal({ open: true, editing: null })}
+        className="absolute left-1/2 -translate-x-1/2 rounded-full px-6 py-3.5 text-sm font-black flex items-center gap-2"
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 8px 32px ${ACCENT}55, 0 2px 8px rgba(0,0,0,0.4)` }}
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 25 }}
+        whileTap={{ scale: 0.96 }}
+      >
+        <Plus size={18} strokeWidth={2.5} /> 타임라인 추가
+      </motion.button>
 
       <AnimatePresence>
         {modal.open && (
