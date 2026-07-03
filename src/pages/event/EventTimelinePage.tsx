@@ -53,14 +53,14 @@ export default function EventTimelinePage() {
         <div className="absolute top-20 -left-8 w-36 h-36 rounded-full pointer-events-none" style={{ background: `${TAB_COLORS.events}14`, filter: "blur(40px)" }} />
 
         <div className="relative">
-          <div className="flex items-center gap-3 mb-3">
-            <BackButton to={`/event/${id}`} />
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full" style={{ background: `${statusColor}22`, color: statusColor }}>
+          <BackButton to={`/event/${id}`} />
+          <div className="flex items-start justify-between gap-3 mt-3 mb-1">
+            <h1 className="text-2xl font-black leading-snug line-clamp-2 min-w-0" style={{ color: "#f0f2f8" }}>{event.title}</h1>
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full shrink-0 mt-1" style={{ background: `${statusColor}22`, color: statusColor }}>
               {status === "live" && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: statusColor }} />}
               {status === "live" ? "LIVE 진행중" : EVENT_STATUS_LABEL[status]}
             </span>
           </div>
-          <h1 className="text-2xl font-black leading-snug mb-1" style={{ color: "#f0f2f8" }}>{event.title}</h1>
           {meta && <p className="text-sm" style={{ color: "#8892a0" }}>{meta}</p>}
 
           <div className="flex gap-3 mt-5">
