@@ -15,6 +15,7 @@ import EventDetailPage from "../pages/event/EventDetailPage";
 import EventSegmentsPage from "../pages/event/EventSegmentsPage";
 import EventListPage from "../pages/event/EventListPage";
 import EventInfoPage from "../pages/event/EventInfoPage";
+import EventTimelinePage from "../pages/event/EventTimelinePage";
 import EventResultsPage from "../pages/event/EventResultsPage";
 import AdminPage from "../pages/AdminPage";
 
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       { path: "/member/bill", element: <MemberBillFormPage /> },
       { path: "/events", element: <EventListPage /> },
       { path: "/event/:id", element: <EventInfoPage /> },
+      { path: "/event/:id/timeline", element: <EventTimelinePage /> },
       { path: "/profile", element: <ProfilePage /> },
       { path: "/gallery", element: <GalleryPage /> },
       { path: "/worship", element: <WorshipSchedulePage /> },
