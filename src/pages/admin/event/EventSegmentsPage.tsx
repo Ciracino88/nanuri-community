@@ -281,7 +281,7 @@ export default function EventSegmentsPage() {
       <motion.button
         onClick={() => setModal({ open: true, editing: null })}
         className="absolute left-1/2 -translate-x-1/2 rounded-full px-6 py-3.5 text-sm font-black flex items-center gap-2"
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 8px 32px ${ACCENT}55, 0 2px 8px rgba(0,0,0,0.4)` }}
+        style={{ bottom: "1.5rem", background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 8px 32px ${ACCENT}55, 0 2px 8px rgba(0,0,0,0.4)` }}
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 25 }}
