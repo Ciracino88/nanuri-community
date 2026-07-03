@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { CalendarDays, Wallet, Settings, Plus, Receipt, BookText } from "lucide-react";
 import toast from "react-hot-toast";
-import LoadingSpinner from "../components/LoadingSpinner";
-import ActionRow from "../components/ui/ActionRow";
-import { computeEventStatus, type EventStatus } from "../lib/eventStatus";
-import { colorForEvent } from "../lib/eventColor";
-import { useAdminEvents } from "../hooks/useEvents";
-import { TAB_COLORS } from "../constants/theme";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import ActionRow from "../../components/ui/ActionRow";
+import { computeEventStatus, type EventStatus } from "../../lib/eventStatus";
+import { colorForEvent } from "../../lib/eventColor";
+import { useAdminEvents } from "../../hooks/useEvents";
+import { TAB_COLORS } from "../../constants/theme";
 
 const ACCENT = TAB_COLORS.admin;
 

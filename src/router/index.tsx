@@ -10,13 +10,13 @@ import MemberBillFormPage from "../pages/bill/MemberBillFormPage";
 import ProfilePage from "../pages/ProfilePage";
 import WorshipSchedulePage from "../pages/worship/WorshipSchedulePage";
 import GalleryPage from "../pages/GalleryPage";
-import EventBuilderPage from "../pages/event/EventBuilderPage";
-import EventDetailPage from "../pages/event/EventDetailPage";
-import EventSegmentsPage from "../pages/event/EventSegmentsPage";
+import EventBuilderPage from "../pages/admin/event/EventBuilderPage";
+import EventDetailPage from "../pages/admin/event/EventDetailPage";
+import EventSegmentsPage from "../pages/admin/event/EventSegmentsPage";
 import EventListPage from "../pages/event/EventListPage";
 import EventInfoPage from "../pages/event/EventInfoPage";
 import EventTimelinePage from "../pages/event/EventTimelinePage";
-import AdminPage from "../pages/AdminPage";
+import AdminPage from "../pages/admin/AdminPage";
 
 export const router = createBrowserRouter([
   {

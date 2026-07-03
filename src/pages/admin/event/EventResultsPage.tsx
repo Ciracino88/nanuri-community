@@ -1,13 +1,13 @@
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import BackButton from "../../components/BackButton";
-import LoadingScreen from "../../components/LoadingScreen";
-import { supabase } from "../../lib/supabase";
-import { buildTimeline, formatClock } from "../../lib/eventTime";
-import { aggregateMoods } from "../../lib/mood";
-import { useEventResults, eventKeys } from "../../hooks/useEvents";
-import { TAB_COLORS } from "../../constants/theme";
+import BackButton from "../../../components/BackButton";
+import LoadingScreen from "../../../components/LoadingScreen";
+import { supabase } from "../../../lib/supabase";
+import { buildTimeline, formatClock } from "../../../lib/eventTime";
+import { aggregateMoods } from "../../../lib/mood";
+import { useEventResults, eventKeys } from "../../../hooks/useEvents";
+import { TAB_COLORS } from "../../../constants/theme";
 
 const ACCENT = TAB_COLORS.admin;
 

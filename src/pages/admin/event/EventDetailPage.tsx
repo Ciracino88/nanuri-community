@@ -2,13 +2,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Pencil, ListOrdered, BarChart3, Trash2 } from "lucide-react";
-import EventInfoView from "../../components/EventInfoView";
-import LoadingScreen from "../../components/LoadingScreen";
-import ActionRow from "../../components/ui/ActionRow";
-import { confirmDialog } from "../../components/ConfirmDialog";
-import { supabase } from "../../lib/supabase";
-import { deleteImage } from "../../lib/deleteImage";
-import { useEventDetail, eventKeys } from "../../hooks/useEvents";
+import EventInfoView from "../../../components/EventInfoView";
+import LoadingScreen from "../../../components/LoadingScreen";
+import ActionRow from "../../../components/ui/ActionRow";
+import { confirmDialog } from "../../../components/ConfirmDialog";
+import { supabase } from "../../../lib/supabase";
+import { deleteImage } from "../../../lib/deleteImage";
+import { useEventDetail, eventKeys } from "../../../hooks/useEvents";
 
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();

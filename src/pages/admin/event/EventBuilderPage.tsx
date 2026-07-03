@@ -4,14 +4,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { CalendarDays, Clock, MapPin, Users, DollarSign, Star, Pencil, Plus, ChevronDown, Trash2, type LucideIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import BackButton from "../../components/BackButton";
-import TextField from "../../components/ui/TextField";
-import { useReceiptUpload } from "../../hooks/useReceiptUpload";
-import { uploadReceipt } from "../../lib/uploadReceipt";
-import { deleteImage } from "../../lib/deleteImage";
-import { supabase } from "../../lib/supabase";
-import { useEventDetail, eventKeys } from "../../hooks/useEvents";
-import { TAB_COLORS } from "../../constants/theme";
+import BackButton from "../../../components/BackButton";
+import TextField from "../../../components/ui/TextField";
+import { useReceiptUpload } from "../../../hooks/useReceiptUpload";
+import { uploadReceipt } from "../../../lib/uploadReceipt";
+import { deleteImage } from "../../../lib/deleteImage";
+import { supabase } from "../../../lib/supabase";
+import { useEventDetail, eventKeys } from "../../../hooks/useEvents";
+import { TAB_COLORS } from "../../../constants/theme";
 
 const ACCENT = TAB_COLORS.admin;
 

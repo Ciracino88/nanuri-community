@@ -19,16 +19,16 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import BackButton from "../../components/BackButton";
-import TextField from "../../components/ui/TextField";
-import TextArea from "../../components/ui/TextArea";
-import LoadingScreen from "../../components/LoadingScreen";
-import { confirmDialog } from "../../components/ConfirmDialog";
-import { supabase } from "../../lib/supabase";
-import { buildTimeline, formatClock, totalDuration, type TimelineSegment } from "../../lib/eventTime";
-import { useEventDetail, eventKeys, type EventDetailData } from "../../hooks/useEvents";
-import { TAB_COLORS } from "../../constants/theme";
-import type { Segment } from "../../types/event";
+import BackButton from "../../../components/BackButton";
+import TextField from "../../../components/ui/TextField";
+import TextArea from "../../../components/ui/TextArea";
+import LoadingScreen from "../../../components/LoadingScreen";
+import { confirmDialog } from "../../../components/ConfirmDialog";
+import { supabase } from "../../../lib/supabase";
+import { buildTimeline, formatClock, totalDuration, type TimelineSegment } from "../../../lib/eventTime";
+import { useEventDetail, eventKeys, type EventDetailData } from "../../../hooks/useEvents";
+import { TAB_COLORS } from "../../../constants/theme";
+import type { Segment } from "../../../types/event";
 
 const ACCENT = TAB_COLORS.admin;
 const DOT_COLORS = Object.values(TAB_COLORS);
