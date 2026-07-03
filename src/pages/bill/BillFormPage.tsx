@@ -33,7 +33,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function MemberBillFormPage() {
+export default function BillFormPage() {
   const navigate = useNavigate();
   const { user, userProfile, fetchUserProfile } = useAuthStore();
 
