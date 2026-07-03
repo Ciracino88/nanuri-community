@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import toast from "react-hot-toast";
-import { GripVertical, Pencil, Trash2, Plus, Clock, ListOrdered } from "lucide-react";
+import { GripVertical, Pencil, Trash2, Plus, Clock, ListOrdered, X, Check } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -21,6 +21,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import BackButton from "../../components/BackButton";
 import TextField from "../../components/ui/TextField";
+import TextArea from "../../components/ui/TextArea";
 import LoadingScreen from "../../components/LoadingScreen";
 import { supabase } from "../../lib/supabase";
 import { buildTimeline, formatClock, totalDuration, type TimelineSegment } from "../../lib/eventTime";
@@ -66,28 +67,38 @@ function SegmentModal({ initial, onSave, onClose, saving }: {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center px-6"
-      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+      className="fixed inset-0 z-[100] flex items-end justify-center"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
-      onClick={onClose}
     >
+      <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} onClick={onClose} />
       <motion.div
-        className="w-full rounded-3xl p-5 flex flex-col gap-4"
-        style={{ maxWidth: 340, background: "rgba(22,25,35,0.98)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 16px 48px rgba(0,0,0,0.6)" }}
-        initial={{ opacity: 0, scale: 0.9, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94, y: 8 }}
-        transition={{ type: "spring", stiffness: 420, damping: 30 }}
-        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md rounded-t-3xl px-6 pt-3 flex flex-col gap-4"
+        style={{ background: "rgba(22,25,35,0.99)", borderTop: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 -12px 48px rgba(0,0,0,0.6)", paddingBottom: "calc(1.75rem + env(safe-area-inset-bottom))" }}
+        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <h2 className="text-base font-black" style={{ color: "#f0f2f8" }}>{initial ? "순서 수정" : "순서 추가"}</h2>
-        <TextField label="제목" accent={ACCENT} placeholder="예) 오프닝 & 환영 인사" value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} />
-        <TextField label="소요시간" type="number" inputMode="numeric" min={1} suffix="분" accent={ACCENT} placeholder="30" value={duration} error={errors.duration} onChange={(e) => setDuration(e.target.value)} />
-        <TextField label="설명 (선택)" accent={ACCENT} placeholder="순서 설명" value={description} onChange={(e) => setDescription(e.target.value)} />
-        <div className="flex gap-2.5 mt-1">
-          <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl text-sm font-bold" style={{ background: "rgba(255,255,255,0.06)", color: "#8892a0", border: "1px solid rgba(255,255,255,0.08)" }}>취소</button>
-          <button type="button" onClick={submit} disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-black disabled:opacity-60" style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117" }}>
-            {saving ? "저장 중..." : "저장"}
+        <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: "rgba(255,255,255,0.15)" }} />
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-black" style={{ color: "#f0f2f8" }}>{initial ? "순서 수정" : "순서 추가"}</h2>
+          <button type="button" onClick={onClose} aria-label="닫기" className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)", color: "#8892a0" }}>
+            <X size={16} />
           </button>
         </div>
+
+        <TextField label="제목" accent={ACCENT} placeholder="예) 오프닝 & 환영 인사" value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} />
+        <TextField label="소요시간" type="number" inputMode="numeric" min={1} suffix="분" accent={ACCENT} placeholder="30" value={duration} error={errors.duration} onChange={(e) => setDuration(e.target.value)} />
+        <TextArea label="설명 (선택)" rows={3} accent={ACCENT} placeholder="이 순서에 대한 설명을 입력해주세요" value={description} onChange={(e) => setDescription(e.target.value)} />
+
+        <button
+          type="button"
+          onClick={submit}
+          disabled={saving}
+          className="w-full py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 mt-1 disabled:opacity-60"
+          style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 6px 24px ${ACCENT}44` }}
+        >
+          <Check size={18} />
+          {saving ? "저장 중..." : "저장하기"}
+        </button>
       </motion.div>
     </motion.div>
   );
