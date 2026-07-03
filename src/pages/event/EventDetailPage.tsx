@@ -52,8 +52,8 @@ export default function EventDetailPage() {
     <div className="flex flex-col gap-3">
       {/* 액션 */}
       <ActionRow Icon={Pencil} label="정보 수정" desc="제목·날짜·장소·상세 정보" onClick={() => navigate(`/admin/events/${event.id}/edit`)} />
-      <ActionRow Icon={ListOrdered} label="진행 관리" desc="순서(타임라인) 편집" onClick={() => navigate(`/admin/events/${event.id}/segments`)} />
-      <ActionRow Icon={BarChart3} label="통계" desc="순서별 만족도·평가 결과" onClick={() => navigate(`/admin/events/${event.id}/results`)} />
+      <ActionRow Icon={ListOrdered} label="진행 관리" desc="타임라인 편집" onClick={() => navigate(`/admin/events/${event.id}/segments`)} />
+      <ActionRow Icon={BarChart3} label="통계" desc="만족도·평가 결과" badge="준비 중" onClick={() => toast("준비 중이에요", { icon: "🚧" })} />
 
       {/* 삭제 */}
       <button
