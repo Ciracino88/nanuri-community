@@ -23,6 +23,7 @@ import BackButton from "../../components/BackButton";
 import TextField from "../../components/ui/TextField";
 import TextArea from "../../components/ui/TextArea";
 import LoadingScreen from "../../components/LoadingScreen";
+import { confirmDialog } from "../../components/ConfirmDialog";
 import { supabase } from "../../lib/supabase";
 import { buildTimeline, formatClock, totalDuration, type TimelineSegment } from "../../lib/eventTime";
 import { useEventDetail, eventKeys, type EventDetailData } from "../../hooks/useEvents";
@@ -201,6 +202,16 @@ export default function EventSegmentsPage() {
     onError: () => { toast.error("순서 변경에 실패했어요"); invalidate(); },
   });
 
+  const handleDelete = async (segment: Segment) => {
+    const ok = await confirmDialog({
+      title: "순서를 삭제할까요?",
+      message: `"${segment.title}" 순서가 삭제됩니다.`,
+      confirmLabel: "삭제",
+      danger: true,
+    });
+    if (ok) deleteMutation.mutate(segment.id);
+  };
+
   if (isLoading) return <LoadingScreen />;
   if (!event) return <p className="flex-1 flex items-center justify-center text-sm" style={{ color: "#4a5568" }}>행사를 찾을 수 없어요</p>;
 
@@ -256,7 +267,7 @@ export default function EventSegmentsPage() {
               <SortableContext items={timeline.map((s) => s.id)} strategy={verticalListSortingStrategy}>
                 <div className="flex flex-col gap-3">
                   {timeline.map((s, i) => (
-                    <SortableRow key={s.id} item={s} index={i} onEdit={() => setModal({ open: true, editing: s })} onDelete={() => deleteMutation.mutate(s.id)} />
+                    <SortableRow key={s.id} item={s} index={i} onEdit={() => setModal({ open: true, editing: s })} onDelete={() => handleDelete(s)} />
                   ))}
                 </div>
               </SortableContext>
