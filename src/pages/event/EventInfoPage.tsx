@@ -35,7 +35,7 @@ export default function EventInfoPage() {
         onClick={() => navigate(`/event/${event.id}/timeline`)}
       >
         <ListOrdered size={16} />
-        진행 순서 보기
+        프로그램 보기
       </motion.button>
       <motion.button
         className="py-3.5 px-4 rounded-2xl text-sm font-bold"

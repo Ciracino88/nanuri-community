@@ -54,7 +54,7 @@ export default function EventResultsPage() {
         <div className="rounded-2xl p-4 flex items-center justify-between" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <div>
             <p className="text-sm font-bold" style={{ color: "#f0f2f8" }}>결과 공개</p>
-            <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>참여자도 순서별 집계를 볼 수 있어요</p>
+            <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>참여자도 프로그램별 집계를 볼 수 있어요</p>
           </div>
           <button
             onClick={() => toggleResultsMutation.mutate(!event.results_public)}
@@ -70,7 +70,7 @@ export default function EventResultsPage() {
         <div className="grid grid-cols-2 gap-3">
           {[
             { label: "전체 평가", value: `${totalEvals}건` },
-            { label: "순서", value: `${segments.length}개` },
+            { label: "프로그램", value: `${segments.length}개` },
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
               <p className="text-xs" style={{ color: "#6b7785" }}>{stat.label}</p>

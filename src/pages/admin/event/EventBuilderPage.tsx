@@ -134,7 +134,7 @@ export default function EventBuilderPage() {
       } else {
         const { data: event, error } = await supabase.from("events").insert(payload).select("id").single();
         if (error) throw error;
-        toast.success("행사를 만들었어요. 순서를 추가하세요");
+        toast.success("행사를 만들었어요. 프로그램을 추가하세요");
         navigate(`/admin/events/${event.id}`);
       }
     } catch (err) {

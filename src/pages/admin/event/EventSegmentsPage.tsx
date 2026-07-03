@@ -80,7 +80,7 @@ function SegmentModal({ initial, onSave, onClose, saving }: {
       >
         <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: "rgba(255,255,255,0.15)" }} />
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black" style={{ color: "#f0f2f8" }}>{initial ? "순서 수정" : "순서 추가"}</h2>
+          <h2 className="text-lg font-black" style={{ color: "#f0f2f8" }}>{initial ? "프로그램 수정" : "프로그램 추가"}</h2>
           <button type="button" onClick={onClose} aria-label="닫기" className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)", color: "#8892a0" }}>
             <X size={16} />
           </button>
@@ -88,7 +88,7 @@ function SegmentModal({ initial, onSave, onClose, saving }: {
 
         <TextField label="제목" accent={ACCENT} placeholder="예) 오프닝 & 환영 인사" value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} />
         <TextField label="소요시간" type="number" inputMode="numeric" min={1} suffix="분" accent={ACCENT} placeholder="30" value={duration} error={errors.duration} onChange={(e) => setDuration(e.target.value)} />
-        <TextArea label="설명 (선택)" rows={3} accent={ACCENT} placeholder="이 순서에 대한 설명을 입력해주세요" value={description} onChange={(e) => setDescription(e.target.value)} />
+        <TextArea label="설명 (선택)" rows={3} accent={ACCENT} placeholder="이 프로그램에 대한 설명을 입력해주세요" value={description} onChange={(e) => setDescription(e.target.value)} />
 
         <button
           type="button"
@@ -125,7 +125,7 @@ function SortableRow({ item, index, onEdit, onDelete }: {
 
   return (
     <div ref={setNodeRef} style={style} className="rounded-2xl p-4 flex items-start gap-3">
-      <button {...attributes} {...listeners} aria-label="순서 이동" className="mt-1 touch-none cursor-grab active:cursor-grabbing shrink-0" style={{ color: "#6b7785" }}>
+      <button {...attributes} {...listeners} aria-label="프로그램 이동" className="mt-1 touch-none cursor-grab active:cursor-grabbing shrink-0" style={{ color: "#6b7785" }}>
         <GripVertical size={18} />
       </button>
       <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0" style={{ background: color, color: "#0f1117" }}>
@@ -204,8 +204,8 @@ export default function EventSegmentsPage() {
 
   const handleDelete = async (segment: Segment) => {
     const ok = await confirmDialog({
-      title: "순서를 삭제할까요?",
-      message: `"${segment.title}" 순서가 삭제됩니다.`,
+      title: "프로그램을 삭제할까요?",
+      message: `"${segment.title}" 프로그램이 삭제됩니다.`,
       confirmLabel: "삭제",
       danger: true,
     });
@@ -241,7 +241,7 @@ export default function EventSegmentsPage() {
           <h1 className="text-2xl font-black leading-snug truncate" style={{ color: "#f0f2f8" }}>{event.title}</h1>
           <div className="flex items-center gap-4 mt-3">
             <span className="flex items-center gap-1 text-xs" style={{ color: "#6b7785" }}><Clock size={12} /> 총 {fmtDuration(totalDuration(segments))}</span>
-            <span className="flex items-center gap-1 text-xs" style={{ color: "#6b7785" }}><ListOrdered size={12} /> {segments.length}개 순서</span>
+            <span className="flex items-center gap-1 text-xs" style={{ color: "#6b7785" }}><ListOrdered size={12} /> {segments.length}개 프로그램</span>
           </div>
         </div>
       </div>
@@ -253,7 +253,7 @@ export default function EventSegmentsPage() {
               <ListOrdered size={28} color="#4a5568" />
             </div>
             <div>
-              <p className="text-sm font-bold" style={{ color: "#8892a0" }}>타임라인이 없어요</p>
+              <p className="text-sm font-bold" style={{ color: "#8892a0" }}>프로그램이 없어요</p>
               <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>아래 버튼을 눌러 추가해보세요</p>
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function EventSegmentsPage() {
         transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 25 }}
         whileTap={{ scale: 0.96 }}
       >
-        <Plus size={18} strokeWidth={2.5} /> 타임라인 추가
+        <Plus size={18} strokeWidth={2.5} /> 프로그램 추가
       </motion.button>
 
       <AnimatePresence>

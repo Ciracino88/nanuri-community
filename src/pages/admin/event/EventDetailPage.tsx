@@ -35,7 +35,7 @@ export default function EventDetailPage() {
   const handleDeleteEvent = async () => {
     const ok = await confirmDialog({
       title: "행사를 삭제할까요?",
-      message: "순서와 평가 데이터도 모두 삭제됩니다.",
+      message: "프로그램과 평가 데이터도 모두 삭제됩니다.",
       confirmLabel: "삭제",
       danger: true,
     });

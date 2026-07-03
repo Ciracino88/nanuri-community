@@ -65,7 +65,7 @@ export default function EventTimelinePage() {
 
           <div className="flex gap-3 mt-5">
             <div className="flex-1 rounded-2xl px-4 py-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-              <p className="text-xs mb-0.5" style={{ color: "#6b7785" }}>전체 순서</p>
+              <p className="text-xs mb-0.5" style={{ color: "#6b7785" }}>전체 프로그램</p>
               <p className="text-lg font-black" style={{ color: "#f0f2f8" }}>{segments.length}<span className="text-sm font-normal ml-1" style={{ color: "#6b7785" }}>개</span></p>
             </div>
             <div className="flex-1 rounded-2xl px-4 py-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
@@ -148,7 +148,7 @@ export default function EventTimelinePage() {
         )}
 
         {timeline.length === 0 && (
-          <p className="text-center text-sm py-12" style={{ color: "#4a5568" }}>아직 등록된 순서가 없어요</p>
+          <p className="text-center text-sm py-12" style={{ color: "#4a5568" }}>아직 등록된 프로그램이 없어요</p>
         )}
       </div>
     </div>
