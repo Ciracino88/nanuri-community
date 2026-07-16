@@ -51,10 +51,12 @@ File 선택 → browser-image-compression (1MB / 1200px 이하)
 세 층으로 나뉩니다.
 
 - **Zustand (`store/authStore.ts`)** — 세션·프로필 전역 상태. `initialize()`가 `main.tsx`에서 한 번 실행되어 `onAuthStateChange`를 구독하고, 구독 해제 함수를 반환합니다.
-- **TanStack Query** — 서버 데이터 캐시. 행사(`hooks/useEvents.ts`)와 찬양팀 일정(`hooks/useWorshipSchedule.ts`)이 사용하며, 쿼리 키는 `eventKeys` 객체에 모아뒀습니다.
+- **TanStack Query** — 서버 데이터 캐시. 행사(`hooks/useEvents.ts`), 소모임(`hooks/useGatherings.ts`), 찬양팀 일정(`hooks/useWorshipSchedule.ts`)이 사용하며, 쿼리 키는 도메인별로 `eventKeys`·`gatheringKeys` 객체에 모아뒀습니다.
 - **useState/useReducer** — 폼과 로컬 UI 상태. 회계 관련 훅은 Query를 쓰지 않고 `useEffect` + `useState`로 직접 패칭합니다(오래된 코드).
 
-Realtime 구독은 두 곳입니다: 행사 결과(`segment_evaluations`)와 찬양팀 참여 현황(`worship_availability`). 두 훅 모두 이벤트 수신 시 Query 캐시를 무효화하는 방식입니다.
+Realtime 구독은 세 곳입니다: 행사 결과(`segment_evaluations`), 소모임(`gatherings` + `gathering_participants`), 찬양팀 참여 현황(`worship_availability`). 모두 이벤트 수신 시 Query 캐시를 무효화하는 방식입니다.
+
+`staleTime`은 훅마다 다릅니다. `useGatherings`는 5분이고 `useEventList`는 지정하지 않아 기본값 0입니다 — **마운트할 때마다 재조회한다는 뜻**이라, 캐시를 미리 채워 쓰는 개발 미리보기에서 문제가 됩니다([status.md](status.md#화면-확인하는-법)).
 
 ## 폴더 구조
 
@@ -62,21 +64,23 @@ Realtime 구독은 두 곳입니다: 행사 결과(`segment_evaluations`)와 찬
 src/
 ├── components/          # 공용 컴포넌트
 │   ├── nav/creatures.tsx  # 하단 탭 캐릭터 SVG
-│   ├── ui/                # Button, TextField, SelectField, TextArea, ActionRow, MoodRating
+│   ├── ui/                # Button, TextField, SelectField, TextArea, ActionRow, BottomSheet, MoodRating
 │   └── worship/           # PositionSlot
-├── constants/           # banks(은행 목록), theme(탭 색), worship(포지션 목록)
-├── hooks/               # 도메인 훅 (행사·찬양팀·회계·영수증·캘린더)
-├── lib/                 # supabase 클라이언트, 업로드/삭제, 행사 시간·상태·색, 닉네임, mood
+├── constants/           # banks(은행 목록), theme(액센트 상수), tints(장식 틴트), worship(포지션 목록)
+├── hooks/               # 도메인 훅 (행사·소모임·찬양팀·회계·영수증·캘린더)
+├── lib/                 # supabase 클라이언트, 업로드/삭제, 행사·소모임 시간·상태·색, 닉네임, mood
 ├── pages/
 │   ├── accounting/        # 회계 리포트 (라우터에 미연결)
 │   ├── admin/             # 관리자 홈 + admin/event/ 행사 관리
 │   ├── auth/              # GatePage, MemberLoginPage
 │   ├── bill/              # BillFormPage (비용 청구)
+│   ├── dev/               # 개발 전용 UI 미리보기 (/__dev/*, 라우터 바깥)
 │   ├── event/             # 행사 목록·정보·타임라인
+│   ├── gathering/         # 소모임 목록 + 개설 시트
 │   └── worship/           # 찬양팀 일정
 ├── router/index.tsx     # 라우트 정의
 ├── store/authStore.ts   # 인증 전역 상태
-└── types/               # event.ts, worship.ts
+└── types/               # event.ts, gathering.ts, worship.ts
 
 worker/                  # Cloudflare Worker (업로드/삭제/지오코딩)
 supabase/migrations/     # 행사 관련 마이그레이션만 존재

@@ -17,6 +17,11 @@
 ### 3. 찬양팀 일정 공유
 매주 주일 기준으로 인도자·싱어·피아노·어쿠스틱·베이스·일렉·드럼·PPT 등 포지션별 참여 가능 여부를 멤버가 직접 등록합니다. 같은 포지션에 중복 등록하면 교체 확인을 거치고, 변경 사항은 Realtime으로 실시간 반영됩니다.
 
+### 4. 소모임 (번개)
+멤버가 가벼운 모임을 열고 참여를 토글합니다(`/gatherings`). 개설자는 곧 첫 참여자가 되고, 참여자 아이콘은 Realtime으로 즉시 반영됩니다. 모이는 시각이 지나면 자동으로 종료 처리됩니다.
+
+**1단계(개설·참여)까지만 동작합니다.** 사진·정산·템플릿은 아직 없습니다.
+
 ### 공통
 - **인증/권한**: Supabase Auth 기반. 멤버 전용 / 관리자 전용 라우트를 `ProtectedRoute`로 분리 제어하며, 실제 차단은 Postgres RLS가 담당합니다.
 - **익명 닉네임 생성**: 랜덤 닉네임(형용사+동물+이모지) 자동 생성
@@ -63,11 +68,12 @@ graph TD
 src/
 ├── components/          # 공용 컴포넌트 (Layout, ProtectedRoute, BottomNav, BackButton 등)
 │   ├── nav/               # 하단 탭 캐릭터 아이콘
-│   ├── ui/                # Button, TextField, SelectField, TextArea, ActionRow, MoodRating
+│   ├── ui/                # Button, TextField, SelectField, TextArea, ActionRow, BottomSheet, MoodRating
 │   └── worship/           # PositionSlot
-├── constants/           # banks(은행 목록), theme(탭 색), worship(포지션 목록)
+├── constants/           # banks(은행 목록), theme(액센트 상수), tints(장식 틴트), worship(포지션 목록)
 ├── hooks/               # 도메인 훅
 │   ├── useEvents.ts        # 행사 전반 (목록·상세·타임라인·결과)
+│   ├── useGatherings.ts / useToggleGatheringJoin.ts  # 소모임
 │   ├── useWorshipSchedule.ts / useToggleAvailability.ts
 │   ├── useReceiptUpload.ts  # 파일 선택 + 미리보기 수명 관리
 │   ├── useCalendar.ts
@@ -80,18 +86,21 @@ src/
 │   ├── eventTime.ts        # 타임라인 시각 계산
 │   ├── eventStatus.ts      # 예정/진행 중/종료 판정
 │   ├── eventColor.ts       # 행사 id → 팔레트 색
+│   ├── gatheringTime.ts    # 소모임 시각 표시·상태 판정
 │   ├── mood.ts             # 3단계 만족도 정의·집계
 │   └── generateNickname.ts # 익명 닉네임 생성
 ├── pages/
 │   ├── auth/             # 게이트 / 멤버 로그인
 │   ├── bill/             # 비용 청구 폼
 │   ├── event/            # 행사 목록/정보/타임라인 (참여자)
+│   ├── gathering/        # 소모임 목록 + 개설 시트
 │   ├── admin/            # 관리자 홈 + event/ 행사 관리
 │   ├── worship/          # 찬양팀 일정
-│   └── accounting/       # 회계 리포트 (라우터 미연결)
+│   ├── accounting/       # 회계 리포트 (라우터 미연결)
+│   └── dev/              # 개발 전용 UI 미리보기 (/__dev/*, 프로덕션 번들 제외)
 ├── router/              # React Router 라우트 정의
 ├── store/               # Zustand 전역 상태 (인증)
-└── types/               # event.ts, worship.ts
+└── types/               # event.ts, gathering.ts, worship.ts
 
 worker/                  # Cloudflare Worker (이미지 업로드/삭제, 역지오코딩 API)
 supabase/migrations/     # 행사 관련 마이그레이션 (그 외 테이블은 미포함)
@@ -121,6 +130,8 @@ VITE_CF_WORKER_URL=
 ```bash
 npm run dev
 ```
+
+로그인 없이 화면만 보고 싶으면 `/__dev/`로 접속하세요. 개발 전용 UI 미리보기 목록이 뜹니다([docs/status.md](docs/status.md#화면-확인하는-법)).
 
 ### 4. 빌드 / 미리보기
 
