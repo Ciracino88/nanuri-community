@@ -6,9 +6,15 @@ import { Toaster } from "react-hot-toast";
 import { router } from "./router";
 import { useAuthStore } from "./store/authStore";
 import { ConfirmHost } from "./components/ConfirmDialog";
+import DevPreviewPage from "./pages/dev/DevPreviewPage";
 import "./index.css";
 
 const queryClient = new QueryClient();
+
+// 개발 전용 UI 미리보기(/__dev/*). 앱 라우터 바깥에 둬야 미리보기 쪽에서 MemoryRouter 로
+// 경로와 인증 상태를 꾸며 띄울 수 있다(라우터는 중첩이 안 된다). 프로덕션 빌드에서는
+// import.meta.env.DEV 가 false 라 이 가지가 통째로 트리셰이킹된다.
+const isDevPreview = import.meta.env.DEV && window.location.pathname.startsWith("/__dev/");
 
 function Root() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -51,7 +57,7 @@ function Root() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Root />
+      {isDevPreview ? <DevPreviewPage /> : <Root />}
     </QueryClientProvider>
   </StrictMode>
 );
