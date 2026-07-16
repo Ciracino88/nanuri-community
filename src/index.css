@@ -2,21 +2,28 @@
 
 @theme {
   /* 글자색 (fg = foreground) */
-  --color-fg-strong: #1f2937;
-  --color-fg: #374151;
-  --color-fg-muted: #6b7280;
-  --color-fg-faint: #9ca3af;
+  --color-fg-strong: #17171c; /* 헤드라인 (거의 검정) */
+  --color-fg: #3d3d47;
+  --color-fg-muted: #75757f;  /* 보조 텍스트·비활성 라벨. 흰 배경 대비 4.5:1 통과 */
+  --color-fg-faint: #a8a8b3;  /* 장식·비활성 아이콘 전용. 대비 미달이라 본문 텍스트 금지 */
 
   /* 표면 */
-  --color-surface: #f9fafb;
+  --color-surface: #f6f6f8; /* 페이지 캔버스 */
   --color-card: #ffffff;
-  --color-sunken: #f3f4f6;
-  --color-inverse: #1f2937;
+  --color-sunken: #f1f1f4;
+  --color-inverse: #17171c; /* 다크 필 버튼 (보조 액션) */
 
   /* 테두리 / 구분선 */
-  --color-line-soft: #f3f4f6;   /* 옅은 구분선 (gray-100) */
-  --color-line: #e5e7eb;        /* 기본 테두리 (gray-200) */
-  --color-line-strong: #d1d5db; /* 진한 테두리 (gray-300) */
+  --color-line-soft: #f1f1f4;   /* 옅은 구분선 */
+  --color-line: #e6e6ec;        /* 기본 테두리 */
+  --color-line-strong: #d3d3dc; /* 진한 테두리 */
+
+  /* 액센트 = 상호작용 전용 (버튼·활성 탭·선택 상태·링크).
+     장식에는 쓰지 않는다 — 장식은 아래 카테고리 틴트가 담당. */
+  --color-accent: #8b3dff;        /* 흰 글자 대비 4.99:1 */
+  --color-accent-strong: #6d28d9; /* 눌림 상태 · 틴트 배경 위 글자 */
+  --color-accent-soft: #ddc7ff;   /* 테두리 */
+  --color-accent-subtle: #f5edff; /* 틴트 배경 */
 
   /* 정보 / 강조 (subtle = 배경, soft = 테두리, base = 기본, strong = 틴트 위 제목) */
   --color-info: #3b82f6;
@@ -28,6 +35,7 @@
   --color-danger: #ef4444;
   --color-danger-soft: #fee2e2;
   --color-danger-subtle: #fef2f2;
+  --color-danger-strong: #7F1D1D;
 
   /* 경고 */
   --color-warning: #d97706;
@@ -38,23 +46,36 @@
   --color-success: #059669;
   --color-success-soft: #d1fae5;
   --color-success-subtle: #ecfdf5;
+  --color-success-strong: #064E3B;
 
-  /* 카테고리 (홈 타일·탭 히어로 장식용). strong = 틴트 배경 위 제목용 진한 색 */
-  --color-purple: #534AB7;
-  --color-purple-subtle: #EEEDFE;
-  --color-purple-strong: #3C3489;
-  --color-teal: #0F6E56;
-  --color-teal-subtle: #E1F5EE;
-  --color-teal-strong: #04342C;
-  --color-pink: #993556;
-  --color-pink-subtle: #FBEAF0;
-  --color-pink-strong: #4B1528;
-  --color-amber: #854F0B;
-  --color-amber-subtle: #FAEEDA;
-  --color-amber-strong: #412402;
+  /* 카테고리 틴트 = 장식·식별 전용 (리스트 아이콘 타일 배경, 히어로 틴트).
+     누를 수 없는 것에만 쓴다. 퍼플 계열은 액센트가 독점하므로 여기 없다.
+     subtle = 타일 배경, base = 그 위 아이콘, strong = 그 위 제목 */
+  --color-teal: #0D9276;
+  --color-teal-subtle: #DFF5EE;
+  --color-teal-strong: #04463A;
+  --color-pink: #DB2777;
+  --color-pink-subtle: #FDE9F1;
+  --color-pink-strong: #6E1233;
+  --color-amber: #D97706;
+  --color-amber-subtle: #FEF0DC;
+  --color-amber-strong: #6B3B05;
   --color-warning-strong: #633806;
 
+  /* 모서리 — 큰 라운드가 새 디자인의 정체성. 버튼·칩은 rounded-full */
+  --radius-tile: 1rem;     /* 16px — 리스트 아이콘 틴트 사각형 */
+  --radius-field: 0.875rem; /* 14px — 입력 필드 */
+  --radius-card: 1.25rem;  /* 20px — 카드·리스트 아이템 */
+  --radius-panel: 1.5rem;  /* 24px — 히어로·바텀시트·모달 */
+
+  /* 그림자 — 테두리 대신 이걸로 면을 띄운다 */
+  --shadow-card: 0 1px 2px rgb(23 23 28 / 0.04), 0 4px 12px rgb(23 23 28 / 0.05);
+  --shadow-lift: 0 2px 4px rgb(23 23 28 / 0.05), 0 12px 28px rgb(23 23 28 / 0.09);
+  --shadow-accent: 0 6px 20px rgb(139 61 255 / 0.30);
+
   /* 타입 스케일 */
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 0.875rem;
   --text-caption: 0.8125rem;
   --text-caption--line-height: 1.125rem;
   --text-body: 0.875rem;
@@ -144,9 +165,9 @@ html, body, #root {
   flex-direction: column;
 }
 
-/* 전역 다크 배경 (앱 캔버스). 페이지·컴포넌트는 배경을 따로 지정하지 않음 */
+/* 전역 라이트 배경 (앱 캔버스). 페이지·컴포넌트는 배경을 따로 지정하지 않음 */
 body {
-  background-color: #0f1117;
+  background-color: var(--color-surface);
 }
 
 @media print {

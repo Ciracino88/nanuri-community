@@ -9,7 +9,7 @@ interface Props {
   onClick?: () => void;
 }
 
-/** 공용 뒤로가기 버튼 — 다크 표준 (36px 둥근 글래스 원 + lucide ChevronLeft) */
+/** 공용 뒤로가기 버튼 — 36px 둥근 흰 원 + lucide ChevronLeft */
 export default function BackButton({ to, onClick }: Props) {
   const navigate = useNavigate();
   const handle = onClick ?? (() => (to ? navigate(to) : navigate(-1)));
@@ -17,13 +17,13 @@ export default function BackButton({ to, onClick }: Props) {
   return (
     <motion.button
       type="button"
-      className="flex items-center justify-center rounded-full shrink-0"
-      style={{ width: 36, height: 36, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+      className="flex items-center justify-center rounded-full shrink-0 bg-card border border-line shadow-card"
+      style={{ width: 36, height: 36 }}
       whileTap={{ scale: 0.88 }}
       onClick={handle}
       aria-label="뒤로"
     >
-      <ChevronLeft size={18} color="#f0f2f8" />
+      <ChevronLeft size={18} className="text-fg-strong" />
     </motion.button>
   );
 }

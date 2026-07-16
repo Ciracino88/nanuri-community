@@ -1,6 +1,6 @@
 import type { ComponentType, SVGProps } from "react";
 
-type Tint = "info" | "purple" | "teal" | "warning";
+type Tint = "info" | "teal" | "pink" | "amber";
 
 interface PageHeroProps {
   /** Heroicons v1 outline 컴포넌트 (하단 탭바와 동일 계열) */
@@ -15,9 +15,9 @@ interface PageHeroProps {
 // 파스텔(subtle) 배경 + 진한 톤(strong) 강조 문구
 const TINTS: Record<Tint, { bg: string; label: string; head: string; icon: string }> = {
   info: { bg: "bg-info-subtle", label: "text-info", head: "text-info-strong", icon: "text-info" },
-  purple: { bg: "bg-purple-subtle", label: "text-purple", head: "text-purple-strong", icon: "text-purple" },
   teal: { bg: "bg-teal-subtle", label: "text-teal", head: "text-teal-strong", icon: "text-teal" },
-  warning: { bg: "bg-warning-subtle", label: "text-warning", head: "text-warning-strong", icon: "text-warning" },
+  pink: { bg: "bg-pink-subtle", label: "text-pink", head: "text-pink-strong", icon: "text-pink" },
+  amber: { bg: "bg-amber-subtle", label: "text-amber", head: "text-amber-strong", icon: "text-amber" },
 };
 
 /**

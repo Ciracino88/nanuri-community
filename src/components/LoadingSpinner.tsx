@@ -1,19 +1,21 @@
 import { motion } from "motion/react";
+import { ACCENT } from "../constants/theme";
 
 interface Props {
   label?: string;
   size?: "sm" | "lg" | number;
+  /** @deprecated 액센트는 퍼플 단일. 호출부 정리 후 제거 예정. */
   color?: string;
 }
 
 const PX = { sm: 26, lg: 40 };
 
-export default function LoadingSpinner({ label, size = "sm", color = "#4ECDC4" }: Props) {
+export default function LoadingSpinner({ label, size = "sm", color = ACCENT }: Props) {
   const px = typeof size === "number" ? size : PX[size];
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-10">
       <div className="relative flex items-center justify-center" style={{ width: px, height: px }}>
-        <div className="absolute inset-0 rounded-full" style={{ border: "2px solid rgba(255,255,255,0.09)" }} />
+        <div className="absolute inset-0 rounded-full border-2 border-line" />
         <motion.div
           className="absolute inset-0 rounded-full"
           style={{
@@ -26,7 +28,7 @@ export default function LoadingSpinner({ label, size = "sm", color = "#4ECDC4" }
         />
       </div>
       {label && (
-        <p className="text-xs font-semibold" style={{ color: "#8892a0", letterSpacing: "0.06em" }}>
+        <p className="text-caption font-semibold text-fg-muted" style={{ letterSpacing: "0.06em" }}>
           {label}
         </p>
       )}

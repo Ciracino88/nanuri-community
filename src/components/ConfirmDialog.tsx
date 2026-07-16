@@ -51,14 +51,13 @@ export function ConfirmHost() {
   }, [open, close]);
 
   const danger = options?.danger;
-  const accent = danger ? "#FF6B6B" : "#74C7FF";
 
   return (
     <AnimatePresence>
       {open && options && (
         <motion.div
           className="fixed inset-0 z-[100] flex items-center justify-center px-6"
-          style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
+          style={{ background: "rgba(23,23,28,0.45)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -66,13 +65,8 @@ export function ConfirmHost() {
           onClick={() => close(false)}
         >
           <motion.div
-            className="w-full rounded-3xl p-5 flex flex-col gap-4"
-            style={{
-              maxWidth: 320,
-              background: "rgba(22,25,35,0.98)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
-            }}
+            className="w-full rounded-panel p-5 flex flex-col gap-4 bg-card shadow-lift"
+            style={{ maxWidth: 320 }}
             initial={{ opacity: 0, scale: 0.9, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 8 }}
@@ -80,22 +74,20 @@ export function ConfirmHost() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-1.5">
-              <h2 className="text-base font-black" style={{ color: "#f0f2f8" }}>{options.title}</h2>
-              {options.message && <p className="text-sm leading-relaxed" style={{ color: "#8892a0" }}>{options.message}</p>}
+              <h2 className="text-emphasis font-bold text-fg-strong">{options.title}</h2>
+              {options.message && <p className="text-body leading-relaxed text-fg-muted">{options.message}</p>}
             </div>
 
             <div className="flex gap-2.5">
               <motion.button
-                className="flex-1 py-3 rounded-xl text-sm font-bold"
-                style={{ background: "rgba(255,255,255,0.06)", color: "#8892a0", border: "1px solid rgba(255,255,255,0.08)" }}
+                className="flex-1 py-3 rounded-full text-body font-semibold bg-card border border-line text-fg"
                 whileTap={{ scale: 0.96 }}
                 onClick={() => close(false)}
               >
                 {options.cancelLabel ?? "취소"}
               </motion.button>
               <motion.button
-                className="flex-1 py-3 rounded-xl text-sm font-black"
-                style={{ background: `linear-gradient(135deg, ${accent}, ${accent}bb)`, color: "#0f1117" }}
+                className={`flex-1 py-3 rounded-full text-body font-semibold text-white ${danger ? "bg-danger" : "bg-accent"}`}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => close(true)}
               >
