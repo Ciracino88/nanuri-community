@@ -30,7 +30,9 @@ async function fetchWorshipData(year: number, month: number) {
 
   const [{ data: schedules }, { data: members }, { data: availability }] = await Promise.all([
     supabase.from("worship_schedules").select("id, date").order("date"),
-    supabase.from("user_profiles").select("id, name, position, avatar_url, team").not("position", "is", null),
+    // 타인의 프로필은 public_profiles 뷰로만 읽는다.
+    // user_profiles 직접 조회는 본인 행으로 제한돼 있다(계좌·연락처 노출 차단).
+    supabase.from("public_profiles").select("id, name, position, avatar_url, team").not("position", "is", null),
     supabase.from("worship_availability").select("schedule_id, user_id, position, available"),
   ]);
 
