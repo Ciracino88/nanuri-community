@@ -23,9 +23,9 @@
 
 `pages/accounting/`에 세 페이지(`AccountingListPage`, `AccountingDetailPage`, `AccountingReportPage`)와 훅 두 개(`useAccountingCategories`, `useAccountingReport`)가 온전히 남아 있지만, **라우터에 등록돼 있지 않고 어디서도 import하지 않습니다.**
 
-게다가 **이 코드가 쿼리하는 `accounting_*` 테이블은 원격 DB에 존재하지 않습니다**(2026-07-16 확인). 대신 `finance_*` 테이블이 있어 이름이 바뀐 뒤 코드가 따라가지 않은 것으로 보입니다. 즉 라우터에 연결만 해서는 동작하지 않고, 테이블 이름부터 맞춰야 합니다.
+게다가 **이 코드가 쿼리하는 `accounting_*` 테이블은 원격 DB에 존재하지 않습니다**(2026-07-16 확인). 대신 `finance_*` 테이블(`finance_ledgers`, `finance_reports`, `finance_splits`, `finance_transactions`)이 있어 이름이 바뀐 뒤 코드가 따라가지 않은 것으로 보입니다. 즉 라우터에 연결만 해서는 동작하지 않습니다.
 
-되살릴지 지울지 결정이 필요합니다. 루트 README는 이 기능을 현재 기능처럼 설명하고 있어 실제와 어긋납니다.
+**다만 이 기능은 iOS 앱으로 이관 예정입니다** — 커밋 `54c0d7d`의 README에 그렇게 적혀 있습니다. 즉 웹에서 되살릴 계획이 아니므로, 웹 코드는 정리(삭제) 대상에 가깝습니다. 관리자 페이지의 "재정 관리" 탭에는 "회계 장부 관리" 항목이 있지만 누르면 준비 중 안내만 뜹니다([AdminPage.tsx:131](../src/pages/admin/AdminPage.tsx:131)).
 
 ### 그 외
 
