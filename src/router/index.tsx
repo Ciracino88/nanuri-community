@@ -14,6 +14,7 @@ import EventBuilderPage from "../pages/admin/event/EventBuilderPage";
 import EventDetailPage from "../pages/admin/event/EventDetailPage";
 import EventSegmentsPage from "../pages/admin/event/EventSegmentsPage";
 import EventListPage from "../pages/event/EventListPage";
+import GatheringListPage from "../pages/gathering/GatheringListPage";
 import EventInfoPage from "../pages/event/EventInfoPage";
 import EventTimelinePage from "../pages/event/EventTimelinePage";
 import AdminPage from "../pages/admin/AdminPage";
@@ -36,6 +37,8 @@ export const router = createBrowserRouter([
     children: [
       { path: "/home", element: <HomePage /> },
       { path: "/member/bill", element: <BillFormPage /> },
+      { path: "/gatherings", element: <GatheringListPage /> },
+      // 행사는 하단 탭에서 빠지고 홈(히어로·퀵액션)에서만 진입한다.
       { path: "/events", element: <EventListPage /> },
       { path: "/event/:id", element: <EventInfoPage /> },
       { path: "/event/:id/timeline", element: <EventTimelinePage /> },
