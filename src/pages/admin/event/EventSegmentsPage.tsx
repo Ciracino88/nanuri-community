@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import toast from "react-hot-toast";
-import { GripVertical, Pencil, Trash2, Plus, Clock, ListOrdered, X, Check } from "lucide-react";
+import { GripVertical, Pencil, Trash2, Plus, Clock, ListOrdered, Check } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -22,16 +22,15 @@ import { CSS } from "@dnd-kit/utilities";
 import BackButton from "../../../components/BackButton";
 import TextField from "../../../components/ui/TextField";
 import TextArea from "../../../components/ui/TextArea";
+import Button from "../../../components/ui/Button";
+import BottomSheet from "../../../components/ui/BottomSheet";
 import LoadingScreen from "../../../components/LoadingScreen";
 import { confirmDialog } from "../../../components/ConfirmDialog";
 import { supabase } from "../../../lib/supabase";
 import { buildTimeline, formatClock, totalDuration, type TimelineSegment } from "../../../lib/eventTime";
 import { useEventDetail, eventKeys, type EventDetailData } from "../../../hooks/useEvents";
-import { TAB_COLORS } from "../../../constants/theme";
+import { TINT_STRONG, tintByIndex } from "../../../constants/tints";
 import type { Segment } from "../../../types/event";
-
-const ACCENT = TAB_COLORS.admin;
-const DOT_COLORS = Object.values(TAB_COLORS);
 
 function fmtDuration(min: number) {
   if (min < 60) return `${min}분`;
@@ -46,8 +45,8 @@ interface SegmentDraft {
   description: string | null;
 }
 
-// ── 추가/수정 모달 ────────────────────────────────────
-function SegmentModal({ initial, onSave, onClose, saving }: {
+// ── 추가/수정 시트 ────────────────────────────────────
+function SegmentSheet({ initial, onSave, onClose, saving }: {
   initial?: Segment;
   onSave: (draft: SegmentDraft) => void;
   onClose: () => void;
@@ -67,41 +66,27 @@ function SegmentModal({ initial, onSave, onClose, saving }: {
   };
 
   return (
-    <motion.div
-      className="fixed inset-0 z-[100] flex items-end justify-center"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
-    >
-      <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} onClick={onClose} />
-      <motion.div
-        className="relative w-full max-w-md rounded-t-3xl px-6 pt-3 flex flex-col gap-4"
-        style={{ background: "rgba(22,25,35,0.99)", borderTop: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 -12px 48px rgba(0,0,0,0.6)", paddingBottom: "calc(1.75rem + env(safe-area-inset-bottom))" }}
-        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        <div className="w-10 h-1 rounded-full mx-auto mb-2" style={{ background: "rgba(255,255,255,0.15)" }} />
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black" style={{ color: "#f0f2f8" }}>{initial ? "프로그램 수정" : "프로그램 추가"}</h2>
-          <button type="button" onClick={onClose} aria-label="닫기" className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)", color: "#8892a0" }}>
-            <X size={16} />
-          </button>
-        </div>
+    <BottomSheet title={initial ? "프로그램 수정" : "프로그램 추가"} onClose={onClose}>
+      <TextField
+        label="제목" placeholder="예) 오프닝 & 환영 인사"
+        value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)}
+      />
+      <TextField
+        label="소요시간" type="number" inputMode="numeric" min={1} suffix="분" placeholder="30"
+        value={duration} error={errors.duration} onChange={(e) => setDuration(e.target.value)}
+      />
+      <TextArea
+        label="설명 (선택)" rows={3} placeholder="이 프로그램에 대한 설명을 입력해주세요"
+        value={description} onChange={(e) => setDescription(e.target.value)}
+      />
 
-        <TextField label="제목" accent={ACCENT} placeholder="예) 오프닝 & 환영 인사" value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} />
-        <TextField label="소요시간" type="number" inputMode="numeric" min={1} suffix="분" accent={ACCENT} placeholder="30" value={duration} error={errors.duration} onChange={(e) => setDuration(e.target.value)} />
-        <TextArea label="설명 (선택)" rows={3} accent={ACCENT} placeholder="이 프로그램에 대한 설명을 입력해주세요" value={description} onChange={(e) => setDescription(e.target.value)} />
-
-        <button
-          type="button"
-          onClick={submit}
-          disabled={saving}
-          className="w-full py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 mt-1 disabled:opacity-60"
-          style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 6px 24px ${ACCENT}44` }}
-        >
+      <Button type="button" onClick={submit} loading={saving} className="mt-1">
+        <span className="flex items-center justify-center gap-2">
           <Check size={18} />
-          {saving ? "저장 중..." : "저장하기"}
-        </button>
-      </motion.div>
-    </motion.div>
+          저장하기
+        </span>
+      </Button>
+    </BottomSheet>
   );
 }
 
@@ -113,39 +98,46 @@ function SortableRow({ item, index, onEdit, onDelete }: {
   onDelete: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
-  const color = DOT_COLORS[index % DOT_COLORS.length];
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 10 : undefined,
-    background: "rgba(255,255,255,0.04)",
-    border: `1px solid ${isDragging ? `${ACCENT}66` : "rgba(255,255,255,0.07)"}`,
-    boxShadow: isDragging ? "0 8px 24px rgba(0,0,0,0.45)" : undefined,
+    // 집어 든 카드는 더 높이 뜬다 — 그림자로 층을 만드는 게 이 디자인의 분리 방식이다.
+    boxShadow: isDragging ? "var(--shadow-lift)" : "var(--shadow-card)",
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="rounded-2xl p-4 flex items-start gap-3">
-      <button {...attributes} {...listeners} aria-label="프로그램 이동" className="mt-1 touch-none cursor-grab active:cursor-grabbing shrink-0" style={{ color: "#6b7785" }}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`rounded-card bg-card p-4 flex items-start gap-3 ${isDragging ? "ring-1 ring-accent-soft" : ""}`}
+    >
+      <button
+        {...attributes} {...listeners}
+        aria-label="프로그램 이동"
+        className="mt-1 touch-none cursor-grab active:cursor-grabbing shrink-0 text-fg-faint"
+      >
         <GripVertical size={18} />
       </button>
-      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0" style={{ background: color, color: "#0f1117" }}>
+      {/* 번호 색은 순서에 따른 장식이지 항목의 의미가 아니다. */}
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-caption font-bold shrink-0 ${TINT_STRONG[tintByIndex(index)]}`}>
         {index + 1}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="text-sm font-bold truncate" style={{ color: "#f0f2f8" }}>{item.title}</h3>
+            <h3 className="text-body font-semibold truncate text-fg-strong">{item.title}</h3>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs font-bold" style={{ color: ACCENT }}>{fmtDuration(item.duration_min)}</span>
-              {item.start && <span className="text-xs" style={{ color: "#6b7785" }}>{formatClock(item.start)} ~</span>}
+              <span className="text-caption font-semibold text-fg">{fmtDuration(item.duration_min)}</span>
+              {item.start && <span className="text-caption text-fg-muted">{formatClock(item.start)} ~</span>}
             </div>
-            {item.description && <p className="text-xs mt-1.5 leading-relaxed line-clamp-2" style={{ color: "#6b7785" }}>{item.description}</p>}
+            {item.description && <p className="text-caption mt-1.5 leading-relaxed line-clamp-2 text-fg-muted">{item.description}</p>}
           </div>
           <div className="flex gap-1.5 shrink-0">
-            <button onClick={onEdit} aria-label="수정" className="w-8 h-8 rounded-xl flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(255,255,255,0.06)", color: "#8892a0" }}>
+            <button onClick={onEdit} aria-label="수정" className="w-8 h-8 rounded-tile flex items-center justify-center active:scale-90 transition bg-sunken text-fg-muted">
               <Pencil size={14} />
             </button>
-            <button onClick={onDelete} aria-label="삭제" className="w-8 h-8 rounded-xl flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(255,255,255,0.06)", color: "#8892a0" }}>
+            <button onClick={onDelete} aria-label="삭제" className="w-8 h-8 rounded-tile flex items-center justify-center active:scale-90 transition bg-sunken text-fg-muted">
               <Trash2 size={14} />
             </button>
           </div>
@@ -160,7 +152,7 @@ export default function EventSegmentsPage() {
   const queryClient = useQueryClient();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const [modal, setModal] = useState<{ open: boolean; editing: Segment | null }>({ open: false, editing: null });
+  const [sheet, setSheet] = useState<{ open: boolean; editing: Segment | null }>({ open: false, editing: null });
 
   const { data, isLoading } = useEventDetail(id);
   const event = data?.event ?? null;
@@ -170,15 +162,15 @@ export default function EventSegmentsPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (draft: SegmentDraft) => {
-      if (modal.editing) {
-        const { error } = await supabase.from("event_segments").update(draft).eq("id", modal.editing.id);
+      if (sheet.editing) {
+        const { error } = await supabase.from("event_segments").update(draft).eq("id", sheet.editing.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("event_segments").insert({ event_id: id, ...draft, sort: segments.length });
         if (error) throw error;
       }
     },
-    onSuccess: () => { setModal({ open: false, editing: null }); invalidate(); },
+    onSuccess: () => { setSheet({ open: false, editing: null }); invalidate(); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "저장에 실패했어요"),
   });
 
@@ -213,7 +205,7 @@ export default function EventSegmentsPage() {
   };
 
   if (isLoading) return <LoadingScreen />;
-  if (!event) return <p className="flex-1 flex items-center justify-center text-sm" style={{ color: "#4a5568" }}>행사를 찾을 수 없어요</p>;
+  if (!event) return <p className="flex-1 flex items-center justify-center text-body text-fg-muted">행사를 찾을 수 없어요</p>;
 
   const timeline = buildTimeline(event.event_date, event.start_time, segments);
 
@@ -235,13 +227,13 @@ export default function EventSegmentsPage() {
         <BackButton to={`/admin/events/${event.id}`} />
         <div className="mt-3">
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: ACCENT }}>관리자</span>
-            <span className="text-[11px]" style={{ color: "#6b7785" }}>· 진행 관리</span>
+            <span className="text-micro font-semibold uppercase tracking-widest text-fg-muted">관리자</span>
+            <span className="text-micro text-fg-muted">· 진행 관리</span>
           </div>
-          <h1 className="text-2xl font-black leading-snug truncate" style={{ color: "#f0f2f8" }}>{event.title}</h1>
+          <h1 className="text-display font-bold leading-snug truncate text-fg-strong">{event.title}</h1>
           <div className="flex items-center gap-4 mt-3">
-            <span className="flex items-center gap-1 text-xs" style={{ color: "#6b7785" }}><Clock size={12} /> 총 {fmtDuration(totalDuration(segments))}</span>
-            <span className="flex items-center gap-1 text-xs" style={{ color: "#6b7785" }}><ListOrdered size={12} /> {segments.length}개 프로그램</span>
+            <span className="flex items-center gap-1 text-caption text-fg-muted"><Clock size={12} /> 총 {fmtDuration(totalDuration(segments))}</span>
+            <span className="flex items-center gap-1 text-caption text-fg-muted"><ListOrdered size={12} /> {segments.length}개 프로그램</span>
           </div>
         </div>
       </div>
@@ -249,25 +241,25 @@ export default function EventSegmentsPage() {
       <div className="flex-1 overflow-y-auto px-4 pb-28 flex flex-col gap-3">
         {timeline.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
-            <div className="w-16 h-16 rounded-3xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)" }}>
-              <ListOrdered size={28} color="#4a5568" />
+            <div className="w-16 h-16 rounded-panel flex items-center justify-center bg-sunken">
+              <ListOrdered size={28} className="text-fg-faint" />
             </div>
             <div>
-              <p className="text-sm font-bold" style={{ color: "#8892a0" }}>프로그램이 없어요</p>
-              <p className="text-xs mt-0.5" style={{ color: "#6b7785" }}>아래 버튼을 눌러 추가해보세요</p>
+              <p className="text-body font-semibold text-fg">프로그램이 없어요</p>
+              <p className="text-caption mt-0.5 text-fg-muted">아래 버튼을 눌러 추가해보세요</p>
             </div>
           </div>
         ) : (
           <>
-            <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.04)" }}>
-              <GripVertical size={16} color="#6b7785" className="shrink-0" />
-              <p className="text-xs" style={{ color: "#6b7785" }}>드래그하여 순서를 변경할 수 있어요</p>
+            <div className="rounded-card px-4 py-3 flex items-center gap-3 bg-sunken">
+              <GripVertical size={16} className="shrink-0 text-fg-faint" />
+              <p className="text-caption text-fg-muted">드래그하여 순서를 변경할 수 있어요</p>
             </div>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={timeline.map((s) => s.id)} strategy={verticalListSortingStrategy}>
                 <div className="flex flex-col gap-3">
                   {timeline.map((s, i) => (
-                    <SortableRow key={s.id} item={s} index={i} onEdit={() => setModal({ open: true, editing: s })} onDelete={() => handleDelete(s)} />
+                    <SortableRow key={s.id} item={s} index={i} onEdit={() => setSheet({ open: true, editing: s })} onDelete={() => handleDelete(s)} />
                   ))}
                 </div>
               </SortableContext>
@@ -279,9 +271,9 @@ export default function EventSegmentsPage() {
 
       {/* 플로팅 추가 버튼 */}
       <motion.button
-        onClick={() => setModal({ open: true, editing: null })}
-        className="absolute left-1/2 -translate-x-1/2 rounded-full px-6 py-3.5 text-sm font-black flex items-center gap-2"
-        style={{ bottom: "1.5rem", background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 8px 32px ${ACCENT}55, 0 2px 8px rgba(0,0,0,0.4)` }}
+        onClick={() => setSheet({ open: true, editing: null })}
+        className="absolute left-1/2 -translate-x-1/2 rounded-full px-6 py-3.5 text-body font-semibold flex items-center gap-2 bg-accent text-white shadow-accent"
+        style={{ bottom: "1.5rem" }}
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 25 }}
@@ -291,12 +283,12 @@ export default function EventSegmentsPage() {
       </motion.button>
 
       <AnimatePresence>
-        {modal.open && (
-          <SegmentModal
-            initial={modal.editing ?? undefined}
+        {sheet.open && (
+          <SegmentSheet
+            initial={sheet.editing ?? undefined}
             saving={saveMutation.isPending}
             onSave={(draft) => saveMutation.mutate(draft)}
-            onClose={() => setModal({ open: false, editing: null })}
+            onClose={() => setSheet({ open: false, editing: null })}
           />
         )}
       </AnimatePresence>

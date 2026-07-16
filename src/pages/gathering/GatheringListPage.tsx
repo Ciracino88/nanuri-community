@@ -12,23 +12,21 @@ import {
   GATHERING_STATUS_LABEL,
   type GatheringStatus,
 } from "../../lib/gatheringTime";
-import { TAB_COLORS } from "../../constants/theme";
 import type { GatheringDraft, GatheringRecord, ParticipantProfile } from "../../types/gathering";
 import GatheringFormSheet from "./GatheringFormSheet";
 
-const ACCENT = TAB_COLORS.gatherings;
-
-const STATUS_META: Record<GatheringStatus, { bg: string; text: string }> = {
-  open: { bg: `${ACCENT}26`, text: ACCENT },
-  closed: { bg: "rgba(255,255,255,0.07)", text: "#8892a0" },
-  done: { bg: "rgba(255,255,255,0.07)", text: "#8892a0" },
+// 상태 배지는 식별용이라 액센트를 쓰지 않는다. 모집 중 = 소모임 카테고리 틴트(앰버).
+const STATUS_BADGE: Record<GatheringStatus, string> = {
+  open: "bg-amber-subtle text-amber-strong",
+  closed: "bg-sunken text-fg-muted",
+  done: "bg-sunken text-fg-muted",
 };
 
 const MAX_FACES = 5;
 
 function AvatarStack({ profiles }: { profiles: ParticipantProfile[] }) {
   if (profiles.length === 0) {
-    return <span className="text-xs font-semibold" style={{ color: "#4a5568" }}>아직 아무도 없어요</span>;
+    return <span className="text-caption font-semibold text-fg-muted">아직 아무도 없어요</span>;
   }
 
   const shown = profiles.slice(0, MAX_FACES);
@@ -40,12 +38,11 @@ function AvatarStack({ profiles }: { profiles: ParticipantProfile[] }) {
         {shown.map((p, i) => (
           <div
             key={p.id}
-            className="rounded-full overflow-hidden flex items-center justify-center"
+            // 얼굴이 겹쳐도 서로 분리돼 보이도록 카드 색 테두리를 두른다.
+            className="rounded-full overflow-hidden flex items-center justify-center bg-sunken border-2 border-card"
             style={{
               width: 26, height: 26,
               marginLeft: i === 0 ? 0 : -8,
-              border: "2px solid #0f1117",
-              background: "rgba(255,255,255,0.1)",
               zIndex: MAX_FACES - i,
             }}
             title={p.name}
@@ -53,14 +50,12 @@ function AvatarStack({ profiles }: { profiles: ParticipantProfile[] }) {
             {p.avatar_url ? (
               <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-[10px] font-black" style={{ color: "#c0c8d4" }}>
-                {p.name.slice(0, 1)}
-              </span>
+              <span className="text-[10px] font-bold text-fg-muted">{p.name.slice(0, 1)}</span>
             )}
           </div>
         ))}
       </div>
-      <span className="text-xs font-bold" style={{ color: "#8892a0" }}>
+      <span className="text-caption font-semibold text-fg-muted">
         {rest > 0 ? `+${rest} · ` : ""}{profiles.length}명
       </span>
     </div>
@@ -77,7 +72,6 @@ function GatheringCard({ gathering, profiles, joined, isCreator, toggling, index
   onToggle: () => void;
 }) {
   const status = computeGatheringStatus(gathering);
-  const meta = STATUS_META[status];
   const dim = status !== "open";
 
   return (
@@ -85,35 +79,29 @@ function GatheringCard({ gathering, profiles, joined, isCreator, toggling, index
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, type: "spring", stiffness: 360, damping: 30 }}
-      className="rounded-2xl p-4 flex flex-col gap-3"
-      style={{
-        background: dim ? "rgba(255,255,255,0.03)" : `${ACCENT}0f`,
-        border: `1px solid ${dim ? "rgba(255,255,255,0.07)" : `${ACCENT}2b`}`,
-      }}
+      className="rounded-card bg-card shadow-card p-4 flex flex-col gap-3"
     >
       <div className="flex items-center gap-3">
         <div
-          className="flex items-center justify-center rounded-xl shrink-0"
-          style={{ width: 44, height: 44, background: "rgba(0,0,0,0.3)", border: `1px solid ${dim ? "rgba(255,255,255,0.07)" : `${ACCENT}30`}` }}
+          className={`w-11 h-11 rounded-tile flex items-center justify-center shrink-0 ${
+            dim ? "bg-sunken text-fg-faint" : "bg-amber-subtle text-amber"
+          }`}
         >
           {gathering.emoji
             ? <span style={{ fontSize: 22 }}>{gathering.emoji}</span>
-            : <Users size={20} color={dim ? "#6b7785" : ACCENT} />}
+            : <Users size={20} strokeWidth={2.25} />}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-sm font-black truncate" style={{ color: dim ? "#8892a0" : "#f0f2f8" }}>
+            <span className={`text-body font-semibold truncate ${dim ? "text-fg-muted" : "text-fg-strong"}`}>
               {gathering.title}
             </span>
-            <span
-              className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0"
-              style={{ background: meta.bg, color: meta.text }}
-            >
+            <span className={`text-caption font-semibold px-2 py-0.5 rounded-full shrink-0 ${STATUS_BADGE[status]}`}>
               {GATHERING_STATUS_LABEL[status]}
             </span>
           </div>
-          <p className="text-xs truncate" style={{ color: dim ? "#4a5568" : "#8892a0" }}>
+          <p className="text-caption text-fg-muted truncate">
             {formatGatheringAt(gathering.gathering_at)}
             {gathering.place_name ? ` · ${gathering.place_name}` : ""}
           </p>
@@ -121,9 +109,7 @@ function GatheringCard({ gathering, profiles, joined, isCreator, toggling, index
       </div>
 
       {gathering.description && (
-        <p className="text-xs leading-relaxed" style={{ color: dim ? "#4a5568" : "#8892a0" }}>
-          {gathering.description}
-        </p>
+        <p className="text-caption leading-relaxed text-fg-muted">{gathering.description}</p>
       )}
 
       <div className="flex items-center justify-between gap-3">
@@ -134,16 +120,18 @@ function GatheringCard({ gathering, profiles, joined, isCreator, toggling, index
             whileTap={{ scale: 0.95 }}
             onClick={onToggle}
             disabled={toggling}
-            className="text-xs font-black px-4 py-2 rounded-xl flex items-center gap-1.5 shrink-0 disabled:opacity-60"
-            style={joined
-              ? { background: `${ACCENT}22`, border: `1px solid ${ACCENT}`, color: ACCENT }
-              : { background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117" }}
+            // 참여 = 선택 상태라 액센트 담당. 참여 중이면 채우지 않고 틴트로 낮춘다.
+            className={`text-caption font-semibold px-4 py-2 rounded-full flex items-center gap-1.5 shrink-0 transition disabled:opacity-60 ${
+              joined
+                ? "bg-accent-subtle border border-accent-soft text-accent-strong"
+                : "bg-accent text-white shadow-accent"
+            }`}
           >
             {joined && <Check size={14} />}
             {joined ? (isCreator ? "개설자" : "참여 중") : "참여하기"}
           </motion.button>
         ) : (
-          <span className="text-xs font-bold shrink-0" style={{ color: "#4a5568" }}>
+          <span className="text-caption font-semibold shrink-0 text-fg-muted">
             {joined ? "참여했어요" : ""}
           </span>
         )}
@@ -199,39 +187,39 @@ export default function GatheringListPage() {
   );
 
   return (
-    <div className="flex-1 flex flex-col relative" style={{ background: "#0f1117" }}>
+    <div className="flex-1 flex flex-col relative">
       <div
         className="w-full max-w-md mx-auto px-4 pt-6 flex flex-col gap-6"
         style={{ paddingBottom: "calc(6rem + env(safe-area-inset-bottom))" }}
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-black" style={{ color: "#f0f2f8" }}>소모임</h1>
-            <p className="text-xs font-semibold mt-0.5" style={{ color: "#4a5568" }}>
+            <h1 className="text-heading font-bold text-fg-strong">소모임</h1>
+            <p className="text-caption font-semibold mt-0.5 text-fg-muted">
               {live.length}개 모집 중 · {past.length}개 지난 모임
             </p>
           </div>
         </div>
 
         {isLoading ? (
-          <LoadingSpinner color={ACCENT} />
+          <LoadingSpinner />
         ) : gatherings.length === 0 ? (
           <div className="text-center py-16 flex flex-col items-center gap-2">
-            <Users size={32} color="#363d47" />
-            <p className="text-sm font-bold" style={{ color: "#4a5568" }}>아직 소모임이 없어요</p>
-            <p className="text-xs" style={{ color: "#363d47" }}>먼저 하나 만들어보세요</p>
+            <Users size={32} className="text-fg-faint" />
+            <p className="text-body font-semibold text-fg-muted">아직 소모임이 없어요</p>
+            <p className="text-caption text-fg-muted">먼저 하나 만들어보세요</p>
           </div>
         ) : (
           <>
             {live.length > 0 && (
               <div className="flex flex-col gap-3">
-                <p className="text-xs font-bold uppercase" style={{ color: ACCENT, letterSpacing: "0.15em" }}>모집 중</p>
+                <p className="text-caption font-semibold uppercase text-fg-muted" style={{ letterSpacing: "0.15em" }}>모집 중</p>
                 {live.map(renderCard)}
               </div>
             )}
             {past.length > 0 && (
               <div className="flex flex-col gap-3">
-                <p className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>지난 모임</p>
+                <p className="text-caption font-semibold uppercase text-fg-muted" style={{ letterSpacing: "0.15em" }}>지난 모임</p>
                 {past.map(renderCard)}
               </div>
             )}
@@ -252,16 +240,11 @@ export default function GatheringListPage() {
           whileTap={{ scale: 0.92 }}
           onClick={() => setSheetOpen(true)}
           aria-label="소모임 만들기"
-          className="pointer-events-auto rounded-2xl flex items-center justify-center gap-1.5 px-5 py-3.5"
-          style={{
-            transform: "translateY(-100%)",
-            background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`,
-            color: "#0f1117",
-            boxShadow: `0 8px 28px ${ACCENT}55, 0 2px 8px rgba(0,0,0,0.4)`,
-          }}
+          className="pointer-events-auto rounded-full flex items-center justify-center gap-1.5 px-5 py-3.5 bg-accent text-white shadow-accent"
+          style={{ transform: "translateY(-100%)" }}
         >
           <Plus size={18} strokeWidth={3} />
-          <span className="text-sm font-black">만들기</span>
+          <span className="text-body font-semibold">만들기</span>
         </motion.button>
       </div>
 

@@ -11,9 +11,6 @@ import { uploadReceipt } from "../../../lib/uploadReceipt";
 import { deleteImage } from "../../../lib/deleteImage";
 import { supabase } from "../../../lib/supabase";
 import { useEventDetail, eventKeys } from "../../../hooks/useEvents";
-import { TAB_COLORS } from "../../../constants/theme";
-
-const ACCENT = TAB_COLORS.admin;
 
 const CUSTOM_FIELD_OPTIONS: { key: string; label: string; Icon: LucideIcon }[] = [
   { key: "target", label: "대상", Icon: Users },
@@ -145,14 +142,15 @@ export default function EventBuilderPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
-      {/* 헤더 */}
-      <div className="flex items-center gap-3 px-4 pt-5 pb-4 sticky top-0 z-10" style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+    <div className="flex-1 flex flex-col">
+      {/* 헤더 — 스크롤 위로 떠 있어야 하므로 캔버스와 같은 색으로 덮고 아래에 선을 둔다. */}
+      <div className="flex items-center gap-3 px-4 pt-5 pb-4 sticky top-0 z-10 bg-surface border-b border-line-soft">
         <BackButton onClick={() => navigate(-1)} />
-        <h1 className="flex-1 text-base font-black" style={{ color: "#f0f2f8" }}>{editing ? "행사 수정" : "행사 추가"}</h1>
+        <h1 className="flex-1 text-emphasis font-bold text-fg-strong">{editing ? "행사 수정" : "행사 추가"}</h1>
         <motion.button
-          className="px-4 py-2 rounded-xl text-sm font-black"
-          style={{ background: canSave ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT}99)` : "rgba(255,255,255,0.06)", color: canSave ? "#0f1117" : "#4a5568" }}
+          className={`px-4 py-2 rounded-full text-body font-semibold transition ${
+            canSave ? "bg-accent text-white shadow-accent" : "bg-sunken text-fg-faint"
+          }`}
           whileTap={canSave ? { scale: 0.94 } : {}}
           onClick={handleSave}
           disabled={saving}
@@ -165,25 +163,25 @@ export default function EventBuilderPage() {
 
         {/* 필수 정보 */}
         <div className="flex flex-col gap-3">
-          <label className="text-xs font-bold uppercase" style={{ color: ACCENT, letterSpacing: "0.15em" }}>필수 정보</label>
+          <label className="text-caption font-semibold uppercase text-fg-muted" style={{ letterSpacing: "0.15em" }}>필수 정보</label>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold" style={{ color: "#6b7785" }}>행사 제목</span>
-            <TextField accent={ACCENT} placeholder="예) 여름 수련회" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <span className="text-caption font-semibold text-fg-muted">행사 제목</span>
+            <TextField placeholder="예) 여름 수련회" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
+              <span className="text-caption font-semibold flex items-center gap-1 text-fg-muted">
                 <CalendarDays size={11} /> 날짜
               </span>
+              {/* 켜짐 = 선택 상태라 액센트가 담당한다. */}
               <motion.button
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold"
-                style={{
-                  background: multiDay ? `${ACCENT}22` : "rgba(255,255,255,0.06)",
-                  border: multiDay ? `1px solid ${ACCENT}44` : "1px solid rgba(255,255,255,0.1)",
-                  color: multiDay ? ACCENT : "#4a5568",
-                }}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption font-semibold border transition ${
+                  multiDay
+                    ? "bg-accent-subtle border-accent-soft text-accent-strong"
+                    : "bg-card border-line text-fg-muted"
+                }`}
                 whileTap={{ scale: 0.92 }}
                 onClick={() => { setMultiDay((v) => !v); setEndDate(""); }}
               >
@@ -194,51 +192,52 @@ export default function EventBuilderPage() {
             <AnimatePresence initial={false} mode="wait">
               {!multiDay ? (
                 <motion.div key="single" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                  <TextField type="date" accent={ACCENT} style={{ colorScheme: "dark" }} value={date} onChange={(e) => setDate(e.target.value)} />
+                  <TextField type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                 </motion.div>
               ) : (
                 <motion.div key="range" className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                  <TextField type="date" accent={ACCENT} wrapperClassName="flex-1" style={{ colorScheme: "dark" }} value={date} onChange={(e) => setDate(e.target.value)} />
-                  <span className="text-xs font-bold shrink-0" style={{ color: "#4a5568" }}>–</span>
-                  <TextField type="date" accent={ACCENT} wrapperClassName="flex-1" style={{ colorScheme: "dark" }} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                  <TextField type="date" wrapperClassName="flex-1" value={date} onChange={(e) => setDate(e.target.value)} />
+                  <span className="text-caption font-semibold shrink-0 text-fg-muted">–</span>
+                  <TextField type="date" wrapperClassName="flex-1" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
+            <span className="text-caption font-semibold flex items-center gap-1 text-fg-muted">
               <Clock size={11} /> 모이는 시각 (선택)
             </span>
-            <TextField type="time" accent={ACCENT} style={{ colorScheme: "dark" }} value={time} onChange={(e) => setTime(e.target.value)} />
+            <TextField type="time" value={time} onChange={(e) => setTime(e.target.value)} />
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
+            <span className="text-caption font-semibold flex items-center gap-1 text-fg-muted">
               <MapPin size={11} /> 장소
             </span>
-            <TextField accent={ACCENT} placeholder="예) 교회 본당" value={location} onChange={(e) => setLocation(e.target.value)} />
+            <TextField placeholder="예) 교회 본당" value={location} onChange={(e) => setLocation(e.target.value)} />
           </div>
         </div>
 
         {/* 배너 (상세 헤더) */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>배너 (상세 헤더)</label>
+          <label className="text-caption font-semibold uppercase text-fg-muted" style={{ letterSpacing: "0.15em" }}>배너 (상세 헤더)</label>
           {shownBanner ? (
             <div className="relative">
               <label className="block cursor-pointer">
-                <img src={shownBanner} alt="배너 미리보기" className="w-full object-cover rounded-xl" style={{ height: 140, border: "1px solid rgba(255,255,255,0.1)" }} />
+                <img src={shownBanner} alt="배너 미리보기" className="w-full object-cover rounded-field border border-line" style={{ height: 140 }} />
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBanner(f); }} />
               </label>
-              <button type="button" onClick={removeBanner} aria-label="배너 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(0,0,0,0.55)", color: "#fff" }}>
+              {/* 사진 위에 얹히는 버튼이라 토큰이 아니라 raw 다 — 어떤 사진 위에서도 읽혀야 한다. */}
+              <button type="button" onClick={removeBanner} aria-label="배너 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition text-white" style={{ background: "rgba(23,23,28,0.55)" }}>
                 <Trash2 size={15} />
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center gap-1.5 w-full py-7 rounded-xl cursor-pointer" style={{ border: "1.5px dashed rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.03)" }}>
-              <Plus size={20} color="#4a5568" />
-              <p className="text-xs font-semibold" style={{ color: "#6b7785" }}>배너 업로드 (가로형)</p>
-              <p className="text-[11px]" style={{ color: "#4a5568" }}>없으면 대표 아이콘으로 표시돼요</p>
+            <label className="flex flex-col items-center justify-center gap-1.5 w-full py-7 rounded-field cursor-pointer bg-card border-[1.5px] border-dashed border-line-strong">
+              <Plus size={20} className="text-fg-faint" />
+              <p className="text-caption font-semibold text-fg-muted">배너 업로드 (가로형)</p>
+              <p className="text-micro text-fg-muted">없으면 대표 아이콘으로 표시돼요</p>
               <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBanner(f); }} />
             </label>
           )}
@@ -246,21 +245,21 @@ export default function EventBuilderPage() {
 
         {/* 포스터 */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>포스터 (원본 비율)</label>
+          <label className="text-caption font-semibold uppercase text-fg-muted" style={{ letterSpacing: "0.15em" }}>포스터 (원본 비율)</label>
           {shownPoster ? (
             <div className="relative">
               <label className="block cursor-pointer">
-                <img src={shownPoster} alt="포스터 미리보기" className="w-full h-auto rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
+                <img src={shownPoster} alt="포스터 미리보기" className="w-full h-auto rounded-field border border-line" />
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePoster(f); }} />
               </label>
-              <button type="button" onClick={removePoster} aria-label="포스터 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition" style={{ background: "rgba(0,0,0,0.55)", color: "#fff" }}>
+              <button type="button" onClick={removePoster} aria-label="포스터 삭제" className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition text-white" style={{ background: "rgba(23,23,28,0.55)" }}>
                 <Trash2 size={15} />
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center gap-1.5 w-full py-7 rounded-xl cursor-pointer" style={{ border: "1.5px dashed rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.03)" }}>
-              <Plus size={20} color="#4a5568" />
-              <p className="text-xs font-semibold" style={{ color: "#6b7785" }}>포스터 업로드</p>
+            <label className="flex flex-col items-center justify-center gap-1.5 w-full py-7 rounded-field cursor-pointer bg-card border-[1.5px] border-dashed border-line-strong">
+              <Plus size={20} className="text-fg-faint" />
+              <p className="text-caption font-semibold text-fg-muted">포스터 업로드</p>
               <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePoster(f); }} />
             </label>
           )}
@@ -268,20 +267,20 @@ export default function EventBuilderPage() {
 
         {/* 추가 정보 (커스텀 필드) */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold uppercase" style={{ color: "#4a5568", letterSpacing: "0.15em" }}>추가 정보</label>
+          <label className="text-caption font-semibold uppercase text-fg-muted" style={{ letterSpacing: "0.15em" }}>추가 정보</label>
 
           <AnimatePresence initial={false}>
             {fields.map((f) => (
               <motion.div key={f.key} className="flex flex-col gap-1" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }}>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold flex items-center gap-1" style={{ color: "#6b7785" }}>
+                  <span className="text-caption font-semibold flex items-center gap-1 text-fg-muted">
                     <f.Icon size={11} /> {f.label}
                   </span>
-                  <motion.button whileTap={{ scale: 0.85 }} onClick={() => removeField(f.key)} aria-label="삭제">
-                    <Trash2 size={13} color="#4a5568" />
+                  <motion.button whileTap={{ scale: 0.85 }} onClick={() => removeField(f.key)} aria-label="삭제" className="text-fg-faint">
+                    <Trash2 size={13} />
                   </motion.button>
                 </div>
-                <TextField accent={ACCENT} placeholder={`${f.label} 입력`} value={f.value} onChange={(e) => updateField(f.key, e.target.value)} />
+                <TextField placeholder={`${f.label} 입력`} value={f.value} onChange={(e) => updateField(f.key, e.target.value)} />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -289,8 +288,7 @@ export default function EventBuilderPage() {
           {addable.length > 0 && (
             <div className="relative">
               <motion.button
-                className="w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-bold"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1.5px dashed rgba(255,255,255,0.12)", color: "#4a5568" }}
+                className="w-full py-3 rounded-field flex items-center justify-center gap-2 text-body font-semibold bg-card border-[1.5px] border-dashed border-line-strong text-fg-muted"
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setShowPicker((v) => !v)}
               >
@@ -302,8 +300,8 @@ export default function EventBuilderPage() {
               <AnimatePresence>
                 {showPicker && (
                   <motion.div
-                    className="absolute left-0 right-0 rounded-xl overflow-hidden mt-1 z-10"
-                    style={{ background: "rgba(22,25,35,0.98)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(20px)" }}
+                    className="absolute left-0 right-0 rounded-field overflow-hidden mt-1 z-10 bg-card"
+                    style={{ boxShadow: "var(--shadow-lift)" }}
                     initial={{ opacity: 0, y: -6, scale: 0.97 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -6, scale: 0.97 }}
@@ -312,11 +310,12 @@ export default function EventBuilderPage() {
                     {addable.map((opt, i) => (
                       <button
                         key={opt.key}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-left"
-                        style={{ color: "#c0c8d4", borderBottom: i < addable.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-body font-semibold text-left text-fg active:bg-sunken ${
+                          i < addable.length - 1 ? "border-b border-line-soft" : ""
+                        }`}
                         onClick={() => addField(opt)}
                       >
-                        <opt.Icon size={15} color="#4a5568" />
+                        <opt.Icon size={15} className="text-fg-faint" />
                         {opt.label}
                       </button>
                     ))}

@@ -4,6 +4,7 @@ import BackButton from "../../components/BackButton";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../store/authStore";
 import LoadingScreen from "../../components/LoadingScreen";
+import Button from "../../components/ui/Button";
 
 const isAndroid = /android/i.test(navigator.userAgent);
 const isInAppBrowser = /KAKAOTALK|Instagram|NAVER|FB_IAB|FBAN|FBAV/i.test(navigator.userAgent);
@@ -52,8 +53,8 @@ export default function MemberLoginPage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 24 }}
         >
-          <h1 className="text-xl font-black" style={{ color: "#f0f2f8" }}>로그인</h1>
-          <p className="text-xs text-center leading-relaxed" style={{ color: "#4a5568" }}>
+          <h1 className="text-title font-bold text-fg-strong">로그인</h1>
+          <p className="text-caption text-center leading-relaxed text-fg-muted">
             Google 계정으로 간편하게 로그인해요
           </p>
         </motion.div>
@@ -66,35 +67,28 @@ export default function MemberLoginPage() {
         >
           {shouldRedirectToBrowser ? (
             <div className="flex flex-col gap-4">
-              <div className="rounded-2xl px-4 py-3.5 text-xs leading-relaxed" style={{ background: "rgba(255,179,71,0.12)", border: "1px solid rgba(255,179,71,0.25)", color: "#FFB347" }}>
+              <div className="rounded-card px-4 py-3.5 text-caption leading-relaxed bg-warning-subtle border border-warning-soft text-warning-strong">
                 카카오톡 내부 브라우저에서는 Google 로그인이 제한돼요. 크롬 브라우저에서 열어주세요.
               </div>
-              <motion.button
-                className="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
-                whileTap={{ scale: 0.97 }}
-                onClick={openInChrome}
-              >
-                <span className="text-sm font-bold" style={{ color: "#f0f2f8" }}>크롬으로 열기</span>
-              </motion.button>
+              <Button onClick={openInChrome}>크롬으로 열기</Button>
             </div>
           ) : (
-            <motion.button
-              className="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-2xl"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
-              whileTap={{ scale: 0.97 }}
+            // 구글 로그인은 흰 면 + 테두리가 관례라 outline 을 쓴다. 이 화면의 유일한
+            // 액션이지만 퍼플 pill 로 칠하면 구글 로고가 퍼플 위에 뜬다.
+            <Button
+              variant="outline"
+              className="flex items-center justify-center gap-3"
               onClick={handleGoogleLogin}
             >
               <GoogleLogo />
-              <span className="text-sm font-bold" style={{ color: "#f0f2f8" }}>Google 계정으로 로그인</span>
-            </motion.button>
+              Google 계정으로 로그인
+            </Button>
           )}
         </motion.div>
       </div>
 
       <motion.p
-        className="text-center text-xs pb-10 px-8"
-        style={{ color: "#363d47" }}
+        className="text-center text-caption pb-10 px-8 text-fg-muted"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35 }}
