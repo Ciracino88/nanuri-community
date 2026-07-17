@@ -26,9 +26,62 @@
 
 | 화면 | 상태 |
 | --- | --- |
-| 소모임 (+ 개설 시트) | **완료** |
-| `ui/` 프리미티브 6종 | **완료** |
+| 소모임 목록 · 상세 · 개설(3단계 페이지) · 카테고리 시트 | **완료** |
+| `ui/` 프리미티브 6종 + `BackButton` | **완료** |
 | 나머지 전부 | 대기 |
+
+### 소모임 2단계 — DB 적용 완료 (2026-07-17)
+
+소모임이 **성격(원데이/챌린지) · 카테고리(멤버가 직접 만듦) · 썸네일 · 리더 위임 · 후기**로 확장됐습니다.
+설계 근거는 전부 [data-model.md](data-model.md#소모임-마이그레이션-있음--근거-20260717000000_gatherings_v2sql)에 있습니다.
+
+`20260717000000_gatherings_v2.sql` 을 **원격에 적용했습니다.** `migration list` 기준 로컬 10 개가
+원격과 모두 일치하고 `db push --dry-run` 이 "up to date" 입니다. 드롭 대상이던 옛 `gatherings` ·
+`gathering_participants` 에 실데이터가 없다는 건 push 전에 대시보드에서 확인했습니다.
+`events_v2` 는 이미 적용돼 있어 push 목록에 끼지 않았습니다 — 행사 데이터는 무사합니다.
+
+> **앞으로 `db push` 할 때도 `--dry-run` 을 먼저 보세요.** 이 저장소에는 `drop cascade` 후
+> 재생성하는 파괴적 마이그레이션이 둘(`events_v2` · `gatherings_v2`) 있습니다. 이미 적용됐으니
+> 정상이라면 목록에 안 뜨지만, 뜬다면 **데이터가 날아간다는 신호**입니다.
+
+#### DB 비밀번호 다루는 법
+
+`db push`·`db pull` 은 `SUPABASE_DB_PASSWORD` 를 요구합니다. `.env.local` 에 있습니다
+(`.gitignore` 의 `.env*` 에 걸려 커밋되지 않습니다). **셸이 읽어서 CLI 에 넘기는 이 패턴으로만**
+씁니다:
+
+```bash
+set -a; . ./.env.local; set +a; npx supabase db push --dry-run
+```
+
+⚠️ **파일을 열거나 값을 출력하지 마세요** — `cat`·`echo`·에디터·`set -x` 전부. 값이
+파일 → 셸 → supabase 프로세스로만 흐르면 어디에도 안 남지만, 한 번이라도 출력하면 프로덕션 DB
+평문 비밀번호가 터미널 기록·에이전트 대화 로그에 남습니다. 안전하게 둔 걸 꺼내서 덜 안전한 곳에
+복사하는 셈입니다. AI 에이전트에게 시킬 때 특히 그렇습니다 — 컨텍스트가 요약되고 저장됩니다.
+
+적용 후 **소모임 화면 동작을 직접 확인했습니다** — 개설·참여·후기가 새 스키마 위에서 돕니다.
+
+다만 **자동 테스트는 없습니다.** 아래 둘은 사람 손으로 만들기 어려운 경로라 아직 실제로 밟힌
+적이 없을 수 있습니다. 나중에 이상하면 여기부터 의심하세요.
+
+- **리더 승계 트리거** — 리더가 모임을 나가거나 admin 이 계정을 지울 때 도는데, 후자는 FK 액션
+  두 개(`set null` · `cascade`)의 순서가 보장되지 않는 경합 위에 있습니다.
+- **재귀 차단** — `gathering_leader_vacated` 의 `when` 조건이 끊습니다. 조건을 손대면 무한 재귀입니다.
+
+(로컬 `supabase db reset` 은 못 돌립니다 — 이 작업 환경에 psql/Docker 가 없습니다.)
+
+> **push 전에 후기 INSERT 정책 버그를 하나 고쳤습니다.** 서브쿼리 안에서 `gathering_id` 를
+> 수식 없이 쓰고 있었는데, `gathering_participants` 에 같은 이름의 컬럼이 있어 안쪽 스코프가
+> 이깁니다 — `gp.gathering_id = gp.gathering_id` 라는 항등식이 되어 정책이 "아무 모임에나
+> 참가자면 통과"로 무너집니다. `gathering_reviews.gathering_id` 로 수식해서 고쳤습니다.
+> **RLS 서브쿼리에서 바깥 컬럼은 항상 테이블명으로 수식하세요.** 바로 위 participants insert
+> 정책이 무사한 건 서브쿼리가 `gatherings g`(컬럼명이 `id`)라 이름이 겹치지 않아서일 뿐입니다.
+
+아직 UI 가 없는 것:
+
+- **리더 위임** — `transfer_gathering_leader` RPC 와 [`useTransferGatheringLeader`](../src/hooks/useGatheringRpc.ts)는 있는데 참가자 고르는 화면이 없습니다.
+- **종료·삭제** — `ended_at` 컬럼과 정책은 있는데 리더가 누를 버튼이 없습니다. 삭제 확인 다이얼로그는 "참여자 N명, 후기 M개가 함께 삭제됩니다"를 보여줘야 합니다(후기 CASCADE).
+- **후기 수정** — [`useUpdateReview`](../src/hooks/useGatheringReviews.ts)는 있고 화면은 삭제만 붙었습니다.
 
 남은 화면을 잔재가 많은 순으로. 숫자는 아래 두 패턴의 매치 수라 대략의 규모로만 보세요.
 
@@ -121,7 +174,7 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 | 인증 (멤버/게스트/관리자) | 동작 | `authStore` + `ProtectedRoute` |
 | 영수증 비용 청구 | 동작 | `/member/bill` → `BillFormPage` |
 | 행사 (타임라인) | 동작 | 참여자·관리자 라우트 모두 연결됨 |
-| 소모임(번개) | **1단계만 동작** | 개설·참여 토글·참여자 아이콘 realtime. 사진·정산·템플릿은 미착수 |
+| 소모임 | **2단계 동작** | 개설·참여·후기·카테고리 생성까지 확인. 리더 위임·종료·후기 수정은 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
 | 찬양팀 일정 | 동작 | `/worship`, Realtime 반영 |
 | 하단 탭바 | **없음** | 위 참고. 글래스 캡슐로 재구현 예정 |
 | 순서별 평가 | **폐기** | 아래 참고 |
