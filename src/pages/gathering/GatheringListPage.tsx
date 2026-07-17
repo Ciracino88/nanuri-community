@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronRight, Plus, Search, Users, X } from "lucide-react";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
@@ -45,25 +45,34 @@ function AvatarStack({ profiles }: { profiles: ParticipantProfile[] }) {
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center">
-        {shown.map((p, i) => (
-          <div
-            key={p.id}
-            // 얼굴이 겹쳐도 서로 분리돼 보이도록 카드 색 테두리를 두른다.
-            className="rounded-full overflow-hidden flex items-center justify-center bg-bg-alternative border-2 border-bg-normal"
-            style={{
-              width: 26, height: 26,
-              marginLeft: i === 0 ? 0 : -8,
-              zIndex: MAX_FACES - i,
-            }}
-            title={p.name}
-          >
-            {p.avatar_url ? (
-              <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-[10px] font-bold text-label-neutral">{p.name.slice(0, 1)}</span>
-            )}
-          </div>
-        ))}
+        {/* 참여자가 늘거나 빠질 때 팝인/팝아웃. popLayout 으로 하나가 빠지면 나머지 얼굴이
+            겹침 간격을 유지한 채 자연스럽게 자리를 메운다. */}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {shown.map((p, i) => (
+            <motion.div
+              key={p.id}
+              layout
+              initial={{ opacity: 0, scale: 0.2 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.2 }}
+              transition={{ type: "spring", stiffness: 500, damping: 32 }}
+              // 얼굴이 겹쳐도 서로 분리돼 보이도록 카드 색 테두리를 두른다.
+              className="rounded-full overflow-hidden flex items-center justify-center bg-bg-alternative border-2 border-bg-normal"
+              style={{
+                width: 26, height: 26,
+                marginLeft: i === 0 ? 0 : -8,
+                zIndex: MAX_FACES - i,
+              }}
+              title={p.name}
+            >
+              {p.avatar_url ? (
+                <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-[10px] font-bold text-label-neutral">{p.name.slice(0, 1)}</span>
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
       <span className="text-label2 font-medium text-label-neutral">
         {rest > 0 ? `+${rest} · ` : ""}{profiles.length}명

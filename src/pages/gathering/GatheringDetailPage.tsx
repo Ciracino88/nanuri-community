@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Check, Heart, MapPin, Pencil, Users } from "lucide-react";
 import toast from "react-hot-toast";
 import BackButton from "../../components/BackButton";
@@ -190,9 +190,21 @@ export default function GatheringDetailPage() {
         ) : (
           // 썸네일 → 카테고리 이모지 → 기본 아이콘. 소모임 자체의 이모지는 없앴다.
           <div className="w-full h-full bg-status-bg-active text-primary-normal flex items-center justify-center">
-            {category
-              ? <span style={{ fontSize: 96 }}>{category.emoji}</span>
-              : <Users size={72} strokeWidth={2} />}
+            {/* 사진이 없을 때 뜨는 폴백 아이콘 — 통통 튀며 등장한 뒤 은은하게 떠 있게 한다 */}
+            <motion.div
+              className="flex items-center justify-center"
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1, y: [0, -8, 0] }}
+              transition={{
+                scale: { type: "spring", stiffness: 260, damping: 16 },
+                opacity: { duration: 0.3 },
+                y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+              }}
+            >
+              {category
+                ? <span style={{ fontSize: 96 }}>{category.emoji}</span>
+                : <Users size={72} strokeWidth={2} />}
+            </motion.div>
           </div>
         )}
         <span className="absolute bottom-3 right-3 text-caption1 font-semibold px-2.5 py-1 rounded-full bg-label-normal text-static-white">
@@ -287,14 +299,25 @@ export default function GatheringDetailPage() {
           <p className="text-label1 text-label-neutral">아직 아무도 없어요</p>
         ) : (
           <div className="flex items-start gap-3 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {members.map((m) => (
-              <div key={m.id} className="flex flex-col items-center gap-1 w-12 shrink-0">
-                <Avatar profile={m} />
-                <span className="text-caption1 text-label-neutral truncate w-full text-center">
-                  {m.name}
-                </span>
-              </div>
-            ))}
+            {/* 참여자가 늘거나 빠질 때 팝인/팝아웃, 남은 아바타는 layout 으로 자연스럽게 밀린다 */}
+            <AnimatePresence initial={false}>
+              {members.map((m) => (
+                <motion.div
+                  key={m.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                  className="flex flex-col items-center gap-1 w-12 shrink-0"
+                >
+                  <Avatar profile={m} />
+                  <span className="text-caption1 text-label-neutral truncate w-full text-center">
+                    {m.name}
+                  </span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </div>
@@ -354,7 +377,9 @@ export default function GatheringDetailPage() {
         {reviews.length === 0 ? (
           <p className="text-label1 text-label-neutral">아직 후기가 없어요</p>
         ) : (
-          reviews.map((r) => {
+          // 후기를 남기거나 지울 때 팝인/팝아웃, 남은 카드는 layout 으로 밀린다
+          <AnimatePresence initial={false}>
+            {reviews.map((r) => {
             // user_id 가 null 이면 계정이 지워진 것이다. 후기는 기록이라 글은 남는다.
             const author = r.user_id ? reviewProfiles.get(r.user_id) : null;
             const mine = !!r.user_id && r.user_id === user?.id;
@@ -362,7 +387,15 @@ export default function GatheringDetailPage() {
             const likers = likesByReview.get(r.id) ?? [];
             const likedByMe = !!user && likers.includes(user.id);
             return (
-              <div key={r.id} className="rounded-card bg-bg-normal shadow-small p-4 flex flex-col gap-2">
+              <motion.div
+                key={r.id}
+                layout
+                initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="rounded-card bg-bg-normal shadow-small p-4 flex flex-col gap-2"
+              >
                 <div className="flex items-center gap-2">
                   {author
                     ? <Avatar profile={author} size={28} />
@@ -429,9 +462,10 @@ export default function GatheringDetailPage() {
                     </button>
                   </>
                 )}
-              </div>
-            );
-          })
+              </motion.div>
+              );
+            })}
+          </AnimatePresence>
         )}
       </div>
     </div>
