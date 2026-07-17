@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { motion } from "motion/react";
-import { Pencil } from "lucide-react";
+import { Camera } from "lucide-react";
 import BackButton from "../components/BackButton";
 import TextField from "../components/ui/TextField";
 import SelectField from "../components/ui/SelectField";
+import Button from "../components/ui/Button";
 import toast from "react-hot-toast";
 import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../store/authStore";
@@ -13,20 +13,10 @@ import { uploadReceipt } from "../lib/uploadReceipt";
 import { POSITIONS } from "../constants/worship";
 import { BANKS } from "../constants/banks";
 
-const ACCENT = "#74C7FF";
-
 interface FormValues {
   name: string;
   account_number: string;
   phone: string;
-}
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <label className="text-xs font-bold tracking-widest uppercase" style={{ color: "#8892a0" }}>
-      {children}
-    </label>
-  );
 }
 
 export default function MemberProfileSetupPage() {
@@ -48,15 +38,14 @@ export default function MemberProfileSetupPage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const initial = (userProfile?.name ?? "").slice(0, 1);
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
-
-  const togglePosition = (pos: string) =>
-    setPositions((prev) => (prev.includes(pos) ? prev.filter((p) => p !== pos) : [...prev, pos]));
 
   const onSubmit = async (values: FormValues) => {
     if (!user) return;
@@ -90,118 +79,80 @@ export default function MemberProfileSetupPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
-
-      {/* 헤더 */}
-      <div className="flex items-center gap-3 px-4 pt-4 pb-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-        <BackButton onClick={() => navigate(-1)} />
-        <h1 className="text-base font-extrabold text-white flex-1">프로필 편집</h1>
-        <div className="w-9" />
-      </div>
-
+    <div className="flex-1 flex flex-col">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md mx-auto px-4 py-5 flex flex-col gap-5"
-        style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+        className="w-full max-w-md mx-auto px-4 pt-4 flex flex-col gap-5"
+        style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}
       >
+        {/* 헤더 */}
+        <div className="flex items-center gap-3">
+          <BackButton onClick={() => navigate(-1)} />
+          <h1 className="text-headline2 font-bold text-label-normal">프로필 편집</h1>
+        </div>
 
         {/* 프로필 사진 */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="relative">
-            <motion.button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              whileTap={{ scale: 0.95 }}
-              className="w-24 h-24 rounded-full flex items-center justify-center text-5xl overflow-hidden"
-              style={{ border: `3px solid ${ACCENT}`, background: `${ACCENT}22` }}
-            >
-              {avatarPreview ? <img src={avatarPreview} alt="" className="w-full h-full object-cover" /> : "🐹"}
-            </motion.button>
-            <motion.div
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{ border: `2px solid ${ACCENT}` }}
-              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-              transition={{ duration: 2.4, repeat: Infinity }}
-            />
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ background: ACCENT }}
-              aria-label="사진 변경"
-            >
-              <Pencil size={13} color="#0f1117" />
-            </button>
-          </div>
-          <p className="text-xs" style={{ color: "#8892a0" }}>탭해서 사진 변경</p>
+        <div className="flex flex-col items-center gap-2 py-2">
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="relative active:scale-95 transition"
+            aria-label="사진 변경"
+          >
+            <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center bg-status-bg-active text-primary-normal text-title1 font-bold">
+              {avatarPreview ? <img src={avatarPreview} alt="" className="w-full h-full object-cover" /> : (initial || <Camera size={30} />)}
+            </div>
+            {/* 편집 어포던스 — 그림자로 면에서 띄운다(테두리 대신, docs/design.md) */}
+            <span className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary-normal text-static-white flex items-center justify-center shadow-small">
+              <Camera size={15} />
+            </span>
+          </button>
+          <p className="text-label2 text-label-neutral">탭해서 사진 변경</p>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
         </div>
 
         {/* 이름 */}
-        <div className="flex flex-col gap-2">
-          <FieldLabel>이름</FieldLabel>
-          <TextField
-            placeholder="이름을 입력하세요"
-            error={errors.name?.message}
-            {...register("name", { required: "이름을 입력해주세요" })}
-          />
-        </div>
+        <TextField
+          label="이름"
+          placeholder="이름을 입력하세요"
+          error={errors.name?.message}
+          {...register("name", { required: "이름을 입력해주세요" })}
+        />
 
-        {/* 팀 */}
-        <div className="flex flex-col gap-2">
-          <FieldLabel>팀</FieldLabel>
+        {/* 팀 — 선택 = 상호작용이라 Primary 담당(docs/design.md) */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-label2 font-medium text-label-normal">팀</span>
           <div className="flex gap-2">
             {["나누리", "섬김이"].map((t) => (
-              <motion.button
+              <button
                 key={t}
                 type="button"
-                whileTap={{ scale: 0.92 }}
                 onClick={() => setTeam(t)}
-                className="flex-1 py-3 rounded-2xl text-sm font-bold"
-                animate={team === t ? { background: ACCENT, color: "#0f1117" } : { background: "rgba(255,255,255,0.06)", color: "#8892a0" }}
-                transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                className={`flex-1 py-3 rounded-field text-body2 font-semibold transition active:scale-[0.98] ${
+                  team === t
+                    ? "bg-primary-normal text-static-white"
+                    : "bg-bg-normal text-label-neutral shadow-xsmall"
+                }`}
               >
                 {t}
-              </motion.button>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* 포지션 */}
-        <div className="flex flex-col gap-2">
-          <FieldLabel>
-            포지션 <span style={{ color: `${ACCENT}99` }}>({positions.length}개 선택)</span>
-          </FieldLabel>
-          <div className="flex flex-wrap gap-2">
-            {POSITIONS.map((pos) => {
-              const selected = positions.includes(pos);
-              return (
-                <motion.button
-                  key={pos}
-                  type="button"
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => togglePosition(pos)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold"
-                  style={{ border: "1px solid" }}
-                  animate={
-                    selected
-                      ? { background: `${ACCENT}33`, color: ACCENT, borderColor: `${ACCENT}88` }
-                      : { background: "rgba(255,255,255,0.05)", color: "#8892a0", borderColor: "rgba(255,255,255,0.1)" }
-                  }
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                >
-                  {selected && <span className="mr-1">✓</span>}
-                  {pos}
-                </motion.button>
-              );
-            })}
-          </div>
-        </div>
+        {/* 포지션 — 여러 개 고르면 트리거에 " & " 로 이어 표기된다(어쿠스틱 & 싱어1) */}
+        <SelectField
+          multiple
+          value={positions}
+          onChange={setPositions}
+          options={POSITIONS}
+          placeholder="포지션 선택"
+          label={<>포지션 <span className="text-label-neutral font-normal">({positions.length}개)</span></>}
+        />
 
-        {/* 은행 정보 */}
+        {/* 은행 */}
         <div className="flex flex-col gap-2">
-          <FieldLabel>은행 정보</FieldLabel>
-          <SelectField value={bank} onChange={setBank} options={BANKS} placeholder="은행 선택" />
+          <SelectField value={bank} onChange={setBank} options={BANKS} placeholder="은행 선택" label="은행" />
           <TextField
             inputMode="numeric"
             placeholder="계좌번호를 입력하세요"
@@ -210,26 +161,17 @@ export default function MemberProfileSetupPage() {
         </div>
 
         {/* 연락처 */}
-        <div className="flex flex-col gap-2">
-          <FieldLabel>연락처</FieldLabel>
-          <TextField
-            type="tel"
-            placeholder="010-0000-0000"
-            {...register("phone")}
-          />
-        </div>
+        <TextField
+          label="연락처"
+          type="tel"
+          placeholder="010-0000-0000"
+          {...register("phone")}
+        />
 
         {/* 저장 */}
-        <motion.button
-          type="submit"
-          disabled={submitting}
-          whileTap={{ scale: 0.96 }}
-          className="w-full py-4 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
-          style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, color: "#0f1117", boxShadow: `0 6px 24px ${ACCENT}44` }}
-        >
-          {submitting ? "저장 중..." : "저장하기"}
-        </motion.button>
-
+        <Button type="submit" loading={submitting} loadingText="저장 중..." className="mt-2">
+          저장하기
+        </Button>
       </form>
     </div>
   );

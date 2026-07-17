@@ -13,14 +13,19 @@ import EventSegmentsPage from "../admin/event/EventSegmentsPage";
 import EventBuilderPage from "../admin/event/EventBuilderPage";
 import EventTimelinePage from "../event/EventTimelinePage";
 import WorshipSchedulePage from "../worship/WorshipSchedulePage";
+import ProfilePage from "../ProfilePage";
+import MemberProfileSetupPage from "../MemberProfileSetupPage";
+import { ConfirmHost } from "../../components/ConfirmDialog";
 import { useAuthStore } from "../../store/authStore";
 import { eventKeys } from "../../hooks/useEvents";
 import { gatheringKeys } from "../../hooks/useGatherings";
 import { reviewKeys, type GatheringReviewData } from "../../hooks/useGatheringReviews";
+import { myReviewKeys } from "../../hooks/useMyReviews";
 import type { EventDetailData } from "../../hooks/useEvents";
 import type { EventRecord } from "../../types/event";
 import type { GatheringData } from "../../hooks/useGatherings";
 import type { WorshipData } from "../../hooks/useWorshipSchedule";
+import type { GatheringReview } from "../../types/gathering";
 
 // 개발 전용 미리보기. 앱 라우터 바깥에서 마운트된다(main.tsx) — 그래야 여기서
 // MemoryRouter 로 원하는 경로·상태를 꾸며 띄울 수 있다. 라우터는 중첩이 안 된다.
@@ -227,6 +232,14 @@ const MOCK_WORSHIP: WorshipData = {
   ],
 };
 
+// 프로필의 "내 후기": 소모임을 가로질러 ME 가 쓴 후기만. g-1(카페)·g-4(통독반) 두 곳.
+const MY_REVIEW_ROWS: GatheringReview[] = [
+  { id: "mr-1", gathering_id: "g-1", user_id: ME, content: "케이크가 맛있었어요.",
+    created_at: inDays(-2), updated_at: null },
+  { id: "mr-2", gathering_id: "g-4", user_id: ME, content: "창세기 완독! 다음 회차도 기대돼요.",
+    created_at: inDays(-6), updated_at: inDays(-5) },
+];
+
 const NAV_ROUTES = ["/gatherings", "/worship", "/profile"];
 
 function NavPreview() {
@@ -393,6 +406,25 @@ const SCREENS: Record<string, () => React.ReactElement> = {
       </Seed>
     );
   },
+  profile: () => {
+    asLoggedIn();
+    // 참가 소모임은 gatherings 캐시(participants 에 ME)로, 내 후기는 my_reviews 키로 심는다.
+    return (
+      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS], [myReviewKeys.of(ME), MY_REVIEW_ROWS]]}>
+        <MemoryRouter initialEntries={["/profile"]}>
+          <Phone><ProfilePage /></Phone>
+        </MemoryRouter>
+      </Seed>
+    );
+  },
+  "profile-setup": () => {
+    asWorshipMember(); // 포지션·팀이 있는 프로필로 띄워 다중 셀렉터의 초기값을 확인한다.
+    return (
+      <MemoryRouter initialEntries={["/member/setup"]}>
+        <Phone><MemberProfileSetupPage /></Phone>
+      </MemoryRouter>
+    );
+  },
   worship: () => {
     asWorshipMember();
     // 쿼리 키가 ["worship", year, month] 라 이번 달로 심는다(useCalendar 기본값과 같은 today 기준).
@@ -421,5 +453,12 @@ export default function DevPreviewPage() {
       </div>
     );
   }
-  return screen();
+  // ConfirmHost 를 같이 마운트한다 — 앱 루트(main.tsx Root)에만 있어서, 그냥 두면
+  // 미리보기에서 confirmDialog() 가 아무것도 안 띄운다(삭제·로그아웃 확인이 안 보인다).
+  return (
+    <>
+      {screen()}
+      <ConfirmHost />
+    </>
+  );
 }

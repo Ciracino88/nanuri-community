@@ -36,9 +36,11 @@
 | 화면 | 상태 |
 | --- | --- |
 | 소모임 목록 · 상세 · 개설(3단계 페이지) · 카테고리 시트 | **완료** |
-| `ui/` 프리미티브 6종 + `BackButton` | **완료** |
+| `ui/` 프리미티브 6종 + `BackButton` | **완료** — `SelectField` 는 `multiple` 다중 선택 지원 |
 | 하단 탭바 (떠 있는 글래스 캡슐) · 상단 바 (`TopBar`) | **완료** — 위 참고 |
 | 찬양팀 시트 (`WorshipSchedulePage` · `PositionSlot`) | **완료** — hero 제거, 옛 빨강→Primary 파랑 |
+| 내정보 (`ProfilePage`) | **완료** — 안 쓰던 통계 3종 제거, 내 소그룹·내 후기 관리 추가 |
+| 프로필 편집 (`MemberProfileSetupPage`) | **완료** — 라이트 이식, 포지션 다중 셀렉터 |
 | 나머지 전부 | 대기 |
 
 ### 소모임 2단계 — DB 적용 완료 (2026-07-17)
@@ -106,9 +108,7 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 | `event/EventListPage` | — | 13 |
 | `components/EventInfoView` | — | 11 |
 | `HomePage` | 11 | — |
-| `MemberProfileSetupPage` | — | 8 |
 | `ConfirmDialog` | 5 | — |
-| `ProfilePage` | — | 5 |
 | `auth/MemberLoginPage` | 4 | — |
 | `event/EventInfoPage` | — | 3 |
 | `auth/GatePage` · `LoadingSpinner` · `BackButton` | 각 2 | — |
