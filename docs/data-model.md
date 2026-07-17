@@ -27,7 +27,7 @@ npx supabase db pull
 | `emoji` | text | 대표 이모지 |
 | `description` | text | |
 | `details` | jsonb `[]` | 상세표 `[{ label, value }]` |
-| `results_public` | boolean `false` | 참여자에게 결과 공개 여부 |
+| `results_public` | boolean `false` | 참여자에게 평가 결과 공개 여부. **코드에서는 제거됨** — 평가 기능 폐기([status.md](status.md)). 컬럼은 DB 에 남아 있음 |
 
 `event_date`는 `20260701020000_event_date_text.sql`에서 text가 되었습니다. `"2021.05.20"` 또는 `"2021.05.20~2021.05.22"`처럼 기간 표기를 허용하기 위한 것으로, 파싱은 `lib/eventTime.ts`의 `parseStartDate()`가 담당합니다(`~` 앞의 시작일만 사용). 날짜 정렬·비교를 DB에 맡길 수 없다는 뜻이기도 합니다.
 
@@ -56,6 +56,10 @@ npx supabase db pull
 | `comment` | text | |
 
 `unique (segment_id, user_id)` — 한 사람이 한 순서에 하나의 평가만.
+
+⚠ **평가 기능은 폐기됐습니다**([status.md](status.md)). 이 테이블을 읽고 쓰는 코드가 이제 없습니다 —
+테이블·정책·Realtime 퍼블리케이션만 DB 에 남아 있습니다. 되살릴 계획이 없다면 마이그레이션으로
+정리하는 게 맞습니다.
 
 **`event_participants`** — "내 일정에 추가"
 
@@ -98,7 +102,10 @@ npx supabase db pull
 | `worship_schedules` | `useWorshipSchedule` | `date` (unique) — 주일 날짜 |
 | `worship_availability` | `useWorshipSchedule`, `useToggleAvailability` | `schedule_id`, `user_id`, `position`, `available` |
 
-**`accounting_categories` / `accounting_reports` / `accounting_transactions`는 DB에 존재하지 않습니다.** `pages/accounting/`와 회계 훅들이 이 이름으로 쿼리하지만 원격에는 없습니다 — 라우터에 연결하는 순간 런타임 에러가 납니다. 대신 `finance_ledgers`, `finance_reports`, `finance_splits`, `finance_transactions`가 있어 이름이 바뀐 것으로 보이나, 코드가 따라가지 않았습니다.
+**`accounting_*` 테이블은 DB 에 존재하지 않습니다.** 이 이름으로 쿼리하던 `pages/accounting/`과
+회계 훅들은 삭제됐습니다([status.md](status.md)) — 원격에는 `finance_ledgers`, `finance_reports`,
+`finance_splits`, `finance_transactions` 가 있어 이름이 바뀐 뒤 코드가 안 따라간 것으로 보입니다.
+회계는 iOS 앱으로 이관 예정이라 웹에서 되살릴 계획이 없습니다.
 
 코드에서 쓰지 않는 테이블도 남아 있습니다: `bible_words`, `event_budget_items`, `event_items`, `event_registrations`, `event_tasks`, `finance_*`, `event_participants`.
 
@@ -164,11 +171,13 @@ exists (select 1 from public.user_profiles p where p.id = auth.uid())
 
 구독하는 곳은 세 군데입니다.
 
-- [`useEvents.ts`](../src/hooks/useEvents.ts#L137) — 채널 `event_results_${id}`, 평가 실시간 반영
-- [`useGatherings.ts`](../src/hooks/useGatherings.ts#L42) — 채널 `gatherings_feed`, 소모임 개설·참여 현황
-- [`useWorshipSchedule.ts`](../src/hooks/useWorshipSchedule.ts#L53) — 채널 `worship_availability_${year}_${month}`, 찬양팀 참여 현황
+- [`useGatherings.ts`](../src/hooks/useGatherings.ts) — 채널 `gatherings_feed`, 소모임 개설·참여 현황
+- [`useWorshipSchedule.ts`](../src/hooks/useWorshipSchedule.ts) — 채널 `worship_availability_${year}_${month}`, 찬양팀 참여 현황
 
-세 훅 모두 이벤트를 받으면 해당 쿼리 캐시를 무효화합니다.
+두 훅 모두 이벤트를 받으면 해당 쿼리 캐시를 무효화합니다.
+
+행사 결과(`event_results_${id}`) 구독은 평가 기능과 함께 사라졌습니다 — 퍼블리케이션에는
+`segment_evaluations` 등이 그대로 등록돼 있지만 구독하는 코드가 없습니다.
 
 ## 마이그레이션 이력
 
