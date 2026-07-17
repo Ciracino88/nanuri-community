@@ -422,7 +422,7 @@ export default function GatheringDetailPage() {
                       aria-label={likedByMe ? "좋아요 취소" : "좋아요"}
                       aria-pressed={likedByMe}
                       className={`self-start flex items-center gap-1.5 text-caption1 active:scale-95 transition
-                        ${likedByMe ? "text-primary-normal" : "text-label-neutral"}`}
+                        ${likedByMe ? "text-status-negative" : "text-label-neutral"}`}
                     >
                       <Heart size={15} strokeWidth={2} fill={likedByMe ? "currentColor" : "none"} />
                       {likers.length > 0 && <span className="tabular-nums">{likers.length}</span>}
