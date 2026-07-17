@@ -42,8 +42,11 @@
 | 훅 | 용도 |
 | --- | --- |
 | `useEvents` | 행사 전반. 쿼리 키는 `eventKeys` 객체에 모음 |
-| `useGatherings` / `useCreateGathering` | 소모임 목록 + Realtime, 개설 |
+| `useGatherings` / `useCreateGathering` | 소모임 목록 + Realtime, 개설. 쿼리 키는 `gatheringKeys` |
+| `useCreateCategory` | 소모임 카테고리 생성 (멤버가 직접 만듭니다) |
 | `useToggleGatheringJoin` | 소모임 참여 토글 |
+| `useGatheringReviews` | 후기 조회·작성·수정·삭제. 쿼리 키는 `reviewKeys` |
+| `useGatheringRpc` | `useUpdateGatheringPlace`(참가자 누구나) · `useTransferGatheringLeader`(리더만) |
 | `useWorshipSchedule` | 월별 주일 일정 + Realtime |
 | `useToggleAvailability` | 포지션 참여 토글 (낙관적 캐시 갱신 + 중복 시 교체 확인) |
 | `useCalendar` | 달력 월 이동 상태 (`useReducer`) |
@@ -59,7 +62,7 @@
 | `lib/deleteImage.ts` | Worker 경유 R2 삭제 |
 | `lib/eventTime.ts` | `formatClock`, `parseStartDate`, `totalDuration`, `buildTimeline` |
 | `lib/eventStatus.ts` | `computeEventStatus` → `upcoming` / `live` / `done`, `EVENT_STATUS_LABEL` |
-| `lib/gatheringTime.ts` | `computeGatheringStatus`, `formatGatheringAt`, `defaultGatheringAt`, `localInputToISO` |
+| `lib/gatheringTime.ts` | `computeGatheringStatus`, **`formatGatheringWhen`**, `formatGatheringAt`, `defaultGatheringAt`, `localInputToISO` |
 | `lib/generateNickname.ts` | 게스트 랜덤 닉네임 (형용사+동물+이모지) |
 
 ## 상수
@@ -69,6 +72,15 @@
 | `constants/theme.ts` | `ACCENT`(Primary) · `MUTED`. **Tailwind 클래스를 못 쓰는 자리(인라인 `style`, SVG `fill`)에서만** 씁니다 |
 | `constants/layout.ts` | `PAGE_BOTTOM_PAD` — 떠 있는 탭바에 가리지 않도록 페이지가 확보하는 하단 여백 |
 | `constants/banks.ts` · `constants/worship.ts` | 은행 목록 · 포지션 목록 |
+
+## 소모임 시간 — `formatGatheringWhen`을 쓰세요
+
+`formatGatheringAt(iso)`가 아니라 **`formatGatheringWhen(gathering)`** 이 화면이 부를 함수입니다.
+챌린지는 `gathering_at`이 `null`이라(기한이 없는 게 챌린지의 정의) `formatGatheringAt`에 그대로
+넘기면 `Invalid Date`입니다. `formatGatheringWhen`이 그 분기를 한 번만 처리해 "무기한"을 돌려줍니다.
+
+`computeGatheringStatus`도 같은 이유로 **레코드 전체**를 받습니다 — 원데이는 `gathering_at`이,
+챌린지는 `ended_at`이 종료를 정합니다([data-model.md](data-model.md)).
 
 ## 행사 시간 계산
 
