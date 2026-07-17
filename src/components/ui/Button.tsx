@@ -23,7 +23,8 @@ export default function Button({
   return (
     <button
       // 반경은 rounded-field(14). 알약(rounded-full)은 옛 디자인의 정체성이라 쓰지 않는다 —
-      // 작은 인라인 칩과 플로팅 버튼만 예외다.
+      // 예외는 작은 인라인 칩·배지뿐이다. 글자만 든 작은 것들은 알약이 맞다.
+      // 플로팅 버튼도 여기 예외가 아니다 — 누르는 것은 반경 14 로 통일한다.
       className={`w-full py-3.5 px-5 rounded-field text-body1 font-semibold transition
         disabled:cursor-not-allowed
         ${VARIANTS[variant]}

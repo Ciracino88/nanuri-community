@@ -25,7 +25,7 @@ export default function BottomSheet({ title, onClose, children }: {
         onClick={onClose}
       />
       <motion.div
-        className="relative w-full max-w-md bg-bg-elevated px-6 pt-3 flex flex-col gap-4 shadow-xlarge"
+        className="relative w-full max-w-md max-h-[88vh] bg-bg-elevated px-6 pt-3 flex flex-col gap-4 shadow-xlarge"
         style={{
           borderTopLeftRadius: "var(--radius-sheet)",
           borderTopRightRadius: "var(--radius-sheet)",
@@ -44,7 +44,13 @@ export default function BottomSheet({ title, onClose, children }: {
             <X size={16} />
           </button>
         </div>
-        {children}
+        {/* 손잡이·제목은 고정하고 폼만 스크롤한다. 시트가 뷰포트를 넘으면(항목이 많은 폼)
+            여기가 없으면 저장 버튼이 화면 밖으로 나가 아예 누를 수 없다.
+            min-h-0: flex 자식은 기본 min-height:auto 라 이게 없으면 축소되지 않아 스크롤이 안 걸린다.
+            -mx-6 px-6: 포커스 링이 좌우로 잘리지 않게 스크롤 영역을 시트 패딩만큼 넓힌다. */}
+        <div className="flex flex-col gap-4 overflow-y-auto min-h-0 -mx-6 px-6">
+          {children}
+        </div>
       </motion.div>
     </motion.div>
   );

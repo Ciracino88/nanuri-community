@@ -1,0 +1,344 @@
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { motion } from "motion/react";
+import { Check, MapPin, Pencil, Users } from "lucide-react";
+import toast from "react-hot-toast";
+import BackButton from "../../components/BackButton";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import Button from "../../components/ui/Button";
+import TextArea from "../../components/ui/TextArea";
+import TextField from "../../components/ui/TextField";
+import { useAuthStore } from "../../store/authStore";
+import { useGatherings, type GatheringData } from "../../hooks/useGatherings";
+import { useToggleGatheringJoin } from "../../hooks/useToggleGatheringJoin";
+import { useUpdateGatheringPlace } from "../../hooks/useGatheringRpc";
+import {
+  useCreateReview,
+  useDeleteReview,
+  useGatheringReviews,
+} from "../../hooks/useGatheringReviews";
+import { PAGE_BOTTOM_PAD } from "../../constants/layout";
+import {
+  computeGatheringStatus,
+  formatGatheringWhen,
+  GATHERING_STATUS_LABEL,
+} from "../../lib/gatheringTime";
+import type { ParticipantProfile } from "../../types/gathering";
+
+function relativeDay(iso: string, now = new Date()) {
+  const days = Math.floor((now.getTime() - new Date(iso).getTime()) / 86400_000);
+  if (days <= 0) return "오늘";
+  if (days === 1) return "어제";
+  if (days < 7) return `${days}일 전`;
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+}
+
+function Avatar({ profile, size = 40 }: { profile: ParticipantProfile; size?: number }) {
+  return (
+    <div
+      className="rounded-full overflow-hidden flex items-center justify-center bg-bg-alternative shrink-0"
+      style={{ width: size, height: size }}
+    >
+      {profile.avatar_url ? (
+        <img src={profile.avatar_url} alt={profile.name} className="w-full h-full object-cover" />
+      ) : (
+        <span className="text-label2 font-bold text-label-neutral">{profile.name.slice(0, 1)}</span>
+      )}
+    </div>
+  );
+}
+
+export default function GatheringDetailPage() {
+  const { id = "" } = useParams();
+  const { user } = useAuthStore();
+  const { data, isLoading } = useGatherings();
+  const { data: reviewData } = useGatheringReviews(id);
+
+  const [editingPlace, setEditingPlace] = useState(false);
+  const [placeDraft, setPlaceDraft] = useState("");
+  const [reviewDraft, setReviewDraft] = useState("");
+
+  const empty: GatheringData = { gatherings: [], participants: [], profiles: [], categories: [] };
+  const { gatherings, participants, profiles, categories } = data ?? empty;
+
+  const { toggle, togglingId } = useToggleGatheringJoin(participants);
+  const updatePlace = useUpdateGatheringPlace();
+  const createReview = useCreateReview(id);
+  const deleteReview = useDeleteReview(id);
+
+  const gathering = gatherings.find((g) => g.id === id);
+
+  if (isLoading) return <LoadingSpinner />;
+  if (!gathering) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-2 px-4">
+        <Users size={32} className="text-label-assistive" />
+        <p className="text-body1 font-semibold text-label-neutral">없는 소모임이에요</p>
+        <BackButton />
+      </div>
+    );
+  }
+
+  const status = computeGatheringStatus(gathering);
+  const category = gathering.category_id
+    ? categories.find((c) => c.id === gathering.category_id) ?? null
+    : null;
+  const profileById = new Map(profiles.map((p) => [p.id, p]));
+
+  const members = participants
+    .filter((p) => p.gathering_id === id)
+    .map((p) => profileById.get(p.user_id))
+    .filter((p): p is ParticipantProfile => !!p);
+
+  const joined = participants.some((p) => p.gathering_id === id && p.user_id === user?.id);
+  const isLeader = gathering.leader_id === user?.id;
+  const leader = gathering.leader_id ? profileById.get(gathering.leader_id) : null;
+  const placeEditor = gathering.place_updated_by ? profileById.get(gathering.place_updated_by) : null;
+
+  const reviews = reviewData?.reviews ?? [];
+  const reviewProfiles = new Map((reviewData?.profiles ?? []).map((p) => [p.id, p]));
+
+  const savePlace = async () => {
+    try {
+      await updatePlace.mutateAsync({ gatheringId: id, place: placeDraft.trim() });
+      setEditingPlace(false);
+      toast.success("장소를 바꿨어요");
+    } catch (err) {
+      console.error("[updateGatheringPlace] error:", err);
+      toast.error("장소를 바꾸지 못했어요");
+    }
+  };
+
+  const submitReview = async () => {
+    if (!user || !reviewDraft.trim()) return;
+    try {
+      await createReview.mutateAsync({ content: reviewDraft.trim(), userId: user.id });
+      setReviewDraft("");
+      toast.success("후기를 남겼어요");
+    } catch (err) {
+      console.error("[createReview] error:", err);
+      toast.error("후기를 남기지 못했어요");
+    }
+  };
+
+  const removeReview = async (reviewId: string) => {
+    try {
+      await deleteReview.mutateAsync(reviewId);
+    } catch (err) {
+      console.error("[deleteReview] error:", err);
+      toast.error("후기를 지우지 못했어요");
+    }
+  };
+
+  return (
+    <div
+      className="w-full max-w-md mx-auto px-4 pt-4 flex flex-col gap-5"
+      style={{ paddingBottom: PAGE_BOTTOM_PAD }}
+    >
+      <BackButton to="/gatherings" />
+
+      {/* 썸네일 + 성격 배지(우하단). 상세는 항목이 하나라 원데이에도 배지를 단다 —
+          목록과 달리 노이즈가 되지 않고, 여기서는 "이 모임이 어떻게 끝나는가"가 정보다. */}
+      <div className="relative w-32 h-32">
+        {gathering.thumbnail_url ? (
+          <img src={gathering.thumbnail_url} alt="" className="w-32 h-32 rounded-card object-cover" />
+        ) : (
+          // 썸네일 → 카테고리 이모지 → 기본 아이콘. 소모임 자체의 이모지는 없앴다.
+          <div className="w-32 h-32 rounded-card bg-status-bg-active text-primary-normal flex items-center justify-center">
+            {category
+              ? <span style={{ fontSize: 56 }}>{category.emoji}</span>
+              : <Users size={44} strokeWidth={2} />}
+          </div>
+        )}
+        <span className="absolute -bottom-1.5 -right-1.5 text-caption1 font-semibold px-2.5 py-1 rounded-full bg-label-normal text-static-white">
+          {gathering.kind === "challenge" ? "챌린지" : "원데이"}
+        </span>
+      </div>
+
+      {/* 카테고리 칩 행 */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {category && (
+          <span className="text-label2 font-medium px-3 py-1.5 rounded-full bg-bg-normal shadow-xsmall text-label-neutral">
+            {category.emoji} {category.label}
+          </span>
+        )}
+        {status !== "open" && (
+          <span className="text-label2 font-medium px-3 py-1.5 rounded-full bg-status-bg-idle text-label-neutral">
+            {GATHERING_STATUS_LABEL[status]}
+          </span>
+        )}
+      </div>
+
+      <div>
+        <h1 className="text-title3 font-bold text-label-normal">{gathering.title}</h1>
+        {leader && (
+          <p className="text-label2 text-label-neutral mt-1">{leader.name}님이 이끌어요</p>
+        )}
+      </div>
+
+      {/* 장소 · 일시 */}
+      <div className="rounded-card bg-bg-normal shadow-small p-4 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-label2 font-medium text-label-neutral">언제</span>
+          <span className="text-label1 font-semibold text-label-normal">
+            {formatGatheringWhen(gathering)}
+          </span>
+        </div>
+
+        <div className="h-px bg-line-solid" />
+
+        {editingPlace ? (
+          <div className="flex flex-col gap-2">
+            <TextField
+              label="어디서" placeholder="예) 한강공원 잠수교"
+              value={placeDraft} onChange={(e) => setPlaceDraft(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <Button type="button" onClick={savePlace} loading={updatePlace.isPending} loadingText="바꾸는 중...">
+                저장
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setEditingPlace(false)}>
+                취소
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-label2 font-medium text-label-neutral">어디서</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-label1 font-semibold text-label-normal truncate">
+                {gathering.place_name ?? "아직 안 정했어요"}
+              </span>
+              {/* 참가자 누구나 고칠 수 있다. 챌린지는 장소가 회차마다 바뀐다. */}
+              {joined && (
+                <button
+                  type="button"
+                  onClick={() => { setPlaceDraft(gathering.place_name ?? ""); setEditingPlace(true); }}
+                  aria-label="장소 바꾸기"
+                  className="w-7 h-7 rounded-full bg-bg-alternative text-label-neutral flex items-center justify-center shrink-0 active:scale-90 transition"
+                >
+                  <Pencil size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 덮어쓰기라 마지막에 쓴 사람이 이긴다. 책임 소재를 남기는 게 이 줄의 목적이다. */}
+        {placeEditor && gathering.place_updated_at && !editingPlace && (
+          <p className="text-caption1 text-label-neutral flex items-center gap-1">
+            <MapPin size={11} />
+            {placeEditor.name}님이 {relativeDay(gathering.place_updated_at)} 수정
+          </p>
+        )}
+      </div>
+
+      {/* 참여하는 사람들 */}
+      <div className="flex flex-col gap-3">
+        <p className="text-caption1 font-semibold text-label-neutral">
+          참여하는 사람 {members.length}명
+        </p>
+        {members.length === 0 ? (
+          <p className="text-label1 text-label-neutral">아직 아무도 없어요</p>
+        ) : (
+          <div className="flex items-start gap-3 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {members.map((m) => (
+              <div key={m.id} className="flex flex-col items-center gap-1 w-12 shrink-0">
+                <Avatar profile={m} />
+                <span className="text-caption1 text-label-neutral truncate w-full text-center">
+                  {m.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 참여 버튼 */}
+      {status === "open" ? (
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={() => toggle(id)}
+          disabled={togglingId === id}
+          className={`w-full rounded-field py-3.5 text-body2 font-semibold flex items-center justify-center gap-2 transition disabled:opacity-60 ${
+            joined ? "bg-status-bg-active text-primary-normal" : "bg-primary-normal text-static-white"
+          }`}
+        >
+          {joined && <Check size={17} strokeWidth={3} />}
+          {joined ? (isLeader ? "내가 이끄는 모임" : "참여 중") : "참여하기"}
+        </motion.button>
+      ) : (
+        <div className="w-full rounded-field py-3.5 bg-bg-alternative text-label-neutral text-body2 font-semibold text-center">
+          {status === "done" ? "끝난 모임이에요" : "모집이 마감됐어요"}
+        </div>
+      )}
+
+      {/* 세부 내용 */}
+      {gathering.description && (
+        <div className="flex flex-col gap-2">
+          <p className="text-caption1 font-semibold text-label-neutral">세부 내용</p>
+          <p className="text-body1-reading text-label-normal whitespace-pre-wrap">
+            {gathering.description}
+          </p>
+        </div>
+      )}
+
+      {/* 후기 */}
+      <div className="flex flex-col gap-3">
+        <p className="text-caption1 font-semibold text-label-neutral">후기 {reviews.length}개</p>
+
+        {joined && (
+          <div className="flex flex-col gap-2">
+            <TextArea
+              label="" rows={2} placeholder="어땠는지 남겨주세요"
+              value={reviewDraft} onChange={(e) => setReviewDraft(e.target.value)}
+            />
+            <Button
+              type="button" onClick={submitReview}
+              loading={createReview.isPending} loadingText="남기는 중..."
+              disabled={!reviewDraft.trim()}
+            >
+              후기 남기기
+            </Button>
+          </div>
+        )}
+
+        {reviews.length === 0 ? (
+          <p className="text-label1 text-label-neutral">아직 후기가 없어요</p>
+        ) : (
+          reviews.map((r) => {
+            // user_id 가 null 이면 계정이 지워진 것이다. 후기는 기록이라 글은 남는다.
+            const author = r.user_id ? reviewProfiles.get(r.user_id) : null;
+            return (
+              <div key={r.id} className="rounded-card bg-bg-normal shadow-small p-4 flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  {author
+                    ? <Avatar profile={author} size={28} />
+                    : <div className="w-7 h-7 rounded-full bg-bg-alternative shrink-0" />}
+                  <span className="text-label2 font-semibold text-label-normal">
+                    {author?.name ?? "탈퇴한 사용자"}
+                  </span>
+                  <span className="text-caption1 text-label-neutral">
+                    {relativeDay(r.created_at)}
+                    {r.updated_at ? " · 수정됨" : ""}
+                  </span>
+                  {r.user_id && r.user_id === user?.id && (
+                    <button
+                      type="button"
+                      onClick={() => removeReview(r.id)}
+                      className="ml-auto text-caption1 text-label-neutral active:scale-95 transition"
+                    >
+                      삭제
+                    </button>
+                  )}
+                </div>
+                <p className="text-label1 text-label-normal whitespace-pre-wrap">{r.content}</p>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}

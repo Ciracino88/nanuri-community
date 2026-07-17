@@ -6,12 +6,15 @@ import GatePage from "../auth/GatePage";
 import MemberLoginPage from "../auth/MemberLoginPage";
 import HomePage from "../HomePage";
 import GatheringListPage from "../gathering/GatheringListPage";
+import GatheringDetailPage from "../gathering/GatheringDetailPage";
+import GatheringFormPage from "../gathering/GatheringFormPage";
 import EventSegmentsPage from "../admin/event/EventSegmentsPage";
 import EventBuilderPage from "../admin/event/EventBuilderPage";
 import EventTimelinePage from "../event/EventTimelinePage";
 import { useAuthStore } from "../../store/authStore";
 import { eventKeys } from "../../hooks/useEvents";
 import { gatheringKeys } from "../../hooks/useGatherings";
+import { reviewKeys, type GatheringReviewData } from "../../hooks/useGatheringReviews";
 import type { EventDetailData } from "../../hooks/useEvents";
 import type { EventRecord } from "../../types/event";
 import type { GatheringData } from "../../hooks/useGatherings";
@@ -82,26 +85,76 @@ const MOCK_EVENTS: EventRecord[] = [
 // 상대 시각이라 오늘 기준으로 만든다 — 고정 날짜면 시간이 지나 전부 "종료"로 굳는다.
 const inDays = (d: number) => new Date(Date.now() + d * 86400_000).toISOString();
 
+// 카테고리는 DB 테이블이다(멤버가 직접 만들 수 있다). 마이그레이션이 심는 기본 8개 중 일부.
+const CAT_STUDY = "cat-study";
+const CAT_CAFE = "cat-cafe";
+const CAT_MEAL = "cat-meal";
+
+// 챌린지(g-4)를 하나 섞어 둔다 — gathering_at 이 null 인 경로가 화면에서 실제로 밟힌다.
+// g-3 은 카테고리가 없다 — 썸네일도 카테고리도 없을 때 기본 아이콘으로 떨어지는 경로다.
 const MOCK_GATHERINGS: GatheringData = {
+  categories: [
+    { id: CAT_CAFE, emoji: "☕️", label: "카페" },
+    { id: CAT_MEAL, emoji: "🍽️", label: "식사" },
+    { id: CAT_STUDY, emoji: "📖", label: "스터디" },
+    // 아무 소모임도 안 달린 카테고리. 필터 칩에 뜨면 안 된다.
+    { id: "cat-volunteer", emoji: "🤝", label: "봉사" },
+  ],
   gatherings: [
-    { id: "g-1", title: "예배 끝나고 카페", gathering_at: inDays(1), place_name: "스타벅스 강남점",
-      description: "커피 마시면서 얘기해요", emoji: "☕", created_by: ME, closed_at: null },
-    { id: "g-2", title: "점심 같이 먹어요", gathering_at: inDays(3), place_name: null,
-      description: null, emoji: "🍽️", created_by: "other", closed_at: null },
-    { id: "g-3", title: "볼링 한 판", gathering_at: inDays(-2), place_name: "강남 볼링장",
-      description: null, emoji: "🎳", created_by: "other", closed_at: null },
+    { id: "g-4", kind: "challenge", title: "성경 통독반", gathering_at: null,
+      place_name: "본당 소예배실", place_updated_by: "u2", place_updated_at: inDays(-1),
+      description: "창세기부터 같이 읽어요", category_id: CAT_STUDY, thumbnail_url: null,
+      leader_id: "other", closed_at: null, ended_at: null },
+    { id: "g-1", kind: "oneday", title: "예배 끝나고 카페", gathering_at: inDays(1),
+      place_name: "스타벅스 강남점", place_updated_by: null, place_updated_at: null,
+      description: "커피 마시면서 얘기해요", category_id: CAT_CAFE, thumbnail_url: null,
+      leader_id: ME, closed_at: null, ended_at: null },
+    { id: "g-2", kind: "oneday", title: "점심 같이 먹어요", gathering_at: inDays(3),
+      place_name: null, place_updated_by: null, place_updated_at: null,
+      description: null, category_id: CAT_MEAL, thumbnail_url: null,
+      leader_id: "other", closed_at: null, ended_at: null },
+    { id: "g-3", kind: "oneday", title: "볼링 한 판", gathering_at: inDays(-2),
+      place_name: "강남 볼링장", place_updated_by: null, place_updated_at: null,
+      description: null, category_id: null, thumbnail_url: null,
+      leader_id: "other", closed_at: null, ended_at: null },
   ],
   participants: [
     { gathering_id: "g-1", user_id: ME },
     { gathering_id: "g-1", user_id: "u2" },
     { gathering_id: "g-1", user_id: "u3" },
     { gathering_id: "g-3", user_id: ME },
+    { gathering_id: "g-4", user_id: "other" },
+    { gathering_id: "g-4", user_id: "u2" },
   ],
   profiles: [
     { id: ME, name: "나", avatar_url: null },
+    { id: "other", name: "박믿음", avatar_url: null },
     { id: "u2", name: "김하늘", avatar_url: null },
     { id: "u3", name: "이바다", avatar_url: null },
   ],
+};
+
+// user_id: null 인 후기를 하나 섞는다 — 계정이 지워져도 글은 남는 경로(gathering_reviews 는
+// user_id 가 SET NULL 이다)가 화면에서 실제로 밟힌다.
+const MOCK_REVIEWS: GatheringReviewData = {
+  reviews: [
+    { id: "r-1", gathering_id: "g-4", user_id: "u2", content: "다들 꾸준히 나와서 좋아요. 창세기 끝났습니다!",
+      created_at: inDays(-1), updated_at: null },
+    { id: "r-2", gathering_id: "g-4", user_id: null, content: "덕분에 성경을 처음 끝까지 읽었어요.",
+      created_at: inDays(-9), updated_at: inDays(-8) },
+  ],
+  profiles: MOCK_GATHERINGS.profiles,
+};
+
+// 내가 쓴 후기(삭제 버튼이 뜬다) + 남이 쓴 후기(안 뜬다).
+const MOCK_MY_REVIEWS: GatheringReviewData = {
+  reviews: [
+    { id: "r-3", gathering_id: "g-1", user_id: ME, content: "케이크가 맛있었어요.",
+      created_at: inDays(-2), updated_at: null },
+    { id: "r-4", gathering_id: "g-1", user_id: "u3", content: "다음엔 좀 더 조용한 데로 가요.",
+      created_at: inDays(-3), updated_at: null },
+  ],
+  profiles: MOCK_GATHERINGS.profiles,
 };
 
 // 행사 상세(관리자·타임라인 공용). 타임라인의 "LIVE/현재 진행" 을 보려면 진행 중이어야 하므로
@@ -199,6 +252,44 @@ const SCREENS: Record<string, () => React.ReactElement> = {
       <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS], [eventKeys.list, MOCK_EVENTS]]}>
         <MemoryRouter initialEntries={["/gatherings"]}>
           <Phone><GatheringListPage /></Phone>
+        </MemoryRouter>
+      </Seed>
+    );
+  },
+  // 챌린지(g-4)로 띄운다 — 무기한 표기·장소 수정 이력·탈퇴한 사용자 후기가 한 화면에 다 나온다.
+  "gathering-detail": () => {
+    asLoggedIn();
+    return (
+      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS], [reviewKeys.of("g-4"), MOCK_REVIEWS]]}>
+        <MemoryRouter initialEntries={["/gatherings/g-4"]}>
+          <Routes>
+            <Route path="/gatherings/:id" element={<Phone><GatheringDetailPage /></Phone>} />
+          </Routes>
+        </MemoryRouter>
+      </Seed>
+    );
+  },
+  "gathering-new": () => {
+    asLoggedIn();
+    // 카테고리 칩이 DB 에서 오므로 목록 쿼리를 심어야 2단계가 빈 화면이 아니다.
+    return (
+      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS]]}>
+        <MemoryRouter initialEntries={["/gatherings/new"]}>
+          <Phone><GatheringFormPage /></Phone>
+        </MemoryRouter>
+      </Seed>
+    );
+  },
+  // 참가자 시점. 장소 수정 연필과 후기 입력은 참가자에게만 보이므로(RLS 와 같은 조건)
+  // 위 화면으로는 그 둘을 볼 수 없다. g-1 은 ME 가 리더이자 참가자다.
+  "gathering-detail-mine": () => {
+    asLoggedIn();
+    return (
+      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS], [reviewKeys.of("g-1"), MOCK_MY_REVIEWS]]}>
+        <MemoryRouter initialEntries={["/gatherings/g-1"]}>
+          <Routes>
+            <Route path="/gatherings/:id" element={<Phone><GatheringDetailPage /></Phone>} />
+          </Routes>
         </MemoryRouter>
       </Seed>
     );

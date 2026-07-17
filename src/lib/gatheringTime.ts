@@ -9,16 +9,24 @@ export const GATHERING_STATUS_LABEL: Record<GatheringStatus, string> = {
 };
 
 /**
- * 소모임 상태.
- * - 모이는 시각이 지났으면 done(종료) — 마감 여부와 무관하게 끝난 건 끝난 거다.
- * - 아직 안 지났는데 closed_at 이 있으면 closed(마감) — 시간은 남았지만 명단이 닫혔다.
- * - 그 외 open(모집 중).
+ * 소모임 상태. **성격(kind)마다 끝나는 방식이 다르다.**
+ *
+ * - 원데이는 시간이 끝낸다 — gathering_at 이 지나면 done.
+ * - 챌린지는 기한이 없어 시간이 영원히 안 끝낸다. 사람이 끝낸다 — ended_at.
+ * - closed(마감)는 양쪽 공통이고 "신청 그만 받기"일 뿐이다. 종료가 아니다.
+ *
+ * ended_at 을 kind 보다 먼저 보는 이유: 마지막 참가자가 나가면 DB 트리거가
+ * kind 와 무관하게 ended_at 을 찍는다(삭제하면 후기까지 증발하므로 종료로 남긴다).
+ * 그래서 원데이도 시각이 오기 전에 ended_at 으로 끝날 수 있다.
  */
 export function computeGatheringStatus(
-  gathering: Pick<GatheringRecord, "gathering_at" | "closed_at">,
+  gathering: Pick<GatheringRecord, "kind" | "gathering_at" | "closed_at" | "ended_at">,
   now: Date = new Date()
 ): GatheringStatus {
-  if (new Date(gathering.gathering_at) < now) return "done";
+  if (gathering.ended_at) return "done";
+  if (gathering.kind === "oneday" && gathering.gathering_at && new Date(gathering.gathering_at) < now) {
+    return "done";
+  }
   if (gathering.closed_at) return "closed";
   return "open";
 }
@@ -49,6 +57,18 @@ export function formatGatheringAt(iso: string, now: Date = new Date()): string {
   if (isSameDay(d, now)) return `오늘 ${clock}`;
   if (isSameDay(d, tomorrow)) return `내일 ${clock}`;
   return `${d.getMonth() + 1}월 ${d.getDate()}일 (${WEEKDAYS[d.getDay()]}) ${clock}`;
+}
+
+/**
+ * 카드·상세에 찍을 "언제". 챌린지는 모이는 시각이 없다 — 그게 챌린지의 정의다.
+ * gathering_at 이 null 인 경우를 여기서 한 번만 처리하고 화면은 이걸 부른다.
+ */
+export function formatGatheringWhen(
+  gathering: Pick<GatheringRecord, "kind" | "gathering_at">,
+  now: Date = new Date()
+): string {
+  if (gathering.kind === "challenge" || !gathering.gathering_at) return "무기한";
+  return formatGatheringAt(gathering.gathering_at, now);
 }
 
 /** datetime-local 입력값(로컬 시각)을 timestamptz 로 보낼 ISO 문자열로 */

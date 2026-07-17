@@ -9,7 +9,12 @@ interface Props {
   onClick?: () => void;
 }
 
-/** 공용 뒤로가기 버튼 — 36px 둥근 흰 원 + lucide ChevronLeft */
+/**
+ * 공용 뒤로가기 버튼 — 36px 둥근 흰 원 + lucide ChevronLeft.
+ *
+ * 테두리를 두르지 않는다 — 원티드는 면을 선이 아니라 그림자로 띄워 분리한다(docs/design.md).
+ * line-solid 는 흰 면 위 대비가 1.19 라 어차피 거의 안 보인다.
+ */
 export default function BackButton({ to, onClick }: Props) {
   const navigate = useNavigate();
   const handle = onClick ?? (() => (to ? navigate(to) : navigate(-1)));
@@ -17,13 +22,13 @@ export default function BackButton({ to, onClick }: Props) {
   return (
     <motion.button
       type="button"
-      className="flex items-center justify-center rounded-full shrink-0 bg-card border border-line shadow-card"
+      className="flex items-center justify-center rounded-full shrink-0 bg-bg-normal shadow-small"
       style={{ width: 36, height: 36 }}
       whileTap={{ scale: 0.88 }}
       onClick={handle}
       aria-label="뒤로"
     >
-      <ChevronLeft size={18} className="text-fg-strong" />
+      <ChevronLeft size={18} className="text-label-normal" />
     </motion.button>
   );
 }
