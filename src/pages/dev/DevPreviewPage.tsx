@@ -188,7 +188,8 @@ function NavPreview() {
       {NAV_ROUTES.map((route) => (
         <div key={route}>
           <p className="text-caption text-fg-muted mb-1">활성: {route}</p>
-          <div className="mx-auto w-full max-w-md border border-line rounded-card overflow-hidden">
+          {/* 캡슐은 떠 있는 조각이라 실제처럼 캔버스 위에 중앙 정렬해 띄운다. */}
+          <div className="mx-auto w-full max-w-md flex justify-center bg-bg-alternative rounded-card py-6">
             <MemoryRouter initialEntries={[route]}>
               <BottomNav />
             </MemoryRouter>

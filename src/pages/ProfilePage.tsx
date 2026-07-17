@@ -4,6 +4,7 @@ import { Image, CalendarDays, Star, Pencil, LogOut } from "lucide-react";
 import toast from "react-hot-toast";
 import { confirmDialog } from "../components/ConfirmDialog";
 import { useAuthStore } from "../store/authStore";
+import { PAGE_BOTTOM_PAD } from "../constants/layout";
 
 const ACCENT = "#74C7FF";
 const INTRO = "나누리 청년부와 함께하고 있어요 🌴";
@@ -27,7 +28,7 @@ export default function ProfilePage() {
     <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
       <div
         className="w-full max-w-md mx-auto flex flex-col items-center px-5 pt-10 gap-6"
-        style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+        style={{ paddingBottom: PAGE_BOTTOM_PAD }}
       >
 
         {/* 아바타 */}

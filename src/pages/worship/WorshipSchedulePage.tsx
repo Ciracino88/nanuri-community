@@ -9,6 +9,7 @@ import { useCalendar } from "../../hooks/useCalendar";
 import { useToggleAvailability } from "../../hooks/useToggleAvailability";
 import PositionSlot from "../../components/worship/PositionSlot";
 import { POSITIONS } from "../../constants/worship";
+import { PAGE_BOTTOM_PAD } from "../../constants/layout";
 
 const ACCENT = "#FF6B6B";
 const MONTH_NAMES = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
@@ -145,7 +146,7 @@ export default function WorshipSchedulePage() {
     <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
       <div
         className="w-full max-w-md mx-auto flex flex-col"
-        style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+        style={{ paddingBottom: PAGE_BOTTOM_PAD }}
       >
 
         {/* Hero */}

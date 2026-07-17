@@ -5,6 +5,7 @@ import { useEventList } from "../hooks/useEvents";
 import { computeEventStatus } from "../lib/eventStatus";
 import ActionRow from "../components/ui/ActionRow";
 import Button from "../components/ui/Button";
+import { PAGE_BOTTOM_PAD } from "../constants/layout";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function HomePage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="pb-6" style={{ paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}>
+      <div className="pb-6" style={{ paddingBottom: PAGE_BOTTOM_PAD }}>
 
         {/* 헤더 */}
         <div className="px-5 pt-6 pb-4 flex items-center justify-between">

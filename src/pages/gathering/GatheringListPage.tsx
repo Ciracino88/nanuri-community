@@ -8,7 +8,7 @@ import { useGatherings, type GatheringData } from "../../hooks/useGatherings";
 import { useToggleGatheringJoin } from "../../hooks/useToggleGatheringJoin";
 import { useEventList } from "../../hooks/useEvents";
 import { computeEventStatus } from "../../lib/eventStatus";
-import { PAGE_BOTTOM_PAD } from "../../constants/layout";
+import { PAGE_BOTTOM_PAD_WITH_FAB } from "../../constants/layout";
 import {
   computeGatheringStatus,
   formatGatheringWhen,
@@ -307,7 +307,7 @@ export default function GatheringListPage() {
     <div className="flex-1 flex flex-col relative">
       <div
         className="w-full max-w-md mx-auto px-4 pt-6 flex flex-col gap-4"
-        style={{ paddingBottom: PAGE_BOTTOM_PAD }}
+        style={{ paddingBottom: PAGE_BOTTOM_PAD_WITH_FAB }}
       >
         <h1 className="text-title3 font-bold text-label-normal">소모임</h1>
 
@@ -403,6 +403,10 @@ export default function GatheringListPage() {
           absolute 로 두면 목록이 길어질 때 같이 스크롤돼 사라진다.
           mt-auto: 목록이 짧을 때도(빈 상태) 버튼이 위로 딸려 올라오지 않고 아래에 붙는다.
 
+          bottom 을 캡슐 높이만큼 올린 이유: 떠 있는 탭바 캡슐이 중앙 하단에 뜨는데, 이 버튼은
+          우하단이라 좁은 폭에서 캡슐과 가로로 겹친다. 캡슐 위로 올려 포개짐을 피한다
+          (docs/design.md · PAGE_BOTTOM_PAD_WITH_FAB).
+
           ⚠ items-end 가 버튼을 띄우는 방식이다. 컨테이너가 height:0 이라 교차축 끝(아래 모서리)이
           곧 기준선이고, 거기에 버튼의 아래 모서리를 맞추면 버튼이 그 위로 넘쳐 그려진다.
           버튼에 transform 을 걸어 올리지 말 것 — whileTap 의 scale 도 transform 이라
@@ -410,7 +414,7 @@ export default function GatheringListPage() {
           transform 은 motion 몫으로 비워둔다. */}
       <div
         className="sticky z-50 mt-auto flex justify-end items-end px-5 pointer-events-none"
-        style={{ bottom: "1.5rem", height: 0 }}
+        style={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom))", height: 0 }}
       >
         <motion.button
           whileTap={{ scale: 0.96 }}

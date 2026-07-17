@@ -12,15 +12,24 @@
 > 앞서 있던 "라이트 리디자인 3단계"는 이 작업에 흡수되어 **폐기**됐습니다. 그때 쓰던
 > 카테고리 틴트(teal/pink/amber)·액센트 퍼플은 더 이상 없습니다.
 
-### ⚠ 지금 앱에 내비게이션이 없습니다
+### 하단 탭바 — 붙였습니다 (2026-07-17)
 
-`Layout`이 탭바를 렌더하지 않습니다. 새 탭바가 **떠 있는 글래스 캡슐**이라 옛 `sticky`
-탭바와 레이아웃이 달라, 옛것을 걷어내고 새것은 아직 안 붙인 상태입니다.
+`Layout`이 **떠 있는 글래스 캡슐** 탭바를 렌더합니다(`BottomNav.tsx`, 새 토큰으로 재작성).
+탭 셋(소모임·찬양팀·내정보)이고, 캡슐 위치(중앙·바닥 띄움)는 `Layout`이 잡고 캡슐 모양은
+`BottomNav`가 그립니다. 크리처 아이콘·활성=아이콘 색 하나 규칙은 그대로 뒀습니다.
 
-즉 **로그인하면 `/home`에 떨어지고 거기 빠른 메뉴 말고는 이동할 방법이 없습니다.**
-`BottomNav.tsx`는 남아 있지만 `DevPreviewPage`만 import 합니다 — 실제 앱에서는 죽은 코드입니다.
+탭바를 띄우는 화면은 `TAB_BAR_ROUTES`(`/home` · `/gatherings` · `/worship` · `/profile`)입니다.
+상세·개설·행사·관리자 같은 하위 화면은 `BackButton` 흐름이라 숨깁니다.
 
-이건 버그가 아니라 작업 중간 상태입니다. 탭바를 붙이면 풀립니다.
+> **`/home`에도 띄웁니다.** 착지점을 `/gatherings`로 옮기지 않은 건 `/home`이 아직
+> **비용 청구(`/member/bill`)로 가는 유일한 진입로**이기 때문입니다 — 소모임 화면은 행사만
+> 흡수했지 비용 청구는 안 가져왔습니다. 비용 청구가 소모임/내정보로 옮겨가면 그때 `/home`을
+> 걷어내고 탭바에서도 빼면 됩니다. 홈은 탭이 아니라 활성 표시는 없습니다.
+
+**하단 여백 주의.** 캡슐이 콘텐츠 위에 뜨므로 각 페이지가 `PAGE_BOTTOM_PAD`로 그만큼을
+비워야 마지막 항목이 안 가립니다. 소모임 목록은 FAB이 캡슐과 가로로 겹쳐 FAB을 캡슐 위로
+올리고 `PAGE_BOTTOM_PAD_WITH_FAB`(더 큰 값)을 씁니다. `/home`·`/worship`·`/profile`은
+`PAGE_BOTTOM_PAD`로 올렸습니다(그 셋은 옛 디자인 그대로라 패딩 값만 손댔습니다).
 
 ### 화면 진행
 
@@ -28,6 +37,7 @@
 | --- | --- |
 | 소모임 목록 · 상세 · 개설(3단계 페이지) · 카테고리 시트 | **완료** |
 | `ui/` 프리미티브 6종 + `BackButton` | **완료** |
+| 하단 탭바 (떠 있는 글래스 캡슐) | **완료** — 위 참고 |
 | 나머지 전부 | 대기 |
 
 ### 소모임 2단계 — DB 적용 완료 (2026-07-17)
@@ -101,7 +111,7 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 | `ProfilePage` · `components/worship/PositionSlot` | — | 각 5 |
 | `auth/MemberLoginPage` | 4 | — |
 | `event/EventInfoPage` | — | 3 |
-| `auth/GatePage` · `LoadingSpinner` · `BottomNav` · `BackButton` | 각 2 | — |
+| `auth/GatePage` · `LoadingSpinner` · `BackButton` | 각 2 | — |
 | `LoadingScreen` · `admin/event/EventDetailPage` · `main.tsx` | 각 1 | 각 1 |
 
 **두 종류가 섞여 있습니다.** 다크 잔재는 폐기된 다크 재디자인의 하드코딩 hex라 흰 배경에서
@@ -176,7 +186,7 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 | 행사 (타임라인) | 동작 | 참여자·관리자 라우트 모두 연결됨 |
 | 소모임 | **2단계 동작** | 개설·참여·후기·카테고리 생성까지 확인. 리더 위임·종료·후기 수정은 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
 | 찬양팀 일정 | 동작 | `/worship`, Realtime 반영 |
-| 하단 탭바 | **없음** | 위 참고. 글래스 캡슐로 재구현 예정 |
+| 하단 탭바 | **동작** | 떠 있는 글래스 캡슐. `Layout`이 `TAB_BAR_ROUTES`에서 렌더 |
 | 순서별 평가 | **폐기** | 아래 참고 |
 | 갤러리 | **폐기** | 준비 중 안내만 렌더하던 빈 껍데기라 삭제 |
 | 회계 리포트 | **폐기** | 아래 참고 |
@@ -207,10 +217,9 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 
 ## 미연결(고아) 코드
 
-- **`/home` · `/admin` 라우트** — 살아 있지만 탭바가 없어 UI 로 닿을 수 없습니다. `/home`은
-  로그인 착지점이라 그나마 보이고, `/admin`은 진입로가 없습니다. 홈은 소모임에 흡수될
-  예정이고(행사 카드는 이미 옮겼습니다) 관리자는 내정보에서 진입시킬 계획입니다.
-- **`BottomNav.tsx`** — `DevPreviewPage`만 씁니다.
+- **`/admin` 라우트** — 살아 있지만 진입로가 없습니다. 관리자는 내정보에서 진입시킬 계획입니다.
+  (`/home`은 이제 탭바가 떠서 닿을 수 있고, 자신도 탭바로 다른 탭에 갈 수 있습니다. 다만
+  홈은 소모임에 흡수될 예정이라 임시입니다 — 위 "하단 탭바" 참고.)
 - `event_participants` 테이블 — "내 일정에 추가"용으로 만들었으나 조회하는 코드가 없습니다.
 
 ## 알려진 정리 대상

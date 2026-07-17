@@ -14,6 +14,9 @@ const PROFILE: Tab = { to: "/profile", label: "내정보", kind: "profile" };
 
 const TABS: Tab[] = [GATHERINGS, WORSHIP, PROFILE];
 
+/** 떠 있는 글래스 캡슐 탭바(docs/design.md). 화면 하단에 붙지 않고 살짝 띄운다 —
+ *  위치(중앙 하단·바닥 띄움)는 Layout 이 잡고, 이 컴포넌트는 캡슐 자체만 그린다.
+ *  면은 테두리가 아니라 그림자로 띄워 분리한다(shadow-large + 반투명 유리). */
 export default function BottomNav() {
 
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
@@ -53,52 +56,48 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="sticky bottom-0 px-3 pt-2 bg-card/92 border-t border-line rounded-t-2xl overflow-hidden"
+      className="pointer-events-auto flex items-end gap-1 rounded-full bg-bg-normal/80 px-3 py-2 shadow-large"
       style={{
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        boxShadow: "0 -2px 16px rgb(23 23 28 / 0.05)",
-        paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))",
       }}
     >
-      <div className="flex items-end justify-around">
-        {TABS.map((tab) => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            className="flex flex-col items-center gap-0.5 relative"
-            style={{ minWidth: 56 }}
-          >
-            {({ isActive }) => {
-              // 활성 표시는 아이콘 색 하나로만 한다. 글로우 알약과 점을 얹으면
-              // 같은 사실을 세 번 말하게 되고, 토스처럼 조용한 탭바가 안 된다.
-              const color = isActive ? ACCENT : MUTED;
-              return (
-                <>
-                  <motion.div
-                    animate={isActive ? { scale: 1.08 } : { scale: 1 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 28 }}
-                  >
-                    <CreatureIcon
-                      kind={tab.kind}
-                      active={isActive}
-                      mousePos={mousePos}
-                      blink={blinkingTab === tab.to && blink}
-                      color={color}
-                    />
-                  </motion.div>
+      {TABS.map((tab) => (
+        <NavLink
+          key={tab.to}
+          to={tab.to}
+          className="flex flex-col items-center gap-0.5 relative px-3 py-1"
+          style={{ minWidth: 56 }}
+        >
+          {({ isActive }) => {
+            // 활성 표시는 아이콘 색 하나로만 한다. 글로우 알약과 점을 얹으면
+            // 같은 사실을 세 번 말하게 되고, 토스처럼 조용한 탭바가 안 된다.
+            const color = isActive ? ACCENT : MUTED;
+            return (
+              <>
+                <motion.div
+                  animate={isActive ? { scale: 1.08 } : { scale: 1 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                >
+                  <CreatureIcon
+                    kind={tab.kind}
+                    active={isActive}
+                    mousePos={mousePos}
+                    blink={blinkingTab === tab.to && blink}
+                    color={color}
+                  />
+                </motion.div>
 
-                  {/* 라벨은 활성이어도 회색. 색은 아이콘 몫이다. */}
-                  <span className="text-micro font-semibold" style={{ color: MUTED }}>
-                    {tab.label}
-                  </span>
-                </>
-              );
-            }}
-          </NavLink>
-        ))}
-      </div>
+                {/* 라벨은 활성이어도 회색. 색은 아이콘 몫이다. */}
+                <span className="text-caption1 font-semibold" style={{ color: MUTED }}>
+                  {tab.label}
+                </span>
+              </>
+            );
+          }}
+        </NavLink>
+      ))}
     </nav>
   );
 }
