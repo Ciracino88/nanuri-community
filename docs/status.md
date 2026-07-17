@@ -127,6 +127,7 @@ grep -rnE "#f0f2f8|#8892a0|#6b7785|#0f1117|#4a5568|#c0c8d4|#363d47|rgba\(255,\s*
 
 - **마이그레이션 공백** — 행사 외 테이블에 마이그레이션이 없습니다. `npx supabase db pull`로 메울 수 있습니다. ([data-model.md](data-model.md))
 - **Worker 인증 없음** — `/upload`, `/delete`가 무인증에 `Allow-Origin: *`입니다. URL만 알면 누구나 업로드·삭제할 수 있습니다.
+- **`worship_availability` RLS** — 로그인한 누구나 남의 참여 행을 수정할 수 있습니다. 다만 이 느슨함을 "교체" 기능이 쓰고 있어 그냥 지우면 깨집니다. ([data-model.md](data-model.md#-알려진-구멍-worship_availability))
 - **디자인 토큰 혼재** — 폐기된 다크 재디자인의 하드코딩 hex가 페이지에 남아 있습니다. 위 "라이트 전면 리디자인 3단계"가 이걸 걷어내는 작업입니다. ([conventions.md](conventions.md))
 - **`event_date`가 text** — 날짜 정렬·필터를 DB에 맡길 수 없고 파싱이 `parseStartDate()`에 의존합니다.
 - **회계 훅의 패칭 방식** — TanStack Query를 쓰는 다른 도메인과 달리 `useEffect` + `useState`이고 에러 처리가 없습니다.
