@@ -210,19 +210,19 @@ npx supabase db pull
 `finance_splits`, `finance_transactions` 가 있어 이름이 바뀐 뒤 코드가 안 따라간 것으로 보입니다.
 회계는 iOS 앱으로 이관 예정이라 웹에서 되살릴 계획이 없습니다.
 
-코드에서 쓰지 않지만 원격에 **살아있는 데이터가 있어 남긴** 테이블: `bible_words`(8172행),
-`event_items`(19행·계속 수정됨), `event_tasks`(12행), `finance_*`. 이 저장소가 안 쓸 뿐 다른
-시스템(회계는 iOS 앱, 나머지도 별도 행사 시스템으로 추정)이 관리하는 남의 데이터입니다.
+코드에서 쓰지 않고 원격에 남은 테이블은 이제 `finance_*`(회계, iOS 앱으로 이관 예정) 뿐입니다.
+이 저장소가 안 쓸 뿐 iOS 앱이 관리하는 남의 데이터라 **건드리지 마세요.**
 
 ⚠ **웹이 안 쓴다는 것만으로 drop 하지 마세요.** 대시보드 `pg_stat_user_tables`로 행 수·누적
-쓰기(`n_tup_ins/upd/del`)를 보고, 정말 비어 있고(행 0 + 누적 쓰기 0) 참조 FK 도 없는 것만
-지웁니다. 지금까지 그 기준으로 지운 것:
+쓰기(`n_tup_ins/upd/del`)를 보고, 비어 있거나 소유주가 폐기를 확인해 준 것만 지웁니다.
+2026-07-17~18 에 아래를 정리해, 정체불명으로 방치된 테이블은 이제 없습니다:
 
 | 마이그레이션 | 지운 테이블 | 근거 |
 | --- | --- | --- |
 | `20260717020000_drop_dead_tables.sql` | `segment_evaluations`·`event_participants` | 웹 전용, 폐기 확정 |
 | `20260717030000_drop_event_tables.sql` | `events`·`event_segments` | 행사 기능 제거, 9행은 테스트 데이터 |
 | `20260718000000_drop_empty_event_tables.sql` | `event_budget_items`·`event_registrations` | 행 0 + 누적 쓰기 0 + 참조 FK 없음 |
+| `20260718010000_drop_game_and_test_event_tables.sql` | `event_items`·`event_tasks`·`bible_words` | 오너 확인 — 테스트 데이터 + 폐기된 게임 기능 데이터 |
 
 모든 public 테이블에 RLS는 켜져 있습니다.
 
