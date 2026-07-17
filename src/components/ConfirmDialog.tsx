@@ -65,7 +65,7 @@ export function ConfirmHost() {
           onClick={() => close(false)}
         >
           <motion.div
-            className="w-full rounded-panel p-5 flex flex-col gap-4 bg-card shadow-lift"
+            className="w-full rounded-sheet p-5 flex flex-col gap-4 bg-bg-normal shadow-large"
             style={{ maxWidth: 320 }}
             initial={{ opacity: 0, scale: 0.9, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -74,20 +74,20 @@ export function ConfirmHost() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col gap-1.5">
-              <h2 className="text-emphasis font-bold text-fg-strong">{options.title}</h2>
-              {options.message && <p className="text-body leading-relaxed text-fg-muted">{options.message}</p>}
+              <h2 className="text-body1 font-bold text-label-normal">{options.title}</h2>
+              {options.message && <p className="text-label1 leading-relaxed text-label-neutral">{options.message}</p>}
             </div>
 
             <div className="flex gap-2.5">
               <motion.button
-                className="flex-1 py-3 rounded-full text-body font-semibold bg-card border border-line text-fg"
+                className="flex-1 py-3 rounded-field text-body2 font-semibold bg-bg-alternative text-label-neutral"
                 whileTap={{ scale: 0.96 }}
                 onClick={() => close(false)}
               >
                 {options.cancelLabel ?? "취소"}
               </motion.button>
               <motion.button
-                className={`flex-1 py-3 rounded-full text-body font-semibold text-white ${danger ? "bg-danger" : "bg-accent"}`}
+                className={`flex-1 py-3 rounded-field text-body2 font-semibold text-static-white ${danger ? "bg-status-negative" : "bg-primary-normal"}`}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => close(true)}
               >
