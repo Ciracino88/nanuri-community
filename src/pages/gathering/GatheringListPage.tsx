@@ -309,7 +309,9 @@ export default function GatheringListPage() {
         className="w-full max-w-md mx-auto px-4 pt-6 flex flex-col gap-4"
         style={{ paddingBottom: PAGE_BOTTOM_PAD_WITH_FAB }}
       >
-        <h1 className="text-title3 font-bold text-label-normal">소모임</h1>
+        {/* 화면 제목은 상단 바가 대신한다 — 여기 큰 "소모임" 라벨은 공간만 먹어 지웠다.
+            다만 문서 구조상 h1 은 남겨야 하니 화면에는 안 보이게 둔다(스크린리더용). */}
+        <h1 className="sr-only">소모임</h1>
 
         <UpcomingEventCard />
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import BottomNav from "../../components/BottomNav";
+import TopBar from "../../components/TopBar";
 import GatePage from "../auth/GatePage";
 import MemberLoginPage from "../auth/MemberLoginPage";
 import HomePage from "../HomePage";
@@ -210,6 +211,19 @@ function Phone({ children }: { children: React.ReactNode }) {
 
 const SCREENS: Record<string, () => React.ReactElement> = {
   nav: () => <NavPreview />,
+  // 상단 바. 실제 앱처럼 캔버스 위에 얹고, 밑에 흰 카드를 하나 둬 하이라인 분리를 확인한다.
+  topbar: () => (
+    <MemoryRouter initialEntries={["/gatherings"]}>
+      <div className="mx-auto w-full max-w-md min-h-dvh bg-bg-alternative flex flex-col">
+        <TopBar />
+        <div className="p-4 flex flex-col gap-3">
+          <div className="rounded-card bg-bg-normal shadow-small p-4 text-body1 text-label-neutral">
+            바 밑을 스치는 흰 카드
+          </div>
+        </div>
+      </div>
+    </MemoryRouter>
+  ),
   gate: () => {
     asLoggedOut();
     return (

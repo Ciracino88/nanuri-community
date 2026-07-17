@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "./BottomNav";
+import TopBar from "./TopBar";
 
 // 탭바를 띄우는 화면. 탭 셋(소모임·찬양팀·내정보)에 더해, 로그인 착지점이자 아직
 // 비용 청구·행사로 가는 진입 허브인 /home 에도 띄운다(홈은 탭이 아니라 활성 표시는 없다).
@@ -17,9 +18,13 @@ export default function Layout() {
 
   return (
     <div className="relative h-dvh mx-auto w-full max-w-md flex flex-col overflow-hidden">
+      {/* 상단 바는 탭 화면에서만. 자리를 차지하는 flex 행이라 안전영역 상단 여백을 스스로 떠안는다 —
+          그래서 이때 main 은 상단 패딩을 주지 않는다(주면 이중이 된다). 하위 화면은 반대로 main 이 진다. */}
+      {showTabBar && <TopBar />}
+
       <main
         className="flex-1 flex flex-col overflow-y-auto min-h-0"
-        style={{ paddingTop: "env(safe-area-inset-top)" }}
+        style={showTabBar ? undefined : { paddingTop: "env(safe-area-inset-top)" }}
       >
         <Outlet />
       </main>
