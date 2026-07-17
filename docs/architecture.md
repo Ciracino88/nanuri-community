@@ -88,6 +88,11 @@ supabase/migrations/     # 행사·소모임·프로필 권한만 존재
 
 ## 빌드·배포
 
-- 프론트엔드는 Vercel에 배포하며 `vercel.json`에 SPA rewrite가 있습니다.
-- Worker는 `cd worker && npx wrangler deploy`로 별도 배포합니다.
+- **프론트엔드는 Vercel 이고 `main` 에 Git 연동돼 있습니다 — `main` 에 push 하면 프로덕션이
+  자동 배포됩니다.** 프로덕션 도메인은 `nanuri.vercel.app`(별칭 `nanuri-git-main-…`도 같은 빌드).
+  즉 push 가 곧 배포라, 배포하려고 `vercel --prod` 를 따로 부를 필요가 없습니다(부르면 중복 배포).
+  `vercel.json` 에 SPA rewrite 가 있습니다. 상태 확인은 `npx vercel ls nanuri` / `npx vercel inspect <url>`.
+- **Worker 는 자동이 아닙니다 — `cd worker && npx wrangler deploy` 로 손으로 배포합니다.**
+  `worker/` 를 안 건드린 변경은 Worker 재배포가 필요 없습니다.
 - `npm run build`는 `tsc -b` 후 `vite build`라 **타입 에러가 있으면 빌드가 실패**합니다.
+  (Vercel 빌드도 같은 명령이라 타입 에러면 배포가 실패합니다.)
