@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence } from "motion/react";
-import { CalendarDays, Check, ImagePlus, Infinity as InfinityIcon, Plus, X } from "lucide-react";
+import { Check, ImagePlus, Plus, X } from "lucide-react";
 import toast from "react-hot-toast";
 import BackButton from "../../components/BackButton";
 import TextField from "../../components/ui/TextField";
@@ -22,26 +22,28 @@ import CategoryFormSheet from "./CategoryFormSheet";
 //   3. 자세히 — 일시·장소·설명·사진. 전부 선택이라 마지막이다
 const STEPS = ["성격", "무엇을", "자세히"] as const;
 
+// 아이콘은 3D 렌더 PNG(투명 배경) 다. public/icons-3d/ 에 있고 코드에선 public 을 뺀 절대경로로 부른다.
+//   원데이=달력(정한 하루), 챌린지=나침반(끝을 안 정하고 계속 나아가는 여정)
 const KIND_OPTIONS: {
   key: GatheringKind;
   label: string;
   hint: string;
   detail: string;
-  icon: typeof CalendarDays;
+  img: string;
 }[] = [
   {
     key: "oneday",
     label: "원데이",
     hint: "한 번 모이고 끝나요",
     detail: "예배 끝나고 카페, 점심 같이 먹기처럼 날짜와 시각을 정해 한 번 모이는 모임이에요. 그 시각이 지나면 자동으로 끝납니다.",
-    icon: CalendarDays,
+    img: "/icons-3d/gathering-oneday.png",
   },
   {
     key: "challenge",
     label: "챌린지",
     hint: "기한 없이 계속해요",
     detail: "성경 통독반, 저녁 마라톤처럼 계속 이어가는 모임이에요. 끝나는 날을 정하지 않고, 리더가 종료할 때까지 계속됩니다.",
-    icon: InfinityIcon,
+    img: "/icons-3d/gathering-challenge.png",
   },
 ];
 
@@ -161,38 +163,45 @@ export default function GatheringFormPage() {
               </p>
             </div>
 
+            {/* 레퍼런스 배치: 꽉 찬 컬러 카드 — 왼쪽 헤드라인·서브텍스트, 오른쪽 큰 3D 아이콘.
+                긴 detail 은 이 히어로 배치에 안 맞아 카드 밖(선택 시 안내)으로 뺀다. */}
             <div className="flex flex-col gap-3">
               {KIND_OPTIONS.map((o) => {
                 const active = kind === o.key;
-                const Icon = o.icon;
                 return (
                   <button
                     key={o.key} type="button"
                     onClick={() => setKind(o.key)}
-                    className={`w-full text-left rounded-card p-4 flex gap-3 transition active:scale-[0.99] ${
-                      active
-                        ? "bg-status-bg-active ring-2 ring-primary-normal"
-                        : "bg-bg-normal shadow-small"
+                    className={`w-full text-left rounded-sheet px-5 py-6 flex items-center gap-3 transition active:scale-[0.99] ${
+                      active ? "bg-primary-normal shadow-small" : "bg-bg-normal shadow-small"
                     }`}
                   >
-                    <div
-                      className={`w-11 h-11 rounded-field flex items-center justify-center shrink-0 ${
-                        active ? "bg-primary-normal text-static-white" : "bg-bg-alternative text-label-neutral"
-                      }`}
-                    >
-                      <Icon size={22} strokeWidth={2.25} />
-                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-body1 font-semibold ${active ? "text-primary-normal" : "text-label-normal"}`}>
+                      <p className={`text-title3 font-bold ${active ? "text-static-white" : "text-label-normal"}`}>
                         {o.label}
                       </p>
-                      <p className="text-label2 font-medium text-label-neutral">{o.hint}</p>
-                      <p className="text-label2 text-label-neutral mt-1.5">{o.detail}</p>
+                      <p className={`text-body1 font-medium mt-1 ${active ? "text-static-white/90" : "text-label-neutral"}`}>
+                        {o.hint}
+                      </p>
                     </div>
+                    {/* 3D 아이콘은 자체 색을 가진 이미지라 상태에 따라 색을 바꾸지 않는다 — 선택은 카드 채움색으로 표시한다 */}
+                    <img
+                      src={o.img}
+                      alt=""
+                      aria-hidden
+                      className="w-28 h-28 shrink-0 object-contain drop-shadow-md"
+                    />
                   </button>
                 );
               })}
             </div>
+
+            {/* 고른 성격의 자세한 설명 — 카드 아래에서 바뀐다 */}
+            {kind && (
+              <p className="text-label1 text-label-neutral px-1">
+                {KIND_OPTIONS.find((o) => o.key === kind)?.detail}
+              </p>
+            )}
           </div>
         )}
 
