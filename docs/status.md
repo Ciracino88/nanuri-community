@@ -182,7 +182,7 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 | --- | --- | --- |
 | 인증 (멤버/게스트/관리자) | 동작 | `authStore` + `ProtectedRoute` |
 | 영수증 비용 청구 | 동작 | `/member/bill` → `BillFormPage` |
-| 행사 (타임라인) | **폐기** | 아래 참고 — 코드 전부 제거, 테이블은 drop 대기 |
+| 행사 (타임라인) | **폐기** | 아래 참고 — 코드·테이블 모두 제거 완료 |
 | 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제·좋아요)·카테고리 생성까지 확인. 리더 위임·종료는 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
 | 찬양팀 일정 | 동작 | `/worship`, Realtime 반영 |
 | 하단 탭바 | **동작** | 떠 있는 글래스 캡슐. `Layout`이 `TAB_BAR_ROUTES`에서 렌더 |
@@ -224,9 +224,9 @@ DB 에서 지웠습니다.**
 `types/event`, `lib/eventStatus`·`lib/eventTime`, 라우트, 소모임 상단 카드, 홈의 행사 히어로·
 일정 보기, 관리자의 행사 관리 탭.
 
-**`events`·`event_segments` 테이블은 아직 원격에 있습니다.** 코드가 사라졌으니 이제 지워도
-안전하지만, Docker/psql 이 없어 행 수(과거 행사 기록)를 확인할 수 없어 대시보드 점검 뒤로
-미뤘습니다([data-model.md](data-model.md)의 그 외 테이블 경고 참고).
+**`events`·`event_segments` 테이블도 지웠습니다** — 2026-07-17
+[`20260717030000_drop_event_tables.sql`](../supabase/migrations/20260717030000_drop_event_tables.sql).
+대시보드에서 확인한 원격 9건은 전부 테스트 데이터라 백업 없이 버렸습니다.
 
 ## 미연결(고아) 코드
 

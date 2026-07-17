@@ -11,12 +11,12 @@ npx supabase db pull
 
 ## 테이블
 
-### 행사 (마이그레이션 있음 — 근거: `20260701000000_events_v2.sql`)
+### ~~행사~~ 삭제됨 (마이그레이션: `20260701000000_events_v2.sql` 생성 → `20260717030000_drop_event_tables.sql` 삭제)
 
-> ⚠️ **행사 기능(코드)은 제거됐습니다**([status.md](status.md#행사)). `events`·`event_segments`
-> 테이블은 아직 원격에 있지만 읽고 쓰는 코드가 없습니다. 지워도 안전하나, Docker/psql 이
-> 없어 행 수(과거 행사 기록)를 확인 못 해 대시보드 점검 뒤로 drop 을 미뤘습니다. 아래
-> 스키마는 그때까지의 기록용입니다.
+> **행사 기능은 코드·테이블 모두 제거됐습니다**([status.md](status.md#행사)). 코드는 8a5c1ac 에서,
+> `events`·`event_segments` 테이블은 2026-07-17
+> [`20260717030000_drop_event_tables.sql`](../supabase/migrations/20260717030000_drop_event_tables.sql)로
+> 지웠습니다(원격의 9건은 전부 테스트 데이터였습니다). 아래 스키마는 기록용입니다.
 
 **`events`**
 
@@ -322,17 +322,16 @@ exists (select 1 from public.user_profiles p where p.id = auth.uid())
 
 ## Realtime
 
-`supabase_realtime` 퍼블리케이션에 `segment_evaluations`, `event_segments`, `event_participants`, `gatherings`, `gathering_participants`, `gathering_reviews`가 등록돼 있습니다(뒤의 셋은 `20260717000000_gatherings_v2.sql`에서 재등록 — `drop table cascade`로 지우면 퍼블리케이션에서도 빠지므로 다시 넣어야 합니다).
+`supabase_realtime` 퍼블리케이션에 `gatherings`, `gathering_participants`, `gathering_categories`, `gathering_reviews`(`20260717000000_gatherings_v2.sql`에서 등록), `gathering_review_likes`(`20260717010000_gathering_review_likes.sql`), `worship_availability`가 등록돼 있습니다. `drop table cascade`로 지우면 퍼블리케이션에서도 빠지므로, 재생성하는 테이블은 다시 넣어야 합니다.
 
-구독하는 곳은 세 군데입니다.
+구독하는 곳은 세 군데이고, 모두 이벤트를 받으면 해당 쿼리 캐시를 무효화합니다.
 
 - [`useGatherings.ts`](../src/hooks/useGatherings.ts) — 채널 `gatherings_feed`, 소모임 개설·참여 현황
+- [`useGatheringReviews.ts`](../src/hooks/useGatheringReviews.ts) — 채널 `gathering_reviews_${id}`, 후기와 좋아요(좋아요는 `gathering_id` 필터가 없어 무필터로 구독)
 - [`useWorshipSchedule.ts`](../src/hooks/useWorshipSchedule.ts) — 채널 `worship_availability_${year}_${month}`, 찬양팀 참여 현황
 
-두 훅 모두 이벤트를 받으면 해당 쿼리 캐시를 무효화합니다.
-
-행사 결과(`event_results_${id}`) 구독은 평가 기능과 함께 사라졌습니다 — 퍼블리케이션에는
-`segment_evaluations` 등이 그대로 등록돼 있지만 구독하는 코드가 없습니다.
+행사·평가 관련 테이블(`events`·`event_segments`·`segment_evaluations`·`event_participants`)은
+모두 삭제돼 퍼블리케이션에서도 빠졌습니다.
 
 ## 마이그레이션 이력
 
