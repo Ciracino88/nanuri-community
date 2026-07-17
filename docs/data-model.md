@@ -44,32 +44,16 @@ npx supabase db pull
 
 인덱스: `(event_id, sort)`
 
-**`segment_evaluations`** — 순서별 익명 평가
+**~~`segment_evaluations`~~ 삭제됨** — 순서별 익명 평가. 기능이 폐기돼([status.md](status.md)) 읽고 쓰는
+코드가 없어졌고, 2026-07-17 [`20260717020000_drop_dead_tables.sql`](../supabase/migrations/20260717020000_drop_dead_tables.sql)로
+테이블·정책·Realtime 퍼블리케이션을 정리했습니다.
 
-| 컬럼 | 타입 | 비고 |
-| --- | --- | --- |
-| `id` | uuid PK | |
-| `segment_id` | uuid → `event_segments` | CASCADE |
-| `user_id` | uuid → `auth.users` | ON DELETE SET NULL |
-| `nickname` | text | 익명 표시용 |
-| `mood` | smallint | 1 불만족 / 2 평범 / 3 만족 |
-| `comment` | text | |
-
-`unique (segment_id, user_id)` — 한 사람이 한 순서에 하나의 평가만.
-
-⚠ **평가 기능은 폐기됐습니다**([status.md](status.md)). 이 테이블을 읽고 쓰는 코드가 이제 없습니다 —
-테이블·정책·Realtime 퍼블리케이션만 DB 에 남아 있습니다. 되살릴 계획이 없다면 마이그레이션으로
-정리하는 게 맞습니다.
-
-**`event_participants`** — "내 일정에 추가"
-
-`unique (event_id, user_id)`. **현재 코드 어디에서도 조회하지 않습니다** — 테이블만 남아 있습니다.
+**~~`event_participants`~~ 삭제됨** — "내 일정에 추가"용으로 만들었으나 조회하는 코드가 한 번도
+없어 같은 마이그레이션으로 지웠습니다.
 
 ### 소모임 (마이그레이션 있음 — 근거: `20260717000000_gatherings_v2.sql`)
 
-> ⚠️ **이 스키마는 아직 원격에 적용되지 않았습니다.** 파일만 저장소에 있습니다. 원격 DB 에는
-> 아직 `20260716020000_gatherings.sql`의 1단계 스키마가 떠 있습니다. `db push` 하기 전까지
-> 아래 서술은 **코드가 향하는 목표**지 현재 원격의 사실이 아닙니다.
+> 이 스키마는 원격에 적용돼 있습니다(`db push` 완료). 아래 서술이 현재 원격의 사실입니다.
 
 **`gatherings`**
 
@@ -221,7 +205,13 @@ npx supabase db pull
 `finance_splits`, `finance_transactions` 가 있어 이름이 바뀐 뒤 코드가 안 따라간 것으로 보입니다.
 회계는 iOS 앱으로 이관 예정이라 웹에서 되살릴 계획이 없습니다.
 
-코드에서 쓰지 않는 테이블도 남아 있습니다: `bible_words`, `event_budget_items`, `event_items`, `event_registrations`, `event_tasks`, `finance_*`, `event_participants`.
+코드에서 쓰지 않는 테이블도 남아 있습니다: `bible_words`, `event_budget_items`, `event_items`, `event_registrations`, `event_tasks`, `finance_*`.
+
+⚠ **이 목록을 통째로 지우면 안 됩니다.** `finance_*` 는 iOS 회계 앱으로 이관 예정인 남의
+데이터고, 나머지는 이 저장소 이전부터 원격에 있던 소유주·데이터 불명 테이블입니다. 웹이 안
+쓴다는 것만으로 drop 하지 말고, 대시보드에서 행 수·용도를 확인한 뒤 개별 판단하세요.
+(웹 전용이었고 폐기가 확정됐던 `segment_evaluations`·`event_participants` 둘만
+[`20260717020000_drop_dead_tables.sql`](../supabase/migrations/20260717020000_drop_dead_tables.sql)로 2026-07-17 정리했습니다.)
 
 모든 public 테이블에 RLS는 켜져 있습니다.
 

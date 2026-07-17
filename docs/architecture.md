@@ -55,7 +55,7 @@ File 선택 → browser-image-compression (1MB / 1200px 이하)
 
 Realtime 구독은 두 곳입니다: 소모임(`gatherings` + `gathering_participants`)과 찬양팀 참여 현황(`worship_availability`). 둘 다 이벤트 수신 시 Query 캐시를 무효화하는 방식입니다.
 
-행사 결과(`segment_evaluations`) 구독은 평가 기능과 함께 폐기됐습니다 — 테이블과 퍼블리케이션은 DB 에 남아 있습니다([status.md](status.md)).
+행사 결과(`segment_evaluations`) 구독은 평가 기능과 함께 폐기됐고, 테이블·퍼블리케이션도 2026-07-17 마이그레이션으로 DB 에서 지웠습니다([status.md](status.md)).
 
 `staleTime`은 훅마다 다릅니다. `useGatherings`는 5분이고 `useEventList`는 지정하지 않아 기본값 0입니다 — **마운트할 때마다 재조회한다는 뜻**이라, 캐시를 미리 채워 쓰는 개발 미리보기에서 문제가 됩니다([status.md](status.md#화면-확인하는-법)).
 

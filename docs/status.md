@@ -208,8 +208,9 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 **사실이 아니었습니다.**
 
 훅·타입·`lib/mood`·`MoodRating`·`results_public` 플래그를 전부 정리했습니다.
-**`segment_evaluations` 테이블과 Realtime 퍼블리케이션은 DB 에 그대로 있습니다** —
-되살릴 일이 없다면 마이그레이션으로 정리하는 게 맞습니다.
+**`segment_evaluations` 테이블과 Realtime 퍼블리케이션은 2026-07-17
+[`20260717020000_drop_dead_tables.sql`](../supabase/migrations/20260717020000_drop_dead_tables.sql)로
+DB 에서 지웠습니다.**
 
 ### 회계 리포트
 
@@ -223,7 +224,8 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 - **`/admin` 라우트** — 살아 있지만 진입로가 없습니다. 관리자는 내정보에서 진입시킬 계획입니다.
   (`/home`은 이제 탭바가 떠서 닿을 수 있고, 자신도 탭바로 다른 탭에 갈 수 있습니다. 다만
   홈은 소모임에 흡수될 예정이라 임시입니다 — 위 "하단 탭바" 참고.)
-- `event_participants` 테이블 — "내 일정에 추가"용으로 만들었으나 조회하는 코드가 없습니다.
+- ~~`event_participants` 테이블~~ — "내 일정에 추가"용으로 만들었으나 조회 코드가 없어
+  2026-07-17 [`20260717020000_drop_dead_tables.sql`](../supabase/migrations/20260717020000_drop_dead_tables.sql)로 지웠습니다.
 
 ## 알려진 정리 대상
 
