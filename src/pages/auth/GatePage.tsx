@@ -11,7 +11,7 @@ export default function GatePage() {
   const { user, isAnonymous, isLoading } = useAuthStore();
 
   if (isLoading) return <LoadingScreen />;
-  if (user && !isAnonymous) return <Navigate to="/home" replace />;
+  if (user && !isAnonymous) return <Navigate to="/gatherings" replace />;
 
   return (
     <div className="min-h-dvh flex flex-col overflow-hidden">

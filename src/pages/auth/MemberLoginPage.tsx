@@ -30,12 +30,12 @@ export default function MemberLoginPage() {
   const { user, isAnonymous, isLoading } = useAuthStore();
 
   if (isLoading) return <LoadingScreen />;
-  if (user && !isAnonymous) return <Navigate to="/home" replace />;
+  if (user && !isAnonymous) return <Navigate to="/gatherings" replace />;
 
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/home` },
+      options: { redirectTo: `${window.location.origin}/gatherings` },
     });
   };
 

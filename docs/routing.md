@@ -17,7 +17,7 @@
 
 | 경로 | 페이지 | 설명 |
 | --- | --- | --- |
-| `/home` | `HomePage` | 홈 |
+| `/home` | `HomePage` | 비용 청구 허브(흡수 예정). **로그인 착지점은 아님** — 착지는 `/gatherings` |
 | `/member/bill` | `BillFormPage` | 영수증 비용 청구 |
 | `/gatherings` | `GatheringListPage` | 소모임(번개) 목록·개설 |
 | `/profile` | `ProfilePage` | 내 정보 |
@@ -46,7 +46,7 @@
 1. `isLoading` → `LoadingScreen` (세션 복원 중 깜빡임 방지)
 2. `!user` → `/`
 3. `memberOnly && isAnonymous` → `/` (게스트 차단)
-4. `adminOnly && role !== "admin"` → `/home`
+4. `adminOnly && role !== "admin"` → `/gatherings`
 5. `!setupPage && !adminOnly && memberOnly && 프로필 이름 없음` → `/member/setup`
 
 4번과 5번의 상호작용에 주의하세요. `adminOnly` 라우트는 프로필 완성 검사를 건너뛰므로, 관리자는 이름 없이도 관리자 페이지에 들어갈 수 있습니다.
@@ -57,15 +57,14 @@
 
 Supabase 익명 로그인을 쓰며 `user.is_anonymous`로 구분합니다. 현재 라우터에 게스트가 들어갈 수 있는 보호 라우트는 없습니다 — 모든 `Layout` 하위가 `memberOnly`입니다. 게스트용 청구 폼(`/guest/form`)은 과거에 있었으나 지금은 없습니다.
 
-## ⚠ 하단 탭이 지금 없습니다
+## 하단 탭바와 착지점
 
-`Layout`이 탭바를 렌더하지 않습니다. 새 탭바가 **떠 있는 글래스 캡슐**이라 옛 `sticky` 탭바와
-레이아웃이 달라, 옛것을 걷어내고 새것은 아직 안 붙인 상태입니다([status.md](status.md)).
+`Layout`이 **떠 있는 글래스 캡슐** 탭바를 `TAB_BAR_ROUTES`에서 렌더합니다([status.md](status.md)).
+탭은 셋입니다: **소모임 · 찬양팀 · 내정보**.
 
-즉 **로그인하면 `/home`에 떨어지고 거기 빠른 메뉴 말고는 이동할 방법이 없습니다.**
-[BottomNav.tsx](../src/components/BottomNav.tsx)는 남아 있지만 `DevPreviewPage`만 import 합니다.
-
-붙일 때 탭은 셋입니다: **소모임 · 찬양팀 · 내정보**.
+**로그인 착지점은 `/gatherings`입니다.** `/`(GatePage)·로그인 페이지·OAuth 콜백 모두 로그인
+상태면 `/gatherings`로 보냅니다(옛날엔 `/home`이었습니다). `/home`은 비용 청구 허브로 남아
+있지만 착지점이 아니고, 탭바에도 없습니다.
 
 - 홈은 소모임에 흡수될 예정입니다. `/home`·`HomePage`는 비용 청구 허브로 아직 살아 있고,
   흡수가 끝나면 지우면서 리다이렉트를 `/gatherings`로 돌립니다.
