@@ -16,7 +16,6 @@
 | `PageContainer` | 페이지 래퍼 |
 | `LoadingScreen` / `LoadingSpinner` | 전체 화면 / 인라인 로딩. `LoadingScreen`은 `LoadingSpinner`를 감싸기만 합니다 — 스피너를 또 만들지 마세요 |
 | `ConfirmDialog` | `confirmDialog()` 명령형 호출로 확인 모달 |
-| `EventInfoView` | 행사 정보 표시. 관리자 상세와 참여자 정보 페이지가 공유 |
 | `worship/PositionSlot` | 찬양팀 포지션 슬롯 |
 
 ### `ui/` 프리미티브
@@ -45,7 +44,6 @@
 
 | 훅 | 용도 |
 | --- | --- |
-| `useEvents` | 행사 전반. 쿼리 키는 `eventKeys` 객체에 모음 |
 | `useGatherings` / `useCreateGathering` | 소모임 목록 + Realtime, 개설. 쿼리 키는 `gatheringKeys` |
 | `useCreateCategory` | 소모임 카테고리 생성 (멤버가 직접 만듭니다) |
 | `useToggleGatheringJoin` | 소모임 참여 토글 |
@@ -64,8 +62,6 @@
 | `lib/supabaseList.ts` | `fetchList<T>(table, { orderBy, ascending, filter })` 범용 조회 |
 | `lib/uploadReceipt.ts` | 압축 + Worker 업로드 → URL |
 | `lib/deleteImage.ts` | Worker 경유 R2 삭제 |
-| `lib/eventTime.ts` | `formatClock`, `parseStartDate`, `totalDuration`, `buildTimeline` |
-| `lib/eventStatus.ts` | `computeEventStatus` → `upcoming` / `live` / `done`, `EVENT_STATUS_LABEL` |
 | `lib/gatheringTime.ts` | `computeGatheringStatus`, **`formatGatheringWhen`**, `formatGatheringAt`, `defaultGatheringAt`, `localInputToISO` |
 | `lib/generateNickname.ts` | 게스트 랜덤 닉네임 (형용사+동물+이모지) |
 
@@ -85,19 +81,6 @@
 
 `computeGatheringStatus`도 같은 이유로 **레코드 전체**를 받습니다 — 원데이는 `gathering_at`이,
 챌린지는 `ended_at`이 종료를 정합니다([data-model.md](data-model.md)).
-
-## 행사 시간 계산
-
-세그먼트는 절대 시각이 아니라 **소요 시간(분)** 으로 저장됩니다. 시작 시각은 `buildTimeline()`이
-`start_time`부터 앞 순서들의 길이를 누적해 계산하고, 각 순서에 `start`/`end`/`status`를 붙여
-돌려줍니다. 순서를 재배치하거나 길이를 바꾸면 뒤 순서 시각이 전부 자동으로 따라옵니다.
-
-`start_time`이나 파싱 가능한 날짜가 없으면 시각은 `null`이고 상태는 `upcoming`으로 떨어집니다.
-시간 관련 표시가 필요하면 페이지에서 직접 계산하지 말고 이 함수들을 쓰세요.
-
-`computeEventStatus(eventDate, startTime, totalDurationMin)`는 **이벤트 객체가 아니라 인자 셋**을
-받습니다. 세그먼트를 안 불러오는 화면은 소요시간에 `0`을 넘깁니다 — 종료 판정이 하루 단위로
-거칠어질 뿐 "다가오는 행사 하나"를 고르는 데는 충분합니다.
 
 ## 코드 규칙
 

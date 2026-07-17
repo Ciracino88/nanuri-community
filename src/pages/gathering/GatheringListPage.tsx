@@ -6,8 +6,6 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import { useAuthStore } from "../../store/authStore";
 import { useGatherings, type GatheringData } from "../../hooks/useGatherings";
 import { useToggleGatheringJoin } from "../../hooks/useToggleGatheringJoin";
-import { useEventList } from "../../hooks/useEvents";
-import { computeEventStatus } from "../../lib/eventStatus";
 import { PAGE_BOTTOM_PAD_WITH_FAB } from "../../constants/layout";
 import {
   computeGatheringStatus,
@@ -71,40 +69,6 @@ function AvatarStack({ profiles }: { profiles: ParticipantProfile[] }) {
         {rest > 0 ? `+${rest} · ` : ""}{profiles.length}명
       </span>
     </div>
-  );
-}
-
-/** 다가오는 행사. 행사는 탭에서 빠져 이 화면이 유일한 진입로다(docs/design.md). */
-function UpcomingEventCard() {
-  const navigate = useNavigate();
-  const { data: events } = useEventList();
-
-  // 소요시간 0: 이 화면은 세그먼트를 안 불러온다. 종료 판정이 하루 단위로만 거칠어질 뿐,
-  // "다가오는 행사 하나"를 고르는 데는 충분하다(홈이 쓰던 방식 그대로).
-  const upcoming = (events ?? []).find(
-    (e) => computeEventStatus(e.event_date, e.start_time, 0) !== "done"
-  );
-  if (!upcoming) return null;
-
-  return (
-    <button
-      onClick={() => navigate(`/event/${upcoming.id}`)}
-      className="w-full text-left rounded-card bg-bg-normal shadow-small p-4 flex items-center gap-3 active:scale-[0.99] transition"
-    >
-      <div className="w-11 h-11 rounded-field bg-status-bg-active flex items-center justify-center shrink-0">
-        {upcoming.emoji
-          ? <span style={{ fontSize: 22 }}>{upcoming.emoji}</span>
-          : <span className="text-primary-normal text-label1 font-bold">행사</span>}
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <p className="text-caption1 font-medium text-label-neutral">다가오는 행사</p>
-        <p className="text-body1 font-semibold text-label-normal truncate">{upcoming.title}</p>
-        <p className="text-label2 text-label-neutral truncate">{upcoming.event_date}</p>
-      </div>
-
-      <ChevronRight size={18} className="text-label-assistive shrink-0" />
-    </button>
   );
 }
 
@@ -312,8 +276,6 @@ export default function GatheringListPage() {
         {/* 화면 제목은 상단 바가 대신한다 — 여기 큰 "소모임" 라벨은 공간만 먹어 지웠다.
             다만 문서 구조상 h1 은 남겨야 하니 화면에는 안 보이게 둔다(스크린리더용). */}
         <h1 className="sr-only">소모임</h1>
-
-        <UpcomingEventCard />
 
         {/* 상태 축 */}
         <div className="flex items-center gap-2">

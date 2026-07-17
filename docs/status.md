@@ -101,21 +101,18 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 
 남은 화면을 잔재가 많은 순으로. 숫자는 아래 두 패턴의 매치 수라 대략의 규모로만 보세요.
 
+행사 페이지들이 잔재의 절반이었는데 [행사 기능 제거](#행사)로 통째로 사라졌습니다. 남은 건
+아래뿐입니다(`admin/AdminPage`·`HomePage`는 행사 제거로 더 줄었으니 숫자는 상한으로만).
+
 | 파일 | 옛 토큰 | 다크 잔재 |
 | --- | --- | --- |
-| `admin/event/EventBuilderPage` | 32 | — |
-| `event/EventTimelinePage` | 27 | — |
-| `admin/event/EventSegmentsPage` | 24 | — |
 | `bill/BillFormPage` | — | 22 |
-| `admin/AdminPage` | — | 16 |
-| `event/EventListPage` | — | 13 |
-| `components/EventInfoView` | — | 11 |
-| `HomePage` | 11 | — |
+| `admin/AdminPage` | — | ≤16 |
+| `HomePage` | ≤11 | — |
 | `ConfirmDialog` | 5 | — |
 | `auth/MemberLoginPage` | 4 | — |
-| `event/EventInfoPage` | — | 3 |
 | `auth/GatePage` · `LoadingSpinner` · `BackButton` | 각 2 | — |
-| `LoadingScreen` · `admin/event/EventDetailPage` · `main.tsx` | 각 1 | 각 1 |
+| `LoadingScreen` · `main.tsx` | 각 1 | 각 1 |
 
 **두 종류가 섞여 있습니다.** 다크 잔재는 폐기된 다크 재디자인의 하드코딩 hex라 흰 배경에서
 안 보이거나 뒤집혀 보입니다. 옛 토큰은 그 다음 라이트 리디자인의 것이라 보이긴 합니다.
@@ -159,14 +156,13 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 목 데이터를 추가할 때 주의할 점 셋:
 
 - **`Seed`가 `staleTime: Infinity`를 같이 박는 게 핵심입니다.** 캐시에 심기만 하면, 훅에
-  `staleTime`이 없는 쿼리(`useEventList`)는 마운트하자마자 재조회하고 로그인이 없어
-  **빈 배열이 성공으로** 돌아오면서 목 데이터를 조용히 덮어씁니다. 화면이 계속 "빈 상태"로
-  보이면 십중팔구 이겁니다.
-- **화면이 읽는 쿼리를 다 심어야 합니다.** 소모임 화면은 홈을 흡수하면서 행사도 읽는데,
-  소모임만 심어두면 "다가오는 행사" 카드가 조용히 안 뜹니다.
-- 상대 시각 데이터(소모임 `gathering_at`, 행사 `event_date`/`start_time`)는 **오늘 기준으로
-  만드세요.** 고정 날짜로 두면 시간이 지나 전부 "종료"로 굳습니다.
-- `useParams`로 `:id`를 읽는 페이지(행사 3종)는 `MemoryRouter` 안에 **`Routes`/`Route`까지**
+  `staleTime`이 없는 쿼리는 마운트하자마자 재조회하고 로그인이 없어 **빈 배열이 성공으로**
+  돌아오면서 목 데이터를 조용히 덮어씁니다. 화면이 계속 "빈 상태"로 보이면 십중팔구 이겁니다.
+- **화면이 읽는 쿼리를 다 심어야 합니다.** 예: 소모임 상세는 후기·좋아요까지 읽으므로
+  `reviewKeys`도 함께 심어야 카드가 다 뜹니다.
+- 상대 시각 데이터(소모임 `gathering_at`)는 **오늘 기준으로 만드세요.** 고정 날짜로 두면
+  시간이 지나 전부 "종료"로 굳습니다.
+- `useParams`로 `:id`를 읽는 페이지(소모임 상세)는 `MemoryRouter` 안에 **`Routes`/`Route`까지**
   세워야 합니다. `initialEntries`만 주면 params가 빈 객체입니다.
 
 **스크린샷 함정 둘**:
@@ -186,7 +182,7 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 | --- | --- | --- |
 | 인증 (멤버/게스트/관리자) | 동작 | `authStore` + `ProtectedRoute` |
 | 영수증 비용 청구 | 동작 | `/member/bill` → `BillFormPage` |
-| 행사 (타임라인) | 동작 | 참여자·관리자 라우트 모두 연결됨 |
+| 행사 (타임라인) | **폐기** | 아래 참고 — 코드 전부 제거, 테이블은 drop 대기 |
 | 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제·좋아요)·카테고리 생성까지 확인. 리더 위임·종료는 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
 | 찬양팀 일정 | 동작 | `/worship`, Realtime 반영 |
 | 하단 탭바 | **동작** | 떠 있는 글래스 캡슐. `Layout`이 `TAB_BAR_ROUTES`에서 렌더 |
@@ -219,6 +215,19 @@ DB 에서 지웠습니다.**
 게다가 iOS 앱으로 이관 예정이라 웹에서 되살릴 계획이 없어 삭제했습니다.
 관리자 페이지의 "회계 장부 관리" 항목은 누르면 준비 중 안내만 뜹니다.
 
+### 행사
+
+리디자인 뒤 반쯤 고아였습니다 — 목록(`/events`)은 로그인 착지점 `/home` 을 통해서만 닿았고,
+관리자 편집(`/admin/events/*`)은 진입로가 아예 없었으며(옛 다크 디자인 그대로), 조회 경로는
+소모임 화면 상단의 "다가오는 행사" 카드뿐이었습니다. 안 쓰기로 해서 **코드를 전부
+걷어냈습니다** — 페이지 6종(`event/*`·`admin/event/*`), `EventInfoView`, `useEvents` 훅,
+`types/event`, `lib/eventStatus`·`lib/eventTime`, 라우트, 소모임 상단 카드, 홈의 행사 히어로·
+일정 보기, 관리자의 행사 관리 탭.
+
+**`events`·`event_segments` 테이블은 아직 원격에 있습니다.** 코드가 사라졌으니 이제 지워도
+안전하지만, Docker/psql 이 없어 행 수(과거 행사 기록)를 확인할 수 없어 대시보드 점검 뒤로
+미뤘습니다([data-model.md](data-model.md)의 그 외 테이블 경고 참고).
+
 ## 미연결(고아) 코드
 
 - **`/admin` 라우트** — 살아 있지만 진입로가 없습니다. 관리자는 내정보에서 진입시킬 계획입니다.
@@ -238,7 +247,5 @@ DB 에서 지웠습니다.**
   ([data-model.md](data-model.md#-알려진-구멍-worship_availability))
 - **`line-solid` 대비 1.19** — 인풋 테두리가 흰 면에서 거의 안 보입니다(WCAG 1.4.11 은 3:1
   요구). 원티드 원본값이라 미해결로 뒀습니다. ([design.md](design.md))
-- **`event_date`가 text** — 날짜 정렬·필터를 DB 에 맡길 수 없고 파싱이 `parseStartDate()`에
-  의존합니다.
-- **린트 4건** — `ConfirmDialog`·`main.tsx`·`EventBuilderPage`에 있으며 리디자인 이전부터
+- **린트 3건** — `ConfirmDialog`·`main.tsx`에 있으며 리디자인 이전부터
   있던 것들입니다(`npm run lint`).

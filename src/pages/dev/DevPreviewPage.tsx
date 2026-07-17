@@ -9,20 +9,14 @@ import HomePage from "../HomePage";
 import GatheringListPage from "../gathering/GatheringListPage";
 import GatheringDetailPage from "../gathering/GatheringDetailPage";
 import GatheringFormPage from "../gathering/GatheringFormPage";
-import EventSegmentsPage from "../admin/event/EventSegmentsPage";
-import EventBuilderPage from "../admin/event/EventBuilderPage";
-import EventTimelinePage from "../event/EventTimelinePage";
 import WorshipSchedulePage from "../worship/WorshipSchedulePage";
 import ProfilePage from "../ProfilePage";
 import MemberProfileSetupPage from "../MemberProfileSetupPage";
 import { ConfirmHost } from "../../components/ConfirmDialog";
 import { useAuthStore } from "../../store/authStore";
-import { eventKeys } from "../../hooks/useEvents";
 import { gatheringKeys } from "../../hooks/useGatherings";
 import { reviewKeys, type GatheringReviewData } from "../../hooks/useGatheringReviews";
 import { myReviewKeys } from "../../hooks/useMyReviews";
-import type { EventDetailData } from "../../hooks/useEvents";
-import type { EventRecord } from "../../types/event";
 import type { GatheringData } from "../../hooks/useGatherings";
 import type { WorshipData } from "../../hooks/useWorshipSchedule";
 import type { GatheringReview } from "../../types/gathering";
@@ -67,8 +61,8 @@ function asWorshipMember() {
  * 그래야 안쪽 useQuery 가 캐시 히트로 시작하고 로그인 없는 요청으로 새지 않는다.
  *
  * setQueryDefaults 로 staleTime 을 무한대로 박는 게 핵심이다. 심어만 두면 훅에 staleTime 이
- * 없는 쿼리(useEventList)는 마운트하자마자 재조회하고, 로그인이 없어 빈 배열이 성공으로
- * 돌아오면서 목 데이터를 덮어쓴다.
+ * 없는 쿼리는 마운트하자마자 재조회하고, 로그인이 없어 빈 배열이 성공으로 돌아오면서
+ * 목 데이터를 덮어쓴다.
  */
 function Seed({ entries, children }: {
   entries: [readonly unknown[], unknown][];
@@ -92,14 +86,6 @@ function Seed({ entries, children }: {
 }
 
 // ── 목 데이터 ────────────────────────────────────────────
-const MOCK_EVENTS: EventRecord[] = [
-  {
-    id: "ev-1", title: "여름 수련회", event_date: "2026-08-14", start_time: "19:00",
-    place_name: "본당", image_url: null, banner_url: null, emoji: null,
-    description: null, details: [],
-  },
-];
-
 // 상대 시각이라 오늘 기준으로 만든다 — 고정 날짜면 시간이 지나 전부 "종료"로 굳는다.
 const inDays = (d: number) => new Date(Date.now() + d * 86400_000).toISOString();
 
@@ -193,27 +179,7 @@ const MOCK_MY_REVIEWS: GatheringReviewData = {
   likes: [{ review_id: "r-4", user_id: "u2" }],
 };
 
-// 행사 상세(관리자·타임라인 공용). 타임라인의 "LIVE/현재 진행" 을 보려면 진행 중이어야 하므로
-// 오늘 날짜 + 조금 전 시작으로 맞춘다. 고정 날짜면 항상 "종료"만 보인다.
 const today = new Date();
-const pad = (n: number) => String(n).padStart(2, "0");
-const TODAY_DOTS = `${today.getFullYear()}.${pad(today.getMonth() + 1)}.${pad(today.getDate())}`;
-const startedAt = new Date(Date.now() - 20 * 60_000); // 20분 전 시작 → 첫 순서가 진행 중
-const START_TIME = `${pad(startedAt.getHours())}:${pad(startedAt.getMinutes())}`;
-
-const MOCK_DETAIL: EventDetailData = {
-  event: {
-    id: "ev-1", title: "여름 수련회", event_date: TODAY_DOTS, start_time: START_TIME,
-    place_name: "본당", image_url: null, banner_url: null, emoji: null,
-    description: null, details: [{ label: "대상", value: "청년부 전체" }],
-  },
-  segments: [
-    { id: "s-1", title: "오프닝 & 환영 인사", duration_min: 30, description: "찬양팀 인도로 시작합니다", sort: 0 },
-    { id: "s-2", title: "말씀", duration_min: 45, description: null, sort: 1 },
-    { id: "s-3", title: "조별 나눔", duration_min: 60, description: "조별로 흩어져 나눔의 시간을 갖습니다", sort: 2 },
-    { id: "s-4", title: "마무리 기도", duration_min: 15, description: null, sort: 3 },
-  ],
-};
 
 // 찬양팀 시트. 이번 달 주일들을 오늘 기준으로 만든다 — 고정 날짜면 달이 바뀌며 빈 화면이 된다.
 // 첫 주일부터 하나 걸러 확정을 채워, 확정 슬롯·미정 슬롯·내 자리(점선)가 한 화면에 다 나온다.
@@ -310,28 +276,15 @@ const SCREENS: Record<string, () => React.ReactElement> = {
   home: () => {
     asLoggedIn();
     return (
-      <Seed entries={[[eventKeys.list, MOCK_EVENTS]]}>
-        <MemoryRouter initialEntries={["/home"]}>
-          <Phone><HomePage /></Phone>
-        </MemoryRouter>
-      </Seed>
-    );
-  },
-  "home-empty": () => {
-    asLoggedIn();
-    return (
-      <Seed entries={[[eventKeys.list, [] as EventRecord[]]]}>
-        <MemoryRouter initialEntries={["/home"]}>
-          <Phone><HomePage /></Phone>
-        </MemoryRouter>
-      </Seed>
+      <MemoryRouter initialEntries={["/home"]}>
+        <Phone><HomePage /></Phone>
+      </MemoryRouter>
     );
   },
   gatherings: () => {
     asLoggedIn();
-    // 홈을 흡수하면서 이 화면이 행사도 읽는다 — 둘 다 심어야 "다가오는 행사" 카드가 뜬다.
     return (
-      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS], [eventKeys.list, MOCK_EVENTS]]}>
+      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS]]}>
         <MemoryRouter initialEntries={["/gatherings"]}>
           <Phone><GatheringListPage /></Phone>
         </MemoryRouter>
@@ -371,43 +324,6 @@ const SCREENS: Record<string, () => React.ReactElement> = {
         <MemoryRouter initialEntries={["/gatherings/g-1"]}>
           <Routes>
             <Route path="/gatherings/:id" element={<Phone><GatheringDetailPage /></Phone>} />
-          </Routes>
-        </MemoryRouter>
-      </Seed>
-    );
-  },
-  // 아래 셋은 useParams 로 :id 를 읽으므로 Routes 로 감싸야 한다 — MemoryRouter 만으로는 빈 params 다.
-  segments: () => {
-    asLoggedIn();
-    return (
-      <Seed entries={[[eventKeys.detail("ev-1"), MOCK_DETAIL]]}>
-        <MemoryRouter initialEntries={["/admin/events/ev-1/segments"]}>
-          <Routes>
-            <Route path="/admin/events/:id/segments" element={<Phone><EventSegmentsPage /></Phone>} />
-          </Routes>
-        </MemoryRouter>
-      </Seed>
-    );
-  },
-  builder: () => {
-    asLoggedIn();
-    return (
-      <Seed entries={[[eventKeys.detail("ev-1"), MOCK_DETAIL]]}>
-        <MemoryRouter initialEntries={["/admin/events/ev-1/edit"]}>
-          <Routes>
-            <Route path="/admin/events/:id/edit" element={<Phone><EventBuilderPage /></Phone>} />
-          </Routes>
-        </MemoryRouter>
-      </Seed>
-    );
-  },
-  timeline: () => {
-    asLoggedIn();
-    return (
-      <Seed entries={[[eventKeys.detail("ev-1"), MOCK_DETAIL]]}>
-        <MemoryRouter initialEntries={["/event/ev-1/timeline"]}>
-          <Routes>
-            <Route path="/event/:id/timeline" element={<Phone><EventTimelinePage /></Phone>} />
           </Routes>
         </MemoryRouter>
       </Seed>
