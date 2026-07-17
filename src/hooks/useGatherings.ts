@@ -12,7 +12,7 @@ import type {
 // ⚠️ 한 줄 리터럴로 둔다. 문자열을 + 로 이으면 타입이 string 으로 넓어지고,
 //    supabase-js 가 select 를 리터럴 타입으로 파싱하지 못해 GenericStringError 가 된다.
 const GATHERING_COLUMNS =
-  "id, kind, title, description, gathering_at, place_name, place_updated_by, place_updated_at, category_id, thumbnail_url, leader_id, closed_at, ended_at";
+  "id, kind, title, description, gathering_at, place_name, place_updated_by, place_updated_at, category_id, thumbnail_url, leader_id, ended_at";
 
 export const gatheringKeys = {
   list: ["gatherings"] as const,
@@ -27,7 +27,9 @@ async function fetchGatherings() {
         .from("gatherings")
         .select(GATHERING_COLUMNS)
         .order("gathering_at", { ascending: false, nullsFirst: true }),
-      supabase.from("gathering_participants").select("gathering_id, user_id"),
+      // created_at 은 위임 대상(가장 먼저 들어온 사람)을 화면에서 짚기 위해 읽는다 — DB 트리거의
+      // order by created_at 과 같은 기준이라 확인창이 예고하는 승계자와 실제 승계자가 일치한다.
+      supabase.from("gathering_participants").select("gathering_id, user_id, created_at"),
       // 타인의 프로필은 public_profiles 뷰로만 읽는다 (계좌·연락처 노출 차단).
       supabase.from("public_profiles").select("id, name, avatar_url"),
       // 카테고리는 멤버가 만들 수 있어서 DB 가 목록의 주인이다. 코드는 하드코딩하지 않는다.
@@ -98,6 +100,46 @@ export function useCreateGathering() {
       if (joinError) throw joinError;
 
       return gathering;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gatheringKeys.list });
+    },
+  });
+}
+
+// ── 리더 전용: 종료 · 삭제 ───────────────────────────────
+// 둘 다 gatherings 의 리더 전용 RLS 정책(update·delete)이 받친다 — RPC 가 필요 없다.
+// 참가자에게 열려 있는 place 수정과 달리 컬럼을 좁힐 이유가 없어서(리더만 하므로) 평범한
+// 테이블 쓰기로 둔다.
+
+/** 종료. 리더가 모임을 끝낸다 — ended_at 을 찍으면 상태가 done 이 되어 참여를 더 받지 않는다.
+ *  챌린지는 시간으로 안 끝나서 이 액션이 유일한 종료 경로다. 원데이는 시각 전에 앞당겨 끝낼 때 쓴다. */
+export function useEndGathering() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (gatheringId: string) => {
+      const { error } = await supabase
+        .from("gatherings")
+        .update({ ended_at: new Date().toISOString() })
+        .eq("id", gatheringId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gatheringKeys.list });
+    },
+  });
+}
+
+/** 삭제. 리더만. gathering_participants·gathering_reviews 가 cascade 라 참여·후기까지 함께 사라진다.
+ *  마지막 한 명(=리더)이 나갈 때만 부른다 — 확인창이 후기 개수를 함께 예고한다. */
+export function useDeleteGathering() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (gatheringId: string) => {
+      const { error } = await supabase.from("gatherings").delete().eq("id", gatheringId);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: gatheringKeys.list });

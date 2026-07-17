@@ -75,7 +75,6 @@ npx supabase db pull
 | `category_id` | uuid → `gathering_categories` | SET NULL — 카테고리가 지워져도 소모임은 남는다 |
 | `thumbnail_url` | text | 없으면 카테고리 이모지, 그것도 없으면 기본 아이콘 |
 | `leader_id` | uuid → `auth.users` | **SET NULL**. 개설자이자 리더. **불변이 아님 — 넘어간다** |
-| `closed_at` | timestamptz | 옛 "참여 신청 마감" 컬럼. **현재 미사용** — 마감은 원데이=`gathering_at` 파생·챌린지=없음으로 정의(아래 참고). 컬럼만 남음 |
 | `ended_at` | timestamptz | 종료 |
 | `created_at` | timestamptz `now()` | |
 
@@ -128,9 +127,9 @@ npx supabase db pull
 - **원데이**: 모집 마감 = `gathering_at`(모이는 시각). "몇 시까지 모이자"의 그 시각이 곧 가입 마감선입니다. 그 전엔 가입할 수 있고, 지나면 `done`이 되어 가입이 저절로 닫힙니다 — 마감과 종료가 **같은 시점**이라 따로 표시할 "마감" 상태가 없습니다.
 - **챌린지**: **자유 가입 / 자유 탈퇴라 마감 개념 자체가 없습니다.** 기한이 없어 "명단을 확정할 시점"이 성립하지 않습니다 — `done`(리더가 끝냄) 전까지 늘 열려 있습니다.
 
-> 옛 모델은 `closed_at`으로 양쪽에 수동 "마감"을 뒀지만(명단 확정·진도), 그 근거가 사라졌습니다(정산이 건별 스냅샷을 뜨므로 명단을 얼릴 이유가 없음, 아래 참여 정책 참고). `closed_at` **컬럼은 아직 남아 있으나 어떤 코드도 읽지 않습니다.** 파괴적 마이그레이션이라 지우지 않고 뒀을 뿐, 상태 계산·배지·필터 어디에도 안 들어갑니다.
+> 옛 모델은 `closed_at`으로 양쪽에 수동 "마감"을 뒀지만(명단 확정·진도), 그 근거가 사라졌습니다(정산이 건별 스냅샷을 뜨므로 명단을 얼릴 이유가 없음, 아래 참여 정책 참고). `closed_at` **컬럼은 2026-07-18 [`20260718020000_gathering_drop_closed_at.sql`](../supabase/migrations/20260718020000_gathering_drop_closed_at.sql)로 삭제했습니다** — 늘 null 이라 실제로 뜬 적이 없어 런타임 동작은 동일합니다.
 >
-> ⚠️ 남은 틈: 원데이 가입 마감(`gathering_at`)은 **UI 에서만** 막습니다(시각 지나면 `done`이라 버튼이 사라짐). 가입 RLS 는 `closed_at`·`ended_at`만 보고 `gathering_at`은 안 봅니다 — 시각이 지난 원데이도 DB 는 여전히 insert 를 허용합니다. DB 로 못 박으려면 insert 정책에 `kind='challenge' or gathering_at > now()` 가드를 더해야 합니다(별도 마이그레이션).
+> 원데이 가입 마감(`gathering_at`)은 이제 **RLS 로도 막습니다.** 예전엔 UI 에서만 막았고(시각 지나면 `done`이라 버튼이 사라짐) 가입 insert 정책은 `ended_at`만 봐서 시각이 지난 원데이도 DB 는 insert 를 허용했는데, 같은 마이그레이션에서 정책에 `(kind = 'challenge' or gathering_at > now())` 가드를 더해 못 박았습니다.
 
 #### 리더는 넘어간다 (`leader_id`)
 
@@ -271,7 +270,7 @@ exists (select 1 from public.user_profiles p where p.id = auth.uid() and p.role 
 | --- | --- | --- |
 | `gathering_categories` | 로그인 사용자 전체 | **멤버만** insert. **수정·삭제 없음** |
 | `gatherings` | 로그인 사용자 전체 | **멤버만** insert, 수정·삭제는 **리더만** |
-| `gathering_participants` | 로그인 사용자 전체 | 본인 것만 insert(**마감·종료 전에만**) / delete(**언제든**) |
+| `gathering_participants` | 로그인 사용자 전체 | 본인 것만 insert(**종료 전 · 원데이는 시각 전에만**) / delete(**언제든**) |
 | `gathering_reviews` | 로그인 사용자 전체 | **참가자만** insert, 수정·삭제는 본인 것만 |
 | `gathering_review_likes` | 로그인 사용자 전체 | **멤버만** insert(본인 것만), delete 는 본인 것만. **수정 없음** |
 

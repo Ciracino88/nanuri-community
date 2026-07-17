@@ -18,8 +18,6 @@ export const GATHERING_STATUS_LABEL: Record<GatheringStatus, string> = {
  *   done 이라 가입이 저절로 닫힌다 — done 과 같은 시점이라 따로 둘 "마감" 상태가 없다.
  * - 챌린지: 자유 가입 / 자유 탈퇴라 마감 개념 자체가 없다. done 전까지 늘 열려 있다.
  *
- * (DB 의 closed_at 컬럼은 이 정의에서 쓰지 않는다 — data-model.md 참고. 컬럼은 남아 있다.)
- *
  * ended_at 을 kind 보다 먼저 보는 이유: 마지막 참가자가 나가면 DB 트리거가
  * kind 와 무관하게 ended_at 을 찍는다(삭제하면 후기까지 증발하므로 종료로 남긴다).
  * 그래서 원데이도 시각이 오기 전에 ended_at 으로 끝날 수 있다.

@@ -25,11 +25,6 @@ export interface GatheringRecord {
   thumbnail_url: string | null;
   /** 리더가 계정을 지우면 null 이 될 수 있다(모임은 리더보다 오래 산다) */
   leader_id: string | null;
-  /**
-   * 옛 "참여 신청 마감" 컬럼. **지금은 안 쓴다** — 마감은 원데이=gathering_at 파생,
-   * 챌린지=없음으로 정의했다(data-model.md). 컬럼만 남아 있고 상태 계산엔 안 들어간다.
-   */
-  closed_at: string | null;
   /** 종료. 챌린지는 시간으로 안 끝나서 이 컬럼이 필요하다 */
   ended_at: string | null;
 }
@@ -37,6 +32,8 @@ export interface GatheringRecord {
 export interface GatheringParticipant {
   gathering_id: string;
   user_id: string;
+  /** 리더 승계 순서(가장 먼저 들어온 사람). 낙관적 insert 직후엔 없을 수 있다 */
+  created_at?: string;
 }
 
 /** 참여자 아이콘용 최소 프로필 (public_profiles 뷰) */

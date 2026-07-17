@@ -119,27 +119,34 @@ const MOCK_GATHERINGS: GatheringData = {
     { id: "g-4", kind: "challenge", title: "성경 통독반", gathering_at: null,
       place_name: "본당 소예배실", place_updated_by: "u2", place_updated_at: inDays(-1),
       description: "창세기부터 같이 읽어요", category_id: CAT_STUDY, thumbnail_url: null,
-      leader_id: "other", closed_at: null, ended_at: null },
+      leader_id: "other", ended_at: null },
     { id: "g-1", kind: "oneday", title: "예배 끝나고 카페", gathering_at: inDays(1),
       place_name: "스타벅스 강남점", place_updated_by: null, place_updated_at: null,
       description: "커피 마시면서 얘기해요", category_id: CAT_CAFE, thumbnail_url: null,
-      leader_id: ME, closed_at: null, ended_at: null },
+      leader_id: ME, ended_at: null },
     { id: "g-2", kind: "oneday", title: "점심 같이 먹어요", gathering_at: inDays(3),
       place_name: null, place_updated_by: null, place_updated_at: null,
       description: null, category_id: CAT_MEAL, thumbnail_url: null,
-      leader_id: "other", closed_at: null, ended_at: null },
+      leader_id: "other", ended_at: null },
     { id: "g-3", kind: "oneday", title: "볼링 한 판", gathering_at: inDays(-2),
       place_name: "강남 볼링장", place_updated_by: null, place_updated_at: null,
       description: null, category_id: null, thumbnail_url: null,
-      leader_id: "other", closed_at: null, ended_at: null },
+      leader_id: "other", ended_at: null },
+    // g-5: ME 가 리더이자 유일한 참가자. 나가면 삭제되는 경로(확인창)를 밟는다.
+    { id: "g-5", kind: "oneday", title: "나 혼자 산책", gathering_at: inDays(2),
+      place_name: "양재천", place_updated_by: null, place_updated_at: null,
+      description: "아직 아무도 안 왔어요", category_id: null, thumbnail_url: null,
+      leader_id: ME, ended_at: null },
   ],
+  // created_at 으로 들어온 순서를 준다 — 리더(ME)가 나갈 때 승계 대상이 결정적으로 정해진다.
   participants: [
-    { gathering_id: "g-1", user_id: ME },
-    { gathering_id: "g-1", user_id: "u2" },
-    { gathering_id: "g-1", user_id: "u3" },
-    { gathering_id: "g-3", user_id: ME },
-    { gathering_id: "g-4", user_id: "other" },
-    { gathering_id: "g-4", user_id: "u2" },
+    { gathering_id: "g-1", user_id: ME, created_at: inDays(-5) },
+    { gathering_id: "g-1", user_id: "u2", created_at: inDays(-4) },
+    { gathering_id: "g-1", user_id: "u3", created_at: inDays(-3) },
+    { gathering_id: "g-3", user_id: ME, created_at: inDays(-8) },
+    { gathering_id: "g-4", user_id: "other", created_at: inDays(-20) },
+    { gathering_id: "g-4", user_id: "u2", created_at: inDays(-18) },
+    { gathering_id: "g-5", user_id: ME, created_at: inDays(-1) },
   ],
   profiles: [
     { id: ME, name: "나", avatar_url: null },
@@ -234,11 +241,16 @@ function NavPreview() {
   );
 }
 
-// 앱 셸과 같은 폭으로 감싸야 실제 화면처럼 보인다.
-// flex-col 인 이유: 페이지들이 flex-1 / mt-auto 로 셸(Layout)의 세로 흐름에 기댄다.
+// 앱 셸과 같은 폭·스크롤 구조로 감싸야 실제 화면처럼 보인다.
+// 실제 Layout 을 그대로 흉내 낸다: 바깥은 h-dvh overflow-hidden 프레임, 안쪽은 flex-1
+// overflow-y-auto 스크롤 영역. 이래야 sticky(상세 상단 바 등)가 실제 앱과 똑같이 스크롤
+// 영역에 붙는다 — min-h-dvh(윈도우 스크롤)로 두면 sticky 가 붙을 컨테이너가 없어 안 먹는다.
+// flex-col 인 이유: 페이지들이 flex-1 / mt-auto 로 셸의 세로 흐름에 기댄다.
 function Phone({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto w-full max-w-md min-h-dvh border-x border-line flex flex-col">{children}</div>
+    <div className="mx-auto w-full max-w-md h-dvh border-x border-line flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-y-auto min-h-0">{children}</div>
+    </div>
   );
 }
 
@@ -322,6 +334,20 @@ const SCREENS: Record<string, () => React.ReactElement> = {
     return (
       <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS], [reviewKeys.of("g-1"), MOCK_MY_REVIEWS]]}>
         <MemoryRouter initialEntries={["/gatherings/g-1"]}>
+          <Routes>
+            <Route path="/gatherings/:id" element={<Phone><GatheringDetailPage /></Phone>} />
+          </Routes>
+        </MemoryRouter>
+      </Seed>
+    );
+  },
+  // ME 가 리더이자 혼자다(g-5). "내가 이끄는 모임"을 누르면 삭제 확인창이 뜨고,
+  // "모임 종료하기"로는 기록을 남긴 채 done 이 된다.
+  "gathering-detail-solo": () => {
+    asLoggedIn();
+    return (
+      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS], [reviewKeys.of("g-5"), { reviews: [], profiles: MOCK_GATHERINGS.profiles, likes: [] }]]}>
+        <MemoryRouter initialEntries={["/gatherings/g-5"]}>
           <Routes>
             <Route path="/gatherings/:id" element={<Phone><GatheringDetailPage /></Phone>} />
           </Routes>

@@ -90,10 +90,19 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 > **RLS 서브쿼리에서 바깥 컬럼은 항상 테이블명으로 수식하세요.** 바로 위 participants insert
 > 정책이 무사한 건 서브쿼리가 `gatherings g`(컬럼명이 `id`)라 이름이 겹치지 않아서일 뿐입니다.
 
-아직 UI 가 없는 것:
+**~~종료·삭제·리더 위임~~ 완료 (2026-07-18)** — [`GatheringDetailPage`](../src/pages/gathering/GatheringDetailPage.tsx)의 리더 흐름을 붙였습니다. DB 변경은 없습니다 — 종료(리더 update 정책)·삭제(리더 delete 정책)·위임(기존 승계 트리거) 전부 기존 RLS 로 됩니다.
 
-- **리더 위임** — `transfer_gathering_leader` RPC 와 [`useTransferGatheringLeader`](../src/hooks/useGatheringRpc.ts)는 있는데 참가자 고르는 화면이 없습니다.
-- **종료·삭제** — `ended_at` 컬럼과 정책은 있는데 리더가 누를 버튼이 없습니다. 삭제 확인 다이얼로그는 "참여자 N명, 후기 M개가 함께 삭제됩니다"를 보여줘야 합니다(후기 CASCADE).
+- **리더 관리 시트(⋯)** — 종료·삭제는 참여 영역에서 빼 **상단 우측 `⋯` → 바텀시트**([`BottomSheet`](../src/components/ui/BottomSheet.tsx), 제목 "소모임 관리")로 모았습니다. 리더에게만 `⋯` 가 보이고, 참여 버튼은 "참여하기"만 남습니다. 행은 아이콘+라벨+설명(종료="후기·기록은 남아요" / 삭제="통째로 지워요")이고 중립색입니다 — 위험 강조는 확인창의 빨강 버튼이 집니다(로그아웃과 같은 규칙). 행을 누르면 시트를 닫고 각자의 확인창으로 넘어갑니다.
+  - **상단 바(뒤로가기+⋯)는 `sticky`** 라 스크롤해도 고정됩니다. 전폭(-mx-4 px-4) 불투명 배경(캔버스와 같은 색)이라 콘텐츠가 뒤로 깔끔히 사라지고 정지 땐 이음매가 없습니다. 스크롤 컨테이너는 `Layout` 의 `main` 이라, 프리뷰로 확인하려면 `Phone` 이 그 구조를 흉내 내야 합니다(아래 "화면 확인하는 법" 참고).
+- **종료** — 시트의 "모임 종료하기"([`useEndGathering`](../src/hooks/useGatherings.ts) → `ended_at` 찍기). 삭제와 달리 **기록을 남깁니다**(done 이 되어 참여만 닫힘). 챌린지는 시간으로 안 끝나서 이게 유일한 종료 경로라 open 일 때만 뜹니다.
+- **삭제** — 두 경로입니다. 둘 다 [`useDeleteGathering`](../src/hooks/useGatherings.ts)로 소모임을 지웁니다(참여·후기 CASCADE).
+  - **시트의 "소모임 삭제"** — 리더가 언제든(다른 참여자가 있어도, open·done 어느 상태든) 부를 수 있습니다. 확인창이 "참여자 N명·후기 M개가 함께 삭제돼요"를 예고합니다.
+  - **혼자 남아 나가기** — 리더가 혼자일 때 "내가 이끄는 모임"(=나가기)을 누르면 "나가면 소모임이 삭제돼요" 확인창이 뜹니다(위임할 사람이 없으므로).
+- **리더 위임** — 리더가 **다른 참여자가 있을 때** 나가면 "리더가 ○○님에게 넘어가요" 확인창이 뜨고, 확인하면 평범한 나가기 → DB 승계 트리거가 넘깁니다. 승계 대상(가장 먼저 들어온 참가자)은 `gathering_participants.created_at` 으로 짚어 트리거와 같은 기준입니다 — 그래서 참여자 쿼리에 `created_at` 을 추가했습니다. `transfer_gathering_leader` RPC(나가지 않고 넘기기)는 여전히 전용 화면이 없습니다.
+- **트리거는 안 건드렸습니다.** "마지막 참가자가 나가면 종료로 남긴다"는 계정 삭제 안전망으로 그대로 두고, UI 에서 리더가 직접 나가는 경로만 명시적 삭제로 처리했습니다.
+- ⚠ 게이트 뒤 화면이라 프리뷰(목 데이터)에선 **세 확인창의 렌더·문구·승계 대상 이름까지** 확인했습니다. 실제 종료·삭제·위임은 로그인 뒤 실데이터에서만 밟힙니다. 프리뷰 키: `gathering-detail-mine`(리더+타인) · `gathering-detail-solo`(리더 혼자).
+
+**~~ConfirmDialog 원티드 이식~~ 완료 (2026-07-18)** — [`ConfirmDialog`](../src/components/ConfirmDialog.tsx)를 옛 토큰(`bg-card`·`text-fg`·`bg-accent`…)에서 새 토큰으로 옮겼습니다. 이미 찬양팀·내정보(둘 다 새 디자인)가 쓰고 있어 그 둘도 함께 개선됩니다. danger 는 `bg-status-negative`(삭제), 기본은 `bg-primary-normal`.
 
 **~~후기 수정~~ 완료** — 내 후기 카드에 수정 버튼을 붙였습니다. 누르면 그 자리에서 인라인 편집(저장/취소)으로 바뀌고 [`useUpdateReview`](../src/hooks/useGatheringReviews.ts)를 호출합니다. `updated_at`이 채워지면 카드에 "· 수정됨"이 뜹니다.
 
@@ -109,7 +118,6 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 | `bill/BillFormPage` | — | 22 |
 | `admin/AdminPage` | — | ≤16 |
 | `HomePage` | ≤11 | — |
-| `ConfirmDialog` | 5 | — |
 | `auth/MemberLoginPage` | 4 | — |
 | `auth/GatePage` · `LoadingSpinner` · `BackButton` | 각 2 | — |
 | `LoadingScreen` · `main.tsx` | 각 1 | 각 1 |
@@ -150,8 +158,9 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 `main.tsx`에서 앱 라우터 **대신** 마운트되고, `authStore`와 쿼리 캐시를 원하는 상태로 꾸며
 띄웁니다. `import.meta.env.DEV` 게이트라 프로덕션 번들에는 들어가지 않습니다.
 
-현재 화면: `nav` · `gate` · `login` · `home` · `home-empty` · `gatherings` · `segments` ·
-`builder` · `timeline`. 경로 없이 `/__dev/`로 가면 목록이 뜹니다.
+현재 화면: `nav` · `topbar` · `gate` · `login` · `home` · `gatherings` · `gathering-detail`
+(챌린지·타인 시점) · `gathering-detail-mine`(리더+타인) · `gathering-detail-solo`(리더 혼자) ·
+`gathering-new` · `worship` · `profile` · `profile-setup`. 경로 없이 `/__dev/`로 가면 목록이 뜹니다.
 
 목 데이터를 추가할 때 주의할 점 셋:
 
@@ -164,6 +173,10 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
   시간이 지나 전부 "종료"로 굳습니다.
 - `useParams`로 `:id`를 읽는 페이지(소모임 상세)는 `MemoryRouter` 안에 **`Routes`/`Route`까지**
   세워야 합니다. `initialEntries`만 주면 params가 빈 객체입니다.
+- **`Phone` 래퍼는 실제 셸(`Layout`)의 스크롤 구조를 흉내 냅니다** — 바깥 `h-dvh overflow-hidden`
+  + 안쪽 `flex-1 overflow-y-auto`. 그래야 `sticky`(상세 상단 바 등)가 실제 앱과 똑같이 스크롤
+  영역에 붙습니다. 예전 `min-h-dvh`(윈도우 스크롤)에선 sticky 가 붙을 컨테이너가 없어 프리뷰에서만
+  안 먹었습니다 — 실기기에선 되는데 프리뷰에서 "안 된다"고 오진하기 쉬웠습니다.
 
 **스크린샷 함정 둘**:
 
@@ -183,7 +196,7 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 | 인증 (멤버/게스트/관리자) | 동작 | `authStore` + `ProtectedRoute` |
 | 영수증 비용 청구 | 동작 | `/member/bill` → `BillFormPage` |
 | 행사 (타임라인) | **폐기** | 아래 참고 — 코드·테이블 모두 제거 완료 |
-| 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제·좋아요)·카테고리 생성까지 확인. 리더 위임·종료는 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
+| 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제·좋아요)·카테고리 생성·리더 종료·삭제·위임까지 확인. 사진·정산·템플릿은 미착수 |
 | 찬양팀 일정 | 동작 | `/worship`, Realtime 반영 |
 | 하단 탭바 | **동작** | 떠 있는 글래스 캡슐. `Layout`이 `TAB_BAR_ROUTES`에서 렌더 |
 | 순서별 평가 | **폐기** | 아래 참고 |
