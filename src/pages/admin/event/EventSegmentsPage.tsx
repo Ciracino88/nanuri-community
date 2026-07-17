@@ -29,7 +29,6 @@ import { confirmDialog } from "../../../components/ConfirmDialog";
 import { supabase } from "../../../lib/supabase";
 import { buildTimeline, formatClock, totalDuration, type TimelineSegment } from "../../../lib/eventTime";
 import { useEventDetail, eventKeys, type EventDetailData } from "../../../hooks/useEvents";
-import { TINT_STRONG, tintByIndex } from "../../../constants/tints";
 import type { Segment } from "../../../types/event";
 
 function fmtDuration(min: number) {
@@ -120,7 +119,7 @@ function SortableRow({ item, index, onEdit, onDelete }: {
         <GripVertical size={18} />
       </button>
       {/* 번호 색은 순서에 따른 장식이지 항목의 의미가 아니다. */}
-      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-caption font-bold shrink-0 ${TINT_STRONG[tintByIndex(index)]}`}>
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-caption font-bold shrink-0 bg-status-bg-active text-primary-normal`}>
         {index + 1}
       </div>
       <div className="flex-1 min-w-0">

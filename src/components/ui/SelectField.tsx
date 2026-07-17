@@ -1,36 +1,39 @@
 import { useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ACCENT } from "../../constants/theme";
+import { Check, ChevronDown } from "lucide-react";
 
 interface SelectFieldProps {
   value: string;
   onChange: (value: string) => void;
   options: string[];
   placeholder?: string;
-  /** @deprecated 액센트는 퍼플 단일. 호출부 정리 후 제거 예정. */
-  accent?: string;
   label?: ReactNode;
 }
 
-// 프로필·청구서 공용 커스텀 드롭다운 (네이티브 select 아님, 애니메이션 목록).
-export default function SelectField({ value, onChange, options, placeholder = "선택", accent = ACCENT, label }: SelectFieldProps) {
+/** 프로필·청구서 공용 커스텀 드롭다운 (네이티브 select 아님, 애니메이션 목록).
+ *  트리거는 TextField 와 같은 껍데기라 나란히 놔도 어긋나지 않는다. */
+export default function SelectField({ value, onChange, options, placeholder = "선택", label }: SelectFieldProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <span className="text-caption font-semibold text-fg-muted">{label}</span>}
+      {label && <span className="text-label2 font-medium text-label-normal">{label}</span>}
+
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full px-4 py-3 text-emphasis font-medium text-left flex items-center justify-between rounded-field bg-card"
-        style={{
-          border: `1px solid ${open ? accent : "var(--color-line)"}`,
-          boxShadow: open ? `0 0 0 3px ${accent}26` : "none",
-          transition: "border-color 0.15s, box-shadow 0.15s",
-        }}
+        className={`w-full rounded-field border bg-bg-normal px-4 py-3 text-body1 text-left flex items-center justify-between transition-colors ${
+          open ? "border-primary-normal" : "border-line-solid"
+        }`}
       >
-        <span className={value ? "text-fg-strong" : "text-fg-muted"}>{value || placeholder}</span>
-        <motion.span className="text-fg-muted" animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>▾</motion.span>
+        <span className={value ? "text-label-normal" : "text-label-alternative"}>{value || placeholder}</span>
+        <motion.span
+          className="text-label-neutral flex"
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronDown size={18} />
+        </motion.span>
       </button>
 
       <AnimatePresence>
@@ -40,17 +43,19 @@ export default function SelectField({ value, onChange, options, placeholder = "�
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22 }}
-            className="overflow-hidden rounded-field bg-card border border-line shadow-card"
+            className="overflow-hidden rounded-field bg-bg-normal border border-line-solid shadow-small"
           >
             {options.map((o, i) => (
               <button
                 key={o}
                 type="button"
-                className={`w-full px-4 py-2.5 text-body font-medium text-left ${value === o ? "text-accent" : "text-fg"} ${i < options.length - 1 ? "border-b border-line-soft" : ""}`}
+                className={`w-full px-4 py-2.5 text-body2 font-medium text-left flex items-center justify-between ${
+                  value === o ? "text-primary-normal" : "text-label-neutral"
+                } ${i < options.length - 1 ? "border-b border-line-solid" : ""}`}
                 onClick={() => { onChange(o); setOpen(false); }}
               >
-                {value === o && <span className="mr-2">✓</span>}
                 {o}
+                {value === o && <Check size={16} strokeWidth={3} />}
               </button>
             ))}
           </motion.div>

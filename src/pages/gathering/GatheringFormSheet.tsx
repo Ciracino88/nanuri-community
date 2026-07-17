@@ -45,7 +45,7 @@ export default function GatheringFormSheet({ onSave, onClose, saving }: {
       />
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-caption font-semibold text-fg-muted">아이콘 (선택)</span>
+        <span className="text-label2 font-medium text-label-normal">아이콘 (선택)</span>
         <div className="flex flex-wrap gap-2">
           {EMOJI_PRESET.map((em) => {
             const active = emoji === em;
@@ -53,9 +53,9 @@ export default function GatheringFormSheet({ onSave, onClose, saving }: {
               <button
                 key={em} type="button"
                 onClick={() => setEmoji(active ? null : em)}
-                // 선택 상태는 상호작용이라 액센트가 담당한다.
-                className={`w-10 h-10 rounded-tile flex items-center justify-center active:scale-95 transition border ${
-                  active ? "bg-accent-subtle border-accent" : "bg-card border-line"
+                // 선택 상태는 상호작용이라 Primary 가 담당한다.
+                className={`w-10 h-10 rounded-field flex items-center justify-center active:scale-95 transition border ${
+                  active ? "bg-status-bg-active border-primary-normal" : "bg-bg-normal border-line-solid"
                 }`}
                 style={{ fontSize: 20 }}
               >
@@ -79,7 +79,7 @@ export default function GatheringFormSheet({ onSave, onClose, saving }: {
         value={description} onChange={(e) => setDescription(e.target.value)}
       />
 
-      <Button type="button" onClick={submit} loading={saving} className="mt-1">
+      <Button type="button" onClick={submit} loading={saving} loadingText="만드는 중..." className="mt-1">
         <span className="flex items-center justify-center gap-2">
           <Check size={18} />
           만들기

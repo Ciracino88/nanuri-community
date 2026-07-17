@@ -7,7 +7,6 @@ import LoadingScreen from "../../components/LoadingScreen";
 import { useEventDetail } from "../../hooks/useEvents";
 import { buildTimeline, formatClock, totalDuration } from "../../lib/eventTime";
 import { computeEventStatus, EVENT_STATUS_LABEL, type EventStatus } from "../../lib/eventStatus";
-import { TINT_STRONG, tintByIndex } from "../../constants/tints";
 
 // 상태 배지는 식별용이라 액센트를 쓰지 않는다. 진행 중만 danger 로 눈에 띄게 둔다 —
 // 경고라서가 아니라 "지금 이거"를 한눈에 찾아야 하는 화면이라서다.
@@ -90,7 +89,7 @@ export default function EventTimelinePage() {
               <div className="flex items-start gap-3 p-4">
                 <div className="flex flex-col items-center gap-1 shrink-0">
                   {/* 번호 색은 순서에 따른 장식이지 항목의 의미가 아니다. */}
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-caption font-bold ${TINT_STRONG[tintByIndex(index)]}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-caption font-bold bg-status-bg-active text-primary-normal`}>
                     {index + 1}
                   </div>
                   {index < timeline.length - 1 && <div className="w-px h-3 mt-1 bg-line" />}

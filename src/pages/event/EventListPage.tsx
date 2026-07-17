@@ -4,8 +4,7 @@ import { CalendarDays, ChevronRight } from "lucide-react";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useEventList } from "../../hooks/useEvents";
 import { computeEventStatus, type EventStatus } from "../../lib/eventStatus";
-import { colorForEvent } from "../../lib/eventColor";
-import { TAB_COLORS } from "../../constants/theme";
+import { ACCENT } from "../../constants/theme";
 import type { EventRecord } from "../../types/event";
 
 const STATUS_META: Record<EventStatus, { label: string; bg: string; text: string }> = {
@@ -84,7 +83,7 @@ export default function EventListPage() {
 
   const graded: CardEvent[] = events.map((e) => ({
     ...e,
-    _color: colorForEvent(e.id),
+    _color: ACCENT,
     _status: computeEventStatus(e.event_date, e.start_time, 0),
   }));
   const upcoming = graded.filter((e) => e._status !== "done");
@@ -113,14 +112,14 @@ export default function EventListPage() {
         </div>
 
         {isLoading ? (
-          <LoadingSpinner color={TAB_COLORS.events} />
+          <LoadingSpinner color={ACCENT} />
         ) : events.length === 0 ? (
           <div className="text-center text-sm py-16" style={{ color: "#4a5568" }}>예정된 행사가 없어요</div>
         ) : (
           <>
             {upcoming.length > 0 && (
               <div className="flex flex-col gap-3">
-                <p className="text-xs font-bold uppercase" style={{ color: TAB_COLORS.events, letterSpacing: "0.15em" }}>진행 · 예정</p>
+                <p className="text-xs font-bold uppercase" style={{ color: ACCENT, letterSpacing: "0.15em" }}>진행 · 예정</p>
                 {upcoming.map((e, i) => (
                   <EventCard key={e.id} event={e} index={i} onOpen={() => navigate(`/event/${e.id}`)} />
                 ))}

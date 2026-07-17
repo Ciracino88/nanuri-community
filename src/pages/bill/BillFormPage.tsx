@@ -10,10 +10,9 @@ import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { uploadReceipt } from "../../lib/uploadReceipt";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../store/authStore";
-import { TAB_COLORS } from "../../constants/theme";
+import { ACCENT } from "../../constants/theme";
 import { BANKS } from "../../constants/banks";
 
-const ACCENT = TAB_COLORS.home;
 
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
@@ -136,13 +135,13 @@ export default function BillFormPage() {
         {/* 제목 */}
         <div className="flex flex-col gap-2">
           <FieldLabel required>제목</FieldLabel>
-          <TextField placeholder="예) 7월 찬양팀 식사비" accent={ACCENT} value={title} onChange={(e) => setTitle(e.target.value)} />
+          <TextField placeholder="예) 7월 찬양팀 식사비" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
 
         {/* 금액 */}
         <div className="flex flex-col gap-2">
           <FieldLabel required>금액</FieldLabel>
-          <TextField type="number" inputMode="numeric" min={1} placeholder="0" suffix="원" accent={ACCENT} value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <TextField type="number" inputMode="numeric" min={1} placeholder="0" suffix="원" value={amount} onChange={(e) => setAmount(e.target.value)} />
           {Number(amount) > 0 && (
             <p className="text-xs pl-1" style={{ color: ACCENT }}>{Number(amount).toLocaleString()}원</p>
           )}
@@ -203,8 +202,8 @@ export default function BillFormPage() {
             ) : (
               <>
                 <p className="text-xs pl-0.5" style={{ color: "#8892a0" }}>입금 받을 계좌 정보를 입력해 주세요.</p>
-                <SelectField placeholder="은행 선택" options={BANKS} accent={ACCENT} value={bank} onChange={setBank} />
-                <TextField placeholder="계좌번호 (- 없이 입력)" inputMode="numeric" accent={ACCENT} value={accountNumber} onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ""))} />
+                <SelectField placeholder="은행 선택" options={BANKS} value={bank} onChange={setBank} />
+                <TextField placeholder="계좌번호 (- 없이 입력)" inputMode="numeric" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ""))} />
                 <label className="flex items-center gap-2.5 cursor-pointer mt-0.5">
                   <div
                     onClick={() => setSaveForLater((v) => !v)}

@@ -1,6 +1,132 @@
 @import "tailwindcss";
 
-@theme {
+/* static = 안 쓰는 토큰도 CSS 변수로 내보낸다. 기본값(트리셰이킹)이면 클래스로 안 쓰인
+   토큰이 사라져, 인라인 style·SVG fill 에서 var(--color-...) 로 참조할 때 빈 값이 된다.
+   디자인 시스템은 "쓰는 것만 있는" 게 아니라 "다 있는" 게 맞다. */
+@theme static {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+
+  /* ══════════════════════════════════════════════════════════════
+     원티드 디자인 시스템 토큰 — Figma 변수 원본값을 그대로 옮긴 것이다.
+     눈대중이나 재해석이 아니므로 임의로 고치지 말 것. 값을 바꿔야 하면
+     Figma 쪽을 먼저 확인한다.
+     출처: figma.com/design/nComAXSHh0jj022PMtT6Du (node 16215:30100)
+     ══════════════════════════════════════════════════════════════ */
+
+  /* ── 글자(Label) ──
+     원티드는 불투명 회색이 아니라 "알파 오버레이"로 위계를 만든다. 배경이 비쳐
+     보이는 구조라, 옛 fg-muted 처럼 고정 대비로 생각하면 안 된다. 밑에 깔린 면이
+     바뀌면 대비도 같이 바뀐다. */
+  --color-label-strong: #000000;
+  --color-label-normal: #171719;
+  --color-label-neutral: #2e2f33e0;     /* 88% */
+  --color-label-alternative: #37383c9c; /* 61% */
+  --color-label-assistive: #37383c47;   /* 28% — 장식·비활성 전용, 본문 금지 */
+  --color-label-disable: #37383c29;     /* 16% */
+
+  /* ── 고정색(Static) — 테마와 무관하게 항상 같은 색 ── */
+  --color-static-white: #ffffff;
+  --color-static-black: #000000;
+
+  /* ── Primary = 상호작용 전용 ──
+     원티드의 파랑. 옛 퍼플 액센트(#8b3dff)를 대체한다. 누를 수 있는 것에만. */
+  --color-primary-normal: #0066ff;
+
+  /* ── 상태(Status) ── */
+  --color-status-positive: #00bf40;
+  --color-status-negative: #ff4242;
+
+  /* ── 배경(Background) ── */
+  --color-bg-normal: #ffffff;      /* 카드·시트 면 */
+  --color-bg-alternative: #f7f7f8; /* 페이지 캔버스 */
+  --color-bg-elevated: #ffffff;    /* 떠 있는 면 */
+
+  /* ── 선(Line) — 알파라 겹치면 진해진다 ── */
+  --color-line-normal: #70737c38;      /* 22% */
+  --color-line-neutral: #70737c29;     /* 16% */
+  --color-line-alternative: #70737c14; /* 8% */
+  --color-line-solid: #eaebec;         /* 불투명 구분선 */
+
+  /* ── 채움(Fill) ── */
+  --color-fill-normal: #70737c;
+  --color-fill-strong: #70737c29;
+
+  --color-interaction-disable: #f4f4f5;
+
+  /* ── 액센트 = 장식·식별 전용. 누를 수 없는 것에만. ── */
+  --color-accent-violet: #6541f2;
+  --color-accent-cyan: #0098b2;
+
+  /* ── 상태 배지 배경 — 원자 팔레트에서 이 둘만 시맨틱에 물려 있다.
+     Figma 에서 Blue/95 → _Status/Normal, Cool Neutral/95 → _Status/Resource. ── */
+  --color-status-bg-active: #eaf2fe;  /* Blue/95 — 진행·모집 중 */
+  --color-status-bg-idle: #dbdcdf;    /* Cool Neutral/95 — 종료·비활성 */
+
+  /* ── 반경 ──
+     ⚠ 원티드가 반경 스케일을 발행하지 않는다. 확인된 값은 인풋의 14 하나뿐이다.
+     나머지는 그 14 를 기준으로 우리가 정한 값이라, Figma 를 근거로 대면 안 된다.
+     원티드는 큰 라운드를 쓰는 시스템이 아니므로 전반적으로 절제한다. */
+  --radius-field: 0.875rem; /* 14 — 원티드 확인값. 인풋·버튼 */
+  --radius-card: 1rem;      /* 16 — 우리 값. 카드·리스트 아이템 */
+  --radius-sheet: 1.25rem;  /* 20 — 우리 값. 바텀시트·모달 */
+
+  /* ── 타입 스케일 ──
+     자간이 크기별로 다른 게 이 시스템의 핵심이다. 큰 글자는 좁히고(-2.7%)
+     작은 글자는 넓힌다(+2.52%). 광학 보정이라 빼면 원티드다운 인상이 죽는다.
+     Figma 는 % 로 저장하므로 em 으로 옮겼다 (-2.7% → -0.027em).
+     굵기는 스케일에 박지 않는다 — font-medium/semibold/bold 로 따로 준다. */
+  --text-caption1: 0.75rem;              /* 12 */
+  --text-caption1--line-height: 1.334;
+  --text-caption1--letter-spacing: 0.0252em;
+
+  --text-label2: 0.8125rem;              /* 13 */
+  --text-label2--line-height: 1.385;
+  --text-label2--letter-spacing: 0.0194em;
+
+  --text-label1: 0.875rem;               /* 14 */
+  --text-label1--line-height: 1.429;
+  --text-label1--letter-spacing: 0.0145em;
+
+  --text-body2: 0.9375rem;               /* 15 */
+  --text-body2--line-height: 1.467;
+  --text-body2--letter-spacing: 0.0096em;
+
+  /* 16px. 입력 필드는 이 크기 밑으로 내리지 말 것 — iOS Safari 가 포커스 시 확대한다. */
+  --text-body1: 1rem;
+  --text-body1--line-height: 1.5;
+  --text-body1--letter-spacing: 0.0057em;
+
+  --text-body1-reading: 1rem;            /* 16 — 긴 글용. 행간만 넓다 */
+  --text-body1-reading--line-height: 1.625;
+  --text-body1-reading--letter-spacing: 0.0057em;
+
+  --text-headline2: 1.0625rem;           /* 17 */
+  --text-headline2--line-height: 1.412;
+  --text-headline2--letter-spacing: 0;
+
+  --text-title3: 1.5rem;                 /* 24 */
+  --text-title3--line-height: 1.334;
+  --text-title3--letter-spacing: -0.023em;
+
+  --text-title1: 2.25rem;                /* 36 */
+  --text-title1--line-height: 1.334;
+  --text-title1--letter-spacing: -0.027em;
+
+  /* ── 그림자 5단계 — 원본값. 색은 #171717 알파. ── */
+  --shadow-xsmall: 0 1px 2px -1px rgb(23 23 23 / 0.10);
+  --shadow-small: 0 4px 6px -1px rgb(23 23 23 / 0.06), 0 2px 4px -2px rgb(23 23 23 / 0.06);
+  --shadow-medium: 0 10px 15px -3px rgb(23 23 23 / 0.07), 0 4px 6px -2px rgb(23 23 23 / 0.07);
+  --shadow-large: 0 16px 24px -6px rgb(23 23 23 / 0.08), 0 6px 10px -4px rgb(23 23 23 / 0.08);
+  --shadow-xlarge: 0 24px 38px -10px rgb(23 23 23 / 0.12), 0 10px 15px -5px rgb(23 23 23 / 0.10);
+
+  /* ══════════════════════════════════════════════════════════════
+     아래는 폐기 예정인 옛 토큰이다. 화면을 새로 그릴 때마다 하나씩 걷어내고,
+     마지막 페이지가 끝나면 이 블록을 통째로 지운다.
+     ⚠ 토큰을 지워도 빌드는 통과한다 — Tailwind 가 클래스를 조용히 안 만들 뿐이라
+     화면이 무스타일로 뜬다. 그래서 한 번에 못 지우고 페이지 단위로 옮긴다.
+     ══════════════════════════════════════════════════════════════ */
+
   /* 글자색 (fg = foreground) */
   --color-fg-strong: #17171c; /* 헤드라인 (거의 검정) */
   --color-fg: #3d3d47;
@@ -48,25 +174,13 @@
   --color-success-subtle: #ecfdf5;
   --color-success-strong: #064E3B;
 
-  /* 카테고리 틴트 = 장식·식별 전용 (리스트 아이콘 타일 배경, 히어로 틴트).
-     누를 수 없는 것에만 쓴다. 퍼플 계열은 액센트가 독점하므로 여기 없다.
-     subtle = 타일 배경, base = 그 위 아이콘, strong = 그 위 제목 */
-  --color-teal: #0D9276;
-  --color-teal-subtle: #DFF5EE;
-  --color-teal-strong: #04463A;
-  --color-pink: #DB2777;
-  --color-pink-subtle: #FDE9F1;
-  --color-pink-strong: #6E1233;
-  --color-amber: #D97706;
-  --color-amber-subtle: #FEF0DC;
-  --color-amber-strong: #6B3B05;
   --color-warning-strong: #633806;
 
-  /* 모서리 — 큰 라운드가 새 디자인의 정체성. 버튼·칩은 rounded-full */
-  --radius-tile: 1rem;     /* 16px — 리스트 아이콘 틴트 사각형 */
-  --radius-field: 0.875rem; /* 14px — 입력 필드 */
-  --radius-card: 1.25rem;  /* 20px — 카드·리스트 아이템 */
-  --radius-panel: 1.5rem;  /* 24px — 히어로·바텀시트·모달 */
+  /* ⚠ 옛 반경. field·card 는 여기서 빼야 한다 — 이 블록이 파일 뒤쪽이라
+     위에서 정의한 새 --radius-card(16) 를 옛 20 으로 덮어버린다.
+     tile·panel 만 남긴 건 아직 쓰는 화면이 있어서다(ConfirmDialog·EventSegmentsPage·HomePage). */
+  --radius-tile: 1rem;    /* 16px */
+  --radius-panel: 1.5rem; /* 24px */
 
   /* 그림자 — 테두리 대신 이걸로 면을 띄운다 */
   --shadow-card: 0 1px 2px rgb(23 23 28 / 0.04), 0 4px 12px rgb(23 23 28 / 0.05);

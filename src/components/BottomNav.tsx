@@ -3,23 +3,18 @@ import { NavLink } from "react-router-dom";
 import { motion } from "motion/react";
 import { CreatureIcon, type CreatureKind } from "./nav/creatures";
 import { ACCENT, MUTED } from "../constants/theme";
-import { useAuthStore } from "../store/authStore";
 
 type Tab = { to: string; label: string; kind: CreatureKind };
 
-const HOME: Tab = { to: "/home", label: "홈", kind: "home" };
-// 행사보다 소모임 빈도가 높아 이 자리를 소모임에 내줬다. 행사는 홈에서 진입한다.
+// 탭은 셋뿐이다. 홈은 소모임에 흡수됐고(행사 카드가 소모임 화면 상단으로 올라간다),
+// 갤러리는 빈 껍데기라 지웠으며, 관리자는 탭이 아니라 내정보에서 진입한다.
 const GATHERINGS: Tab = { to: "/gatherings", label: "소모임", kind: "schedule" };
-const GALLERY: Tab = { to: "/gallery", label: "갤러리", kind: "gallery" };
-const ADMIN: Tab = { to: "/admin", label: "관리자", kind: "admin" };
 const WORSHIP: Tab = { to: "/worship", label: "찬양팀", kind: "songs" };
 const PROFILE: Tab = { to: "/profile", label: "내정보", kind: "profile" };
 
+const TABS: Tab[] = [GATHERINGS, WORSHIP, PROFILE];
+
 export default function BottomNav() {
-  const { userProfile } = useAuthStore();
-  const isAdmin = userProfile?.role === "admin";
-  // 관리자는 갤러리 자리에 관리자 탭
-  const TABS: Tab[] = [HOME, GATHERINGS, isAdmin ? ADMIN : GALLERY, WORSHIP, PROFILE];
 
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [blink, setBlink] = useState(false);

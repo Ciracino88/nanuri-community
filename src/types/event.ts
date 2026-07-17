@@ -16,7 +16,6 @@ export interface EventRecord {
   emoji: string | null;
   description: string | null;
   details: EventDetail[];
-  results_public: boolean;
 }
 
 export interface Segment {
@@ -25,13 +24,4 @@ export interface Segment {
   title: string;
   description: string | null;
   sort: number;
-}
-
-export interface Evaluation {
-  id: string;
-  segment_id: string;
-  user_id: string | null;
-  nickname: string | null;
-  mood: number | null;
-  comment: string | null;
 }

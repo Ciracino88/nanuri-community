@@ -143,7 +143,6 @@ export default function MemberProfileSetupPage() {
           <TextField
             placeholder="이름을 입력하세요"
             error={errors.name?.message}
-            accent={ACCENT}
             {...register("name", { required: "이름을 입력해주세요" })}
           />
         </div>
@@ -202,11 +201,10 @@ export default function MemberProfileSetupPage() {
         {/* 은행 정보 */}
         <div className="flex flex-col gap-2">
           <FieldLabel>은행 정보</FieldLabel>
-          <SelectField value={bank} onChange={setBank} options={BANKS} placeholder="은행 선택" accent={ACCENT} />
+          <SelectField value={bank} onChange={setBank} options={BANKS} placeholder="은행 선택" />
           <TextField
             inputMode="numeric"
             placeholder="계좌번호를 입력하세요"
-            accent={ACCENT}
             {...register("account_number")}
           />
         </div>
@@ -217,7 +215,6 @@ export default function MemberProfileSetupPage() {
           <TextField
             type="tel"
             placeholder="010-0000-0000"
-            accent={ACCENT}
             {...register("phone")}
           />
         </div>

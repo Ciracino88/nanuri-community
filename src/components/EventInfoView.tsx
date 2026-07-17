@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { CalendarDays, Image as ImageIcon } from "lucide-react";
 import BackButton from "./BackButton";
 import { computeEventStatus, type EventStatus } from "../lib/eventStatus";
-import { colorForEvent } from "../lib/eventColor";
+import { ACCENT } from "../constants/theme";
 import type { EventRecord } from "../types/event";
 
 const STATUS_META: Record<EventStatus, { label: string; text: string }> = {
@@ -18,7 +18,8 @@ export default function EventInfoView({ event, backTo, footer }: { event: EventR
   const status = computeEventStatus(event.event_date, event.start_time, 0);
   const meta = STATUS_META[status];
   const isDone = status === "done";
-  const color = colorForEvent(event.id);
+  // 행사마다 색을 돌리던 것을 폐기 — 원티드엔 카테고리 팔레트가 없다.
+  const color = ACCENT;
 
   const rows = [
     { label: "일정", value: [event.event_date, event.start_time ? `${event.start_time.slice(0, 5)} 시작` : null].filter(Boolean).join(" · ") },

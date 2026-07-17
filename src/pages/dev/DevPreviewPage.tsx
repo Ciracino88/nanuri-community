@@ -75,7 +75,7 @@ const MOCK_EVENTS: EventRecord[] = [
   {
     id: "ev-1", title: "여름 수련회", event_date: "2026-08-14", start_time: "19:00",
     place_name: "본당", image_url: null, banner_url: null, emoji: null,
-    description: null, details: [], results_public: false,
+    description: null, details: [],
   },
 ];
 
@@ -116,7 +116,7 @@ const MOCK_DETAIL: EventDetailData = {
   event: {
     id: "ev-1", title: "여름 수련회", event_date: TODAY_DOTS, start_time: START_TIME,
     place_name: "본당", image_url: null, banner_url: null, emoji: null,
-    description: null, details: [{ label: "대상", value: "청년부 전체" }], results_public: false,
+    description: null, details: [{ label: "대상", value: "청년부 전체" }],
   },
   segments: [
     { id: "s-1", title: "오프닝 & 환영 인사", duration_min: 30, description: "찬양팀 인도로 시작합니다", sort: 0 },
@@ -126,7 +126,7 @@ const MOCK_DETAIL: EventDetailData = {
   ],
 };
 
-const NAV_ROUTES = ["/home", "/gatherings", "/gallery", "/worship", "/profile"];
+const NAV_ROUTES = ["/gatherings", "/worship", "/profile"];
 
 function NavPreview() {
   return (
@@ -194,8 +194,9 @@ const SCREENS: Record<string, () => React.ReactElement> = {
   },
   gatherings: () => {
     asLoggedIn();
+    // 홈을 흡수하면서 이 화면이 행사도 읽는다 — 둘 다 심어야 "다가오는 행사" 카드가 뜬다.
     return (
-      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS]]}>
+      <Seed entries={[[gatheringKeys.list, MOCK_GATHERINGS], [eventKeys.list, MOCK_EVENTS]]}>
         <MemoryRouter initialEntries={["/gatherings"]}>
           <Phone><GatheringListPage /></Phone>
         </MemoryRouter>

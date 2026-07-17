@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, ChevronRight, Plus, Receipt, CalendarDays, Image as ImageIcon } from "lucide-react";
+import { Bell, ChevronRight, Plus, Receipt, CalendarDays } from "lucide-react";
 import toast from "react-hot-toast";
 import { useEventList } from "../hooks/useEvents";
 import { computeEventStatus } from "../lib/eventStatus";
@@ -35,7 +35,7 @@ export default function HomePage() {
             className="mx-5 mb-6 w-[calc(100%-2.5rem)] rounded-card bg-card shadow-card p-5 text-left active:scale-[0.99] transition"
           >
             <div className="flex items-start gap-3.5">
-              <div className="w-12 h-12 rounded-tile bg-amber-subtle text-amber flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-field bg-status-bg-active text-primary-normal flex items-center justify-center shrink-0">
                 <CalendarDays size={22} strokeWidth={2.25} />
               </div>
               <div className="flex-1 min-w-0">
@@ -62,22 +62,13 @@ export default function HomePage() {
               Icon={Receipt}
               label="비용 청구"
               desc="영수증 올리고 청구서 작성"
-              tint="teal"
               onClick={() => navigate("/member/bill")}
             />
             <ActionRow
               Icon={CalendarDays}
               label="일정 보기"
               desc="다가오는 행사 일정"
-              tint="amber"
               onClick={() => navigate("/events")}
-            />
-            <ActionRow
-              Icon={ImageIcon}
-              label="갤러리"
-              desc="함께 찍은 사진"
-              tint="pink"
-              onClick={() => navigate("/gallery")}
             />
           </div>
         </div>

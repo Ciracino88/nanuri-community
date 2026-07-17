@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import EventInfoView from "../../components/EventInfoView";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useEventDetail } from "../../hooks/useEvents";
-import { colorForEvent } from "../../lib/eventColor";
+import { ACCENT } from "../../constants/theme";
 
 export default function EventInfoPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,7 +19,7 @@ export default function EventInfoPage() {
     return <p className="flex-1 flex items-center justify-center text-sm" style={{ color: "#4a5568" }}>행사를 찾을 수 없어요</p>;
   }
 
-  const color = colorForEvent(event.id);
+  const color = ACCENT;
 
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href).catch(() => {});

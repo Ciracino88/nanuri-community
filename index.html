@@ -8,6 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>accounting-app</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+    <!-- dynamic-subset: 글리프를 조각으로 쪼개 실제 쓰는 글자만 받는다. 한글 웹폰트는
+         이렇게 안 하면 수 MB가 된다. 원티드 파일은 다국어용 "Pretendard JP"를 쓰지만
+         한국어 전용인 이 앱은 일본어 글리프가 빠진 기본 Pretendard를 쓴다(메트릭 동일). -->
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
+    />
   </head>
   <body>
     <div id="root"></div>

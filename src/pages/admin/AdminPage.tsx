@@ -6,11 +6,9 @@ import toast from "react-hot-toast";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ActionRow from "../../components/ui/ActionRow";
 import { computeEventStatus, type EventStatus } from "../../lib/eventStatus";
-import { colorForEvent } from "../../lib/eventColor";
 import { useAdminEvents } from "../../hooks/useEvents";
-import { TAB_COLORS } from "../../constants/theme";
+import { ACCENT } from "../../constants/theme";
 
-const ACCENT = TAB_COLORS.admin;
 
 const SUB_TABS = [
   { id: "events", label: "행사 관리", Icon: CalendarDays },
@@ -95,7 +93,7 @@ function EventsAdminSection() {
 
   const graded: AdminRowEvent[] = events.map((e) => ({
     ...e,
-    _color: colorForEvent(e.id),
+    _color: ACCENT,
     _status: computeEventStatus(e.event_date, e.start_time, e.totalDuration),
   }));
   const upcoming = graded.filter((e) => e._status !== "done");
