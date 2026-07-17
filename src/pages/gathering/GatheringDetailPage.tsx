@@ -16,6 +16,7 @@ import {
   useCreateReview,
   useDeleteReview,
   useGatheringReviews,
+  useUpdateReview,
 } from "../../hooks/useGatheringReviews";
 import { PAGE_BOTTOM_PAD } from "../../constants/layout";
 import {
@@ -58,6 +59,9 @@ export default function GatheringDetailPage() {
   const [editingPlace, setEditingPlace] = useState(false);
   const [placeDraft, setPlaceDraft] = useState("");
   const [reviewDraft, setReviewDraft] = useState("");
+  // 편집 중인 후기 id 와 그 초안. null 이면 편집 중이 아니다.
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [reviewEditDraft, setReviewEditDraft] = useState("");
 
   const empty: GatheringData = { gatherings: [], participants: [], profiles: [], categories: [] };
   const { gatherings, participants, profiles, categories } = data ?? empty;
@@ -65,6 +69,7 @@ export default function GatheringDetailPage() {
   const { toggle, togglingId } = useToggleGatheringJoin(participants);
   const updatePlace = useUpdateGatheringPlace();
   const createReview = useCreateReview(id);
+  const updateReview = useUpdateReview(id);
   const deleteReview = useDeleteReview(id);
 
   const gathering = gatherings.find((g) => g.id === id);
@@ -128,6 +133,29 @@ export default function GatheringDetailPage() {
     } catch (err) {
       console.error("[deleteReview] error:", err);
       toast.error("후기를 지우지 못했어요");
+    }
+  };
+
+  const startEditReview = (reviewId: string, content: string) => {
+    setEditingReviewId(reviewId);
+    setReviewEditDraft(content);
+  };
+
+  const cancelEditReview = () => {
+    setEditingReviewId(null);
+    setReviewEditDraft("");
+  };
+
+  const saveReview = async (reviewId: string) => {
+    const content = reviewEditDraft.trim();
+    if (!content) return;
+    try {
+      await updateReview.mutateAsync({ id: reviewId, content });
+      cancelEditReview();
+      toast.success("후기를 고쳤어요");
+    } catch (err) {
+      console.error("[updateReview] error:", err);
+      toast.error("후기를 고치지 못했어요");
     }
   };
 
@@ -314,6 +342,8 @@ export default function GatheringDetailPage() {
           reviews.map((r) => {
             // user_id 가 null 이면 계정이 지워진 것이다. 후기는 기록이라 글은 남는다.
             const author = r.user_id ? reviewProfiles.get(r.user_id) : null;
+            const mine = !!r.user_id && r.user_id === user?.id;
+            const editing = editingReviewId === r.id;
             return (
               <div key={r.id} className="rounded-card bg-bg-normal shadow-small p-4 flex flex-col gap-2">
                 <div className="flex items-center gap-2">
@@ -327,17 +357,47 @@ export default function GatheringDetailPage() {
                     {relativeDay(r.created_at)}
                     {r.updated_at ? " · 수정됨" : ""}
                   </span>
-                  {r.user_id && r.user_id === user?.id && (
-                    <button
-                      type="button"
-                      onClick={() => removeReview(r.id)}
-                      className="ml-auto text-caption1 text-label-neutral active:scale-95 transition"
-                    >
-                      삭제
-                    </button>
+                  {mine && !editing && (
+                    <div className="ml-auto flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => startEditReview(r.id, r.content)}
+                        className="text-caption1 text-label-neutral active:scale-95 transition"
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeReview(r.id)}
+                        className="text-caption1 text-label-neutral active:scale-95 transition"
+                      >
+                        삭제
+                      </button>
+                    </div>
                   )}
                 </div>
-                <p className="text-label1 text-label-normal whitespace-pre-wrap">{r.content}</p>
+                {editing ? (
+                  <div className="flex flex-col gap-2">
+                    <TextArea
+                      label="" rows={2} placeholder="어땠는지 남겨주세요"
+                      value={reviewEditDraft} onChange={(e) => setReviewEditDraft(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button" onClick={() => saveReview(r.id)}
+                        loading={updateReview.isPending} loadingText="고치는 중..."
+                        disabled={!reviewEditDraft.trim()}
+                      >
+                        저장
+                      </Button>
+                      <Button type="button" variant="outline" onClick={cancelEditReview}>
+                        취소
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-label1 text-label-normal whitespace-pre-wrap">{r.content}</p>
+                )}
               </div>
             );
           })

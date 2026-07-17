@@ -94,7 +94,8 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 
 - **리더 위임** — `transfer_gathering_leader` RPC 와 [`useTransferGatheringLeader`](../src/hooks/useGatheringRpc.ts)는 있는데 참가자 고르는 화면이 없습니다.
 - **종료·삭제** — `ended_at` 컬럼과 정책은 있는데 리더가 누를 버튼이 없습니다. 삭제 확인 다이얼로그는 "참여자 N명, 후기 M개가 함께 삭제됩니다"를 보여줘야 합니다(후기 CASCADE).
-- **후기 수정** — [`useUpdateReview`](../src/hooks/useGatheringReviews.ts)는 있고 화면은 삭제만 붙었습니다.
+
+**~~후기 수정~~ 완료** — 내 후기 카드에 수정 버튼을 붙였습니다. 누르면 그 자리에서 인라인 편집(저장/취소)으로 바뀌고 [`useUpdateReview`](../src/hooks/useGatheringReviews.ts)를 호출합니다. `updated_at`이 채워지면 카드에 "· 수정됨"이 뜹니다.
 
 남은 화면을 잔재가 많은 순으로. 숫자는 아래 두 패턴의 매치 수라 대략의 규모로만 보세요.
 
@@ -184,7 +185,7 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 | 인증 (멤버/게스트/관리자) | 동작 | `authStore` + `ProtectedRoute` |
 | 영수증 비용 청구 | 동작 | `/member/bill` → `BillFormPage` |
 | 행사 (타임라인) | 동작 | 참여자·관리자 라우트 모두 연결됨 |
-| 소모임 | **2단계 동작** | 개설·참여·후기·카테고리 생성까지 확인. 리더 위임·종료·후기 수정은 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
+| 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제)·카테고리 생성까지 확인. 리더 위임·종료는 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
 | 찬양팀 일정 | 동작 | `/worship`, Realtime 반영 |
 | 하단 탭바 | **동작** | 떠 있는 글래스 캡슐. `Layout`이 `TAB_BAR_ROUTES`에서 렌더 |
 | 순서별 평가 | **폐기** | 아래 참고 |
