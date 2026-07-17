@@ -138,20 +138,21 @@ export default function GatheringDetailPage() {
     >
       <BackButton to="/gatherings" />
 
-      {/* 썸네일 + 성격 배지(우하단). 상세는 항목이 하나라 원데이에도 배지를 단다 —
-          목록과 달리 노이즈가 되지 않고, 여기서는 "이 모임이 어떻게 끝나는가"가 정보다. */}
-      <div className="relative w-32 h-32">
+      {/* 썸네일(프레임 전체 너비·정사각형) + 성격 배지. 상세는 항목이 하나라 원데이에도 배지를
+          단다 — 목록과 달리 노이즈가 되지 않고, 여기서는 "이 모임이 어떻게 끝나는가"가 정보다.
+          -mx-4 로 좌우 패딩을 넘어 프레임 끝까지 채우고, 배지는 썸네일 안쪽 우하단에 앉힌다. */}
+      <div className="relative -mx-4 aspect-square">
         {gathering.thumbnail_url ? (
-          <img src={gathering.thumbnail_url} alt="" className="w-32 h-32 rounded-card object-cover" />
+          <img src={gathering.thumbnail_url} alt="" className="w-full h-full object-cover" />
         ) : (
           // 썸네일 → 카테고리 이모지 → 기본 아이콘. 소모임 자체의 이모지는 없앴다.
-          <div className="w-32 h-32 rounded-card bg-status-bg-active text-primary-normal flex items-center justify-center">
+          <div className="w-full h-full bg-status-bg-active text-primary-normal flex items-center justify-center">
             {category
-              ? <span style={{ fontSize: 56 }}>{category.emoji}</span>
-              : <Users size={44} strokeWidth={2} />}
+              ? <span style={{ fontSize: 96 }}>{category.emoji}</span>
+              : <Users size={72} strokeWidth={2} />}
           </div>
         )}
-        <span className="absolute -bottom-1.5 -right-1.5 text-caption1 font-semibold px-2.5 py-1 rounded-full bg-label-normal text-static-white">
+        <span className="absolute bottom-3 right-3 text-caption1 font-semibold px-2.5 py-1 rounded-full bg-label-normal text-static-white">
           {gathering.kind === "challenge" ? "챌린지" : "원데이"}
         </span>
       </div>
@@ -274,14 +275,17 @@ export default function GatheringDetailPage() {
         </div>
       )}
 
-      {/* 세부 내용 */}
+      {/* 참여 영역과 아래 내용을 가르는 구분선 */}
+      <div className="h-px bg-line-solid" />
+
+      {/* 세부 내용 + 끝 구분선 */}
       {gathering.description && (
-        <div className="flex flex-col gap-2">
-          <p className="text-caption1 font-semibold text-label-neutral">세부 내용</p>
+        <>
           <p className="text-body1-reading text-label-normal whitespace-pre-wrap">
             {gathering.description}
           </p>
-        </div>
+          <div className="h-px bg-line-solid" />
+        </>
       )}
 
       {/* 후기 */}
