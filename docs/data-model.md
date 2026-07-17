@@ -210,13 +210,19 @@ npx supabase db pull
 `finance_splits`, `finance_transactions` 가 있어 이름이 바뀐 뒤 코드가 안 따라간 것으로 보입니다.
 회계는 iOS 앱으로 이관 예정이라 웹에서 되살릴 계획이 없습니다.
 
-코드에서 쓰지 않는 테이블도 남아 있습니다: `bible_words`, `event_budget_items`, `event_items`, `event_registrations`, `event_tasks`, `finance_*`.
+코드에서 쓰지 않지만 원격에 **살아있는 데이터가 있어 남긴** 테이블: `bible_words`(8172행),
+`event_items`(19행·계속 수정됨), `event_tasks`(12행), `finance_*`. 이 저장소가 안 쓸 뿐 다른
+시스템(회계는 iOS 앱, 나머지도 별도 행사 시스템으로 추정)이 관리하는 남의 데이터입니다.
 
-⚠ **이 목록을 통째로 지우면 안 됩니다.** `finance_*` 는 iOS 회계 앱으로 이관 예정인 남의
-데이터고, 나머지는 이 저장소 이전부터 원격에 있던 소유주·데이터 불명 테이블입니다. 웹이 안
-쓴다는 것만으로 drop 하지 말고, 대시보드에서 행 수·용도를 확인한 뒤 개별 판단하세요.
-(웹 전용이었고 폐기가 확정됐던 `segment_evaluations`·`event_participants` 둘만
-[`20260717020000_drop_dead_tables.sql`](../supabase/migrations/20260717020000_drop_dead_tables.sql)로 2026-07-17 정리했습니다.)
+⚠ **웹이 안 쓴다는 것만으로 drop 하지 마세요.** 대시보드 `pg_stat_user_tables`로 행 수·누적
+쓰기(`n_tup_ins/upd/del`)를 보고, 정말 비어 있고(행 0 + 누적 쓰기 0) 참조 FK 도 없는 것만
+지웁니다. 지금까지 그 기준으로 지운 것:
+
+| 마이그레이션 | 지운 테이블 | 근거 |
+| --- | --- | --- |
+| `20260717020000_drop_dead_tables.sql` | `segment_evaluations`·`event_participants` | 웹 전용, 폐기 확정 |
+| `20260717030000_drop_event_tables.sql` | `events`·`event_segments` | 행사 기능 제거, 9행은 테스트 데이터 |
+| `20260718000000_drop_empty_event_tables.sql` | `event_budget_items`·`event_registrations` | 행 0 + 누적 쓰기 0 + 참조 FK 없음 |
 
 모든 public 테이블에 RLS는 켜져 있습니다.
 
