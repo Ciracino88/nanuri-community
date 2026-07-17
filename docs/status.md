@@ -37,7 +37,8 @@
 | --- | --- |
 | 소모임 목록 · 상세 · 개설(3단계 페이지) · 카테고리 시트 | **완료** |
 | `ui/` 프리미티브 6종 + `BackButton` | **완료** |
-| 하단 탭바 (떠 있는 글래스 캡슐) | **완료** — 위 참고 |
+| 하단 탭바 (떠 있는 글래스 캡슐) · 상단 바 (`TopBar`) | **완료** — 위 참고 |
+| 찬양팀 시트 (`WorshipSchedulePage` · `PositionSlot`) | **완료** — hero 제거, 옛 빨강→Primary 파랑 |
 | 나머지 전부 | 대기 |
 
 ### 소모임 2단계 — DB 적용 완료 (2026-07-17)
@@ -105,10 +106,9 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 | `event/EventListPage` | — | 13 |
 | `components/EventInfoView` | — | 11 |
 | `HomePage` | 11 | — |
-| `worship/WorshipSchedulePage` | — | 9 |
 | `MemberProfileSetupPage` | — | 8 |
 | `ConfirmDialog` | 5 | — |
-| `ProfilePage` · `components/worship/PositionSlot` | — | 각 5 |
+| `ProfilePage` | — | 5 |
 | `auth/MemberLoginPage` | 4 | — |
 | `event/EventInfoPage` | — | 3 |
 | `auth/GatePage` · `LoadingSpinner` · `BackButton` | 각 2 | — |

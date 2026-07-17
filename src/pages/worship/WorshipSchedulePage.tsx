@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronLeft, ChevronRight, Music, Music2, Music3, Music4 } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
 import { useWorshipSchedule } from "../../hooks/useWorshipSchedule";
@@ -11,7 +10,6 @@ import PositionSlot from "../../components/worship/PositionSlot";
 import { POSITIONS } from "../../constants/worship";
 import { PAGE_BOTTOM_PAD } from "../../constants/layout";
 
-const ACCENT = "#FF6B6B";
 const MONTH_NAMES = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
 
 function getSundaysInMonth(year: number, month: number): Date[] {
@@ -25,45 +23,21 @@ function getSundaysInMonth(year: number, month: number): Date[] {
   return sundays;
 }
 
-const NOTE_ICONS = [Music2, Music, Music3, Music4];
-
-function FloatingNote({ color, index }: { color: string; index: number }) {
-  const Icon = NOTE_ICONS[index % NOTE_ICONS.length];
-  const size = 12 + (index % 3) * 6;
-  const startX = 20 + ((index * 37) % 60);
-  const duration = 4 + ((index * 1.3) % 4);
-  const delay = (index * 0.7) % 3;
-  return (
-    <motion.div
-      className="absolute pointer-events-none"
-      style={{ left: `${startX}%`, bottom: 0 }}
-      animate={{
-        y: [-10, -120 - index * 20],
-        x: [0, (index % 2 === 0 ? 1 : -1) * (10 + index * 5)],
-        opacity: [0, 0.5, 0.3, 0],
-        rotate: [0, index % 2 === 0 ? 20 : -20],
-      }}
-      transition={{ duration, delay, repeat: Infinity, ease: "easeOut" }}
-    >
-      <Icon size={size} color={color} />
-    </motion.div>
-  );
-}
-
-function ProgressRing({ confirmed, total, color }: { confirmed: number; total: number; color: string }) {
+/** 확정 진행률 링. 트랙은 구분선, 진행분은 Primary. 파랑 위 작은 글자라 굵기를 올린다. */
+function ProgressRing({ confirmed, total }: { confirmed: number; total: number }) {
   const r = 18;
   const circ = 2 * Math.PI * r;
   const progress = total > 0 ? confirmed / total : 0;
   return (
     <div className="relative w-12 h-12 flex items-center justify-center">
       <svg width="48" height="48" className="absolute inset-0 -rotate-90">
-        <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+        <circle cx="24" cy="24" r={r} fill="none" stroke="var(--color-line-solid)" strokeWidth="3" />
         <motion.circle
           cx="24"
           cy="24"
           r={r}
           fill="none"
-          stroke={color}
+          stroke="var(--color-primary-normal)"
           strokeWidth="3"
           strokeLinecap="round"
           strokeDasharray={circ}
@@ -71,7 +45,7 @@ function ProgressRing({ confirmed, total, color }: { confirmed: number; total: n
           transition={{ duration: 0.8, ease: "easeOut" }}
         />
       </svg>
-      <span className="text-xs font-extrabold" style={{ color }}>
+      <span className="text-caption1 font-bold text-primary-normal">
         {confirmed}/{total}
       </span>
     </div>
@@ -79,7 +53,6 @@ function ProgressRing({ confirmed, total, color }: { confirmed: number; total: n
 }
 
 export default function WorshipSchedulePage() {
-  const navigate = useNavigate();
   const { user, userProfile } = useAuthStore();
 
   const today = new Date();
@@ -143,86 +116,57 @@ export default function WorshipSchedulePage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col" style={{ background: "#0f1117" }}>
+    <div className="flex-1 flex flex-col">
       <div
-        className="w-full max-w-md mx-auto flex flex-col"
+        className="w-full max-w-md mx-auto px-4 pt-6 flex flex-col gap-4"
         style={{ paddingBottom: PAGE_BOTTOM_PAD }}
       >
+        {/* 화면 제목은 상단 바가 대신한다 — 문서 구조상 h1 은 스크린리더용으로만 남긴다. */}
+        <h1 className="sr-only">찬양팀 시트</h1>
 
-        {/* Hero */}
-        <div
-          className="relative px-6 pt-8 pb-8 mx-4 mt-4 rounded-3xl overflow-hidden"
-          style={{ background: `linear-gradient(135deg, ${ACCENT}22 0%, ${ACCENT}08 100%)`, border: `1px solid ${ACCENT}33` }}
-        >
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: `linear-gradient(105deg, transparent 40%, ${ACCENT}18 50%, transparent 60%)` }}
-            animate={{ x: ["-100%", "200%"] }}
-            transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }}
-          />
-          <p className="text-xs font-bold mb-2 tracking-widest uppercase relative z-10" style={{ color: ACCENT }}>
-            찬양팀 일정
-          </p>
-          <h1 className="text-2xl font-extrabold text-white leading-tight relative z-10">
-            주일 포지션을<br />등록해보세요
-          </h1>
-          <div className="absolute inset-0 overflow-hidden">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <FloatingNote key={i} color={ACCENT} index={i} />
-            ))}
-          </div>
-          <motion.div
-            className="absolute right-5 bottom-3"
-            style={{ opacity: 0.1 }}
-            animate={{ rotate: [0, 8, -4, 0], y: [0, -4, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            aria-hidden="true"
-          >
-            <Music2 size={72} color={ACCENT} />
-          </motion.div>
-        </div>
-
-        {/* 포지션 미등록 안내 */}
-        {myPositions.length === 0 && (
-          <button
-            onClick={() => navigate("/member/setup")}
-            className="mx-4 mt-4 px-4 py-3 rounded-2xl flex items-center justify-between text-left"
-            style={{ background: `${ACCENT}14`, border: `1px solid ${ACCENT}33` }}
-          >
-            <span className="text-sm" style={{ color: "#e0e6f0" }}>포지션을 등록해야 일정에 참여할 수 있어요</span>
-            <span className="text-sm font-bold shrink-0 ml-3" style={{ color: ACCENT }}>등록 →</span>
-          </button>
-        )}
-
-        {/* 팀 토글 */}
-        <div className="flex gap-2 px-4 mt-4">
+        {/* 1. 칩 셀렉터 — 팀. 선택 = 상호작용이라 Primary 담당(docs/design.md). */}
+        <div className="flex items-center gap-2">
           {["나누리", "섬김이"].map((t) => (
-            <motion.button
+            <button
               key={t}
+              type="button"
               onClick={() => setTeamFilter(t)}
-              className="px-5 py-2 rounded-full text-sm font-bold"
-              whileTap={{ scale: 0.93 }}
-              style={teamFilter === t ? { background: ACCENT, color: "#0f1117" } : { background: "rgba(255,255,255,0.07)", color: "#8892a0" }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className={`text-label1 font-semibold px-4 py-2 rounded-full whitespace-nowrap transition active:scale-95 ${
+                teamFilter === t
+                  ? "bg-primary-normal text-static-white"
+                  : "bg-bg-normal text-label-neutral shadow-xsmall"
+              }`}
             >
               {t}
-            </motion.button>
+            </button>
           ))}
         </div>
 
-        {/* 달력 헤더 */}
-        <div className="flex items-center justify-between px-6 mt-5">
-          <motion.button whileTap={{ scale: 0.85, x: -2 }} onClick={() => moveMonth(-1)} className="p-1" style={{ color: "#8892a0" }} aria-label="이전 달">
-            <ChevronLeft size={18} />
+        {/* 2. 날짜 이동 바 — 월 */}
+        <div className="flex items-center justify-between rounded-field bg-bg-normal shadow-xsmall px-2 py-1.5">
+          <motion.button
+            whileTap={{ scale: 0.85, x: -2 }}
+            onClick={() => moveMonth(-1)}
+            className="p-2 text-label-neutral"
+            aria-label="이전 달"
+          >
+            <ChevronLeft size={20} />
           </motion.button>
-          <span className="text-sm font-bold text-white">{viewYear}년 {MONTH_NAMES[viewMonth]}</span>
-          <motion.button whileTap={{ scale: 0.85, x: 2 }} onClick={() => moveMonth(1)} className="p-1" style={{ color: "#8892a0" }} aria-label="다음 달">
-            <ChevronRight size={18} />
+          <span className="text-headline2 font-bold text-label-normal">
+            {viewYear}년 {MONTH_NAMES[viewMonth]}
+          </span>
+          <motion.button
+            whileTap={{ scale: 0.85, x: 2 }}
+            onClick={() => moveMonth(1)}
+            className="p-2 text-label-neutral"
+            aria-label="다음 달"
+          >
+            <ChevronRight size={20} />
           </motion.button>
         </div>
 
-        {/* 주일 날짜 */}
-        <div className="flex gap-2 px-4 mt-3 justify-center">
+        {/* 3. 주 선택 바 — 주일 날짜 */}
+        <div className="flex gap-2">
           {sundaysInMonth.map((d) => {
             const dateStr = d.toISOString().slice(0, 10);
             const isActive = dateStr === activeDateStr;
@@ -230,54 +174,67 @@ export default function WorshipSchedulePage() {
               <motion.button
                 key={dateStr}
                 onClick={() => selectDate(d)}
-                className="flex flex-col items-center gap-1 px-3 py-2.5 rounded-2xl flex-1 relative overflow-hidden"
-                whileTap={{ scale: 0.9 }}
-                style={{ color: isActive ? "#0f1117" : "#8892a0", background: isActive ? "transparent" : "rgba(255,255,255,0.06)" }}
+                className="flex flex-col items-center gap-0.5 px-2 py-2.5 rounded-field flex-1 relative overflow-hidden"
+                whileTap={{ scale: 0.92 }}
               >
+                {/* 선택 표시는 Primary 면. 안 고른 칸은 카드 면 위에 얹는다. */}
+                <div
+                  className={`absolute inset-0 rounded-field ${isActive ? "" : "bg-bg-normal shadow-xsmall"}`}
+                />
                 {isActive && (
                   <motion.div
-                    layoutId="datePulse"
-                    className="absolute inset-0 rounded-2xl"
-                    style={{ background: ACCENT }}
-                    transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                    layoutId="worshipDateActive"
+                    className="absolute inset-0 rounded-field bg-primary-normal"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <span className="text-xs font-semibold relative z-10">일</span>
-                <span className="text-lg font-extrabold leading-none relative z-10">{d.getDate()}</span>
+                <span
+                  className={`text-caption1 font-medium relative z-10 ${
+                    isActive ? "text-static-white/80" : "text-label-neutral"
+                  }`}
+                >
+                  일
+                </span>
+                <span
+                  className={`text-headline2 font-bold leading-none relative z-10 ${
+                    isActive ? "text-static-white" : "text-label-normal"
+                  }`}
+                >
+                  {d.getDate()}
+                </span>
               </motion.button>
             );
           })}
         </div>
 
-        {/* 날짜 + 확정 진행률 */}
-        <div className="flex items-center justify-between px-5 mt-5 mb-3">
-          <span className="text-sm font-bold text-white">
+        {/* 4. 선택된 날짜 + 확정 현황 */}
+        <div className="flex items-center justify-between px-1 pt-1">
+          <span className="text-title3 font-bold text-label-normal">
             {activeDate ? `${activeDate.getMonth() + 1}월 ${activeDate.getDate()}일` : ""}
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold" style={{ color: "#8892a0" }}>확정</span>
-            <ProgressRing confirmed={confirmedCount} total={POSITIONS.length} color={ACCENT} />
+            <span className="text-label2 font-medium text-label-neutral">확정</span>
+            <ProgressRing confirmed={confirmedCount} total={POSITIONS.length} />
           </div>
         </div>
 
-        {/* 포지션 그리드 */}
+        {/* 5. 포지션 슬롯 */}
         <AnimatePresence mode="wait">
           <motion.div
             key={activeDateStr}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col gap-2 px-4"
+            className="flex flex-col gap-3"
           >
-            <div className="p-4 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="rounded-card bg-bg-normal shadow-small p-4">
               <div className="grid grid-cols-5 gap-2">{POSITIONS.slice(0, 5).map((pos, i) => renderSlot(pos, i))}</div>
             </div>
-            <div className="p-4 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="rounded-card bg-bg-normal shadow-small p-4">
               <div className="grid grid-cols-5 gap-2">{POSITIONS.slice(5).map((pos, i) => renderSlot(pos, i + 5))}</div>
             </div>
           </motion.div>
         </AnimatePresence>
-
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import GatheringFormPage from "../gathering/GatheringFormPage";
 import EventSegmentsPage from "../admin/event/EventSegmentsPage";
 import EventBuilderPage from "../admin/event/EventBuilderPage";
 import EventTimelinePage from "../event/EventTimelinePage";
+import WorshipSchedulePage from "../worship/WorshipSchedulePage";
 import { useAuthStore } from "../../store/authStore";
 import { eventKeys } from "../../hooks/useEvents";
 import { gatheringKeys } from "../../hooks/useGatherings";
@@ -19,6 +20,7 @@ import { reviewKeys, type GatheringReviewData } from "../../hooks/useGatheringRe
 import type { EventDetailData } from "../../hooks/useEvents";
 import type { EventRecord } from "../../types/event";
 import type { GatheringData } from "../../hooks/useGatherings";
+import type { WorshipData } from "../../hooks/useWorshipSchedule";
 
 // 개발 전용 미리보기. 앱 라우터 바깥에서 마운트된다(main.tsx) — 그래야 여기서
 // MemoryRouter 로 원하는 경로·상태를 꾸며 띄울 수 있다. 라우터는 중첩이 안 된다.
@@ -39,6 +41,16 @@ function asLoggedIn() {
   useAuthStore.setState({
     user: { id: ME } as never,
     userProfile: { id: ME, name: "미리보기" } as never,
+    isAnonymous: false,
+    isLoading: false,
+  });
+}
+
+// 찬양팀 미리보기용: 포지션·팀이 있어야 내 슬롯(점선)과 토글 가능 여부가 화면에 드러난다.
+function asWorshipMember() {
+  useAuthStore.setState({
+    user: { id: ME } as never,
+    userProfile: { id: ME, name: "미리보기", position: ["인도자", "일렉"], team: "나누리" } as never,
     isAnonymous: false,
     isLoading: false,
   });
@@ -85,6 +97,17 @@ const MOCK_EVENTS: EventRecord[] = [
 
 // 상대 시각이라 오늘 기준으로 만든다 — 고정 날짜면 시간이 지나 전부 "종료"로 굳는다.
 const inDays = (d: number) => new Date(Date.now() + d * 86400_000).toISOString();
+
+function getSundaysInMonth(year: number, month: number): Date[] {
+  const sundays: Date[] = [];
+  const d = new Date(year, month, 1);
+  while (d.getDay() !== 0) d.setDate(d.getDate() + 1);
+  while (d.getMonth() === month) {
+    sundays.push(new Date(d));
+    d.setDate(d.getDate() + 7);
+  }
+  return sundays;
+}
 
 // 카테고리는 DB 테이블이다(멤버가 직접 만들 수 있다). 마이그레이션이 심는 기본 8개 중 일부.
 const CAT_STUDY = "cat-study";
@@ -177,6 +200,30 @@ const MOCK_DETAIL: EventDetailData = {
     { id: "s-2", title: "말씀", duration_min: 45, description: null, sort: 1 },
     { id: "s-3", title: "조별 나눔", duration_min: 60, description: "조별로 흩어져 나눔의 시간을 갖습니다", sort: 2 },
     { id: "s-4", title: "마무리 기도", duration_min: 15, description: null, sort: 3 },
+  ],
+};
+
+// 찬양팀 시트. 이번 달 주일들을 오늘 기준으로 만든다 — 고정 날짜면 달이 바뀌며 빈 화면이 된다.
+// 첫 주일부터 하나 걸러 확정을 채워, 확정 슬롯·미정 슬롯·내 자리(점선)가 한 화면에 다 나온다.
+const wsSundays = getSundaysInMonth(today.getFullYear(), today.getMonth());
+const wsActive = wsSundays.find((d) => d >= today) ?? wsSundays[wsSundays.length - 1];
+const wsActiveId = "ws-active";
+const MOCK_WORSHIP: WorshipData = {
+  schedules: wsSundays.map((d, i) => ({
+    id: d === wsActive ? wsActiveId : `ws-${i}`,
+    date: d.toISOString().slice(0, 10),
+  })),
+  members: [
+    { id: ME, name: "미리보기", position: ["인도자", "일렉"], avatar_url: null, team: "나누리" },
+    { id: "m2", name: "김하늘", position: ["싱어1"], avatar_url: null, team: "나누리" },
+    { id: "m3", name: "이바다", position: ["메인 피아노"], avatar_url: null, team: "나누리" },
+    { id: "m4", name: "박믿음", position: ["드럼"], avatar_url: null, team: "나누리" },
+    { id: "m5", name: "정소망", position: ["베이스"], avatar_url: null, team: "섬김이" },
+  ],
+  availability: [
+    { schedule_id: wsActiveId, user_id: "m2", position: "싱어1", available: true },
+    { schedule_id: wsActiveId, user_id: "m3", position: "메인 피아노", available: true },
+    { schedule_id: wsActiveId, user_id: "m4", position: "드럼", available: true },
   ],
 };
 
@@ -342,6 +389,17 @@ const SCREENS: Record<string, () => React.ReactElement> = {
           <Routes>
             <Route path="/event/:id/timeline" element={<Phone><EventTimelinePage /></Phone>} />
           </Routes>
+        </MemoryRouter>
+      </Seed>
+    );
+  },
+  worship: () => {
+    asWorshipMember();
+    // 쿼리 키가 ["worship", year, month] 라 이번 달로 심는다(useCalendar 기본값과 같은 today 기준).
+    return (
+      <Seed entries={[[["worship", today.getFullYear(), today.getMonth()], MOCK_WORSHIP]]}>
+        <MemoryRouter initialEntries={["/worship"]}>
+          <Phone><WorshipSchedulePage /></Phone>
         </MemoryRouter>
       </Seed>
     );
