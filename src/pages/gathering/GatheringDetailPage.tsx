@@ -337,7 +337,7 @@ export default function GatheringDetailPage() {
         </motion.button>
       ) : (
         <div className="w-full rounded-field py-3.5 bg-bg-alternative text-label-neutral text-body2 font-semibold text-center">
-          {status === "done" ? "끝난 모임이에요" : "모집이 마감됐어요"}
+          끝난 모임이에요
         </div>
       )}
 

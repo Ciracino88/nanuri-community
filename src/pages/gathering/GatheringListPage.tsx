@@ -19,7 +19,6 @@ import type { GatheringCategory, GatheringRecord, ParticipantProfile } from "../
 // 규칙이 깨진다. 원티드가 시맨틱에 물려둔 상태 배경 둘을 그대로 쓴다.
 const STATUS_BADGE: Record<GatheringStatus, string> = {
   open: "bg-status-bg-active text-primary-normal",
-  closed: "bg-status-bg-idle text-label-neutral",
   done: "bg-status-bg-idle text-label-neutral",
 };
 

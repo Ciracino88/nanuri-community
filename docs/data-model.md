@@ -75,7 +75,7 @@ npx supabase db pull
 | `category_id` | uuid → `gathering_categories` | SET NULL — 카테고리가 지워져도 소모임은 남는다 |
 | `thumbnail_url` | text | 없으면 카테고리 이모지, 그것도 없으면 기본 아이콘 |
 | `leader_id` | uuid → `auth.users` | **SET NULL**. 개설자이자 리더. **불변이 아님 — 넘어간다** |
-| `closed_at` | timestamptz | 참여 신청 마감. 종료가 아님 |
+| `closed_at` | timestamptz | 옛 "참여 신청 마감" 컬럼. **현재 미사용** — 마감은 원데이=`gathering_at` 파생·챌린지=없음으로 정의(아래 참고). 컬럼만 남음 |
 | `ended_at` | timestamptz | 종료 |
 | `created_at` | timestamptz `now()` | |
 
@@ -115,12 +115,22 @@ npx supabase db pull
 | | 원데이 | 챌린지 |
 | --- | --- | --- |
 | `done` (종료) | `gathering_at` 지남 — **시간이** 끝낸다 | `ended_at` — **사람이** 끝낸다 |
-| `closed` (마감) | `closed_at` — 명단 확정 | `closed_at` — 진도 때문에 더 안 받음 |
 | `open` | 그 외 | 그 외 |
 
-`ended_at`이 챌린지 쪽에서 `gathering_at`의 자리를 대신하는 대칭 구조입니다. 덕분에 `closed_at`의 뜻("신청 마감")을 `kind` 별로 재해석하지 않아도 됩니다 — 같은 컬럼이 행마다 다른 뜻이 되면 반드시 물립니다.
+`ended_at`이 챌린지 쪽에서 `gathering_at`의 자리를 대신하는 대칭 구조입니다.
 
 상태 판정은 DB 가 아니라 `lib/gatheringTime.ts`의 `computeGatheringStatus()`가 계산합니다.
+
+#### 모집 마감은 별도 상태가 아닙니다
+
+상태는 `open`·`done` 둘뿐입니다. "모집 마감"(가입을 더 안 받는 시점)은 성격이 알아서 정합니다.
+
+- **원데이**: 모집 마감 = `gathering_at`(모이는 시각). "몇 시까지 모이자"의 그 시각이 곧 가입 마감선입니다. 그 전엔 가입할 수 있고, 지나면 `done`이 되어 가입이 저절로 닫힙니다 — 마감과 종료가 **같은 시점**이라 따로 표시할 "마감" 상태가 없습니다.
+- **챌린지**: **자유 가입 / 자유 탈퇴라 마감 개념 자체가 없습니다.** 기한이 없어 "명단을 확정할 시점"이 성립하지 않습니다 — `done`(리더가 끝냄) 전까지 늘 열려 있습니다.
+
+> 옛 모델은 `closed_at`으로 양쪽에 수동 "마감"을 뒀지만(명단 확정·진도), 그 근거가 사라졌습니다(정산이 건별 스냅샷을 뜨므로 명단을 얼릴 이유가 없음, 아래 참여 정책 참고). `closed_at` **컬럼은 아직 남아 있으나 어떤 코드도 읽지 않습니다.** 파괴적 마이그레이션이라 지우지 않고 뒀을 뿐, 상태 계산·배지·필터 어디에도 안 들어갑니다.
+>
+> ⚠️ 남은 틈: 원데이 가입 마감(`gathering_at`)은 **UI 에서만** 막습니다(시각 지나면 `done`이라 버튼이 사라짐). 가입 RLS 는 `closed_at`·`ended_at`만 보고 `gathering_at`은 안 봅니다 — 시각이 지난 원데이도 DB 는 여전히 insert 를 허용합니다. DB 로 못 박으려면 insert 정책에 `kind='challenge' or gathering_at > now()` 가드를 더해야 합니다(별도 마이그레이션).
 
 #### 리더는 넘어간다 (`leader_id`)
 
