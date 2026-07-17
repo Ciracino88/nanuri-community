@@ -49,7 +49,7 @@
 | `useGatherings` / `useCreateGathering` | 소모임 목록 + Realtime, 개설. 쿼리 키는 `gatheringKeys` |
 | `useCreateCategory` | 소모임 카테고리 생성 (멤버가 직접 만듭니다) |
 | `useToggleGatheringJoin` | 소모임 참여 토글 |
-| `useGatheringReviews` | 후기 조회·작성·수정·삭제. 쿼리 키는 `reviewKeys` |
+| `useGatheringReviews` | 후기 조회(좋아요 포함)·작성·수정·삭제·좋아요 토글(`useToggleReviewLike`). 쿼리 키는 `reviewKeys` |
 | `useGatheringRpc` | `useUpdateGatheringPlace`(참가자 누구나) · `useTransferGatheringLeader`(리더만) |
 | `useWorshipSchedule` | 월별 주일 일정 + Realtime |
 | `useToggleAvailability` | 포지션 참여 토글 (낙관적 캐시 갱신 + 중복 시 교체 확인) |

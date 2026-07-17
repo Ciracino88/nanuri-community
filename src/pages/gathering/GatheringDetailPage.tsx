@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { Check, MapPin, Pencil, Users } from "lucide-react";
+import { Check, Heart, MapPin, Pencil, Users } from "lucide-react";
 import toast from "react-hot-toast";
 import BackButton from "../../components/BackButton";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -16,6 +16,7 @@ import {
   useCreateReview,
   useDeleteReview,
   useGatheringReviews,
+  useToggleReviewLike,
   useUpdateReview,
 } from "../../hooks/useGatheringReviews";
 import { PAGE_BOTTOM_PAD } from "../../constants/layout";
@@ -71,6 +72,7 @@ export default function GatheringDetailPage() {
   const createReview = useCreateReview(id);
   const updateReview = useUpdateReview(id);
   const deleteReview = useDeleteReview(id);
+  const toggleLike = useToggleReviewLike(id);
 
   const gathering = gatherings.find((g) => g.id === id);
 
@@ -103,6 +105,13 @@ export default function GatheringDetailPage() {
 
   const reviews = reviewData?.reviews ?? [];
   const reviewProfiles = new Map((reviewData?.profiles ?? []).map((p) => [p.id, p]));
+  // 후기별 좋아요를 미리 묶는다 — 카드마다 카운트와 "내가 눌렀나"를 O(1) 로 읽는다.
+  const likesByReview = new Map<string, string[]>();
+  for (const l of reviewData?.likes ?? []) {
+    const arr = likesByReview.get(l.review_id);
+    if (arr) arr.push(l.user_id);
+    else likesByReview.set(l.review_id, [l.user_id]);
+  }
 
   const savePlace = async () => {
     try {
@@ -157,6 +166,12 @@ export default function GatheringDetailPage() {
       console.error("[updateReview] error:", err);
       toast.error("후기를 고치지 못했어요");
     }
+  };
+
+  const likeReview = (reviewId: string, liked: boolean) => {
+    if (!user) return;
+    // 낙관적 반영이라 await 하지 않는다 — 실패는 훅이 스냅샷으로 되돌린다.
+    toggleLike.mutate({ reviewId, userId: user.id, liked });
   };
 
   return (
@@ -344,6 +359,8 @@ export default function GatheringDetailPage() {
             const author = r.user_id ? reviewProfiles.get(r.user_id) : null;
             const mine = !!r.user_id && r.user_id === user?.id;
             const editing = editingReviewId === r.id;
+            const likers = likesByReview.get(r.id) ?? [];
+            const likedByMe = !!user && likers.includes(user.id);
             return (
               <div key={r.id} className="rounded-card bg-bg-normal shadow-small p-4 flex flex-col gap-2">
                 <div className="flex items-center gap-2">
@@ -396,7 +413,21 @@ export default function GatheringDetailPage() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-label1 text-label-normal whitespace-pre-wrap">{r.content}</p>
+                  <>
+                    <p className="text-label1 text-label-normal whitespace-pre-wrap">{r.content}</p>
+                    <button
+                      type="button"
+                      onClick={() => likeReview(r.id, likedByMe)}
+                      disabled={!user}
+                      aria-label={likedByMe ? "좋아요 취소" : "좋아요"}
+                      aria-pressed={likedByMe}
+                      className={`self-start flex items-center gap-1.5 text-caption1 active:scale-95 transition
+                        ${likedByMe ? "text-primary-normal" : "text-label-neutral"}`}
+                    >
+                      <Heart size={15} strokeWidth={2} fill={likedByMe ? "currentColor" : "none"} />
+                      {likers.length > 0 && <span className="tabular-nums">{likers.length}</span>}
+                    </button>
+                  </>
                 )}
               </div>
             );

@@ -97,6 +97,8 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 
 **~~후기 수정~~ 완료** — 내 후기 카드에 수정 버튼을 붙였습니다. 누르면 그 자리에서 인라인 편집(저장/취소)으로 바뀌고 [`useUpdateReview`](../src/hooks/useGatheringReviews.ts)를 호출합니다. `updated_at`이 채워지면 카드에 "· 수정됨"이 뜹니다.
 
+**~~후기 좋아요~~ 완료** — `gathering_review_likes` 테이블([마이그레이션](../supabase/migrations/20260717010000_gathering_review_likes.sql), 원격 적용됨)을 새로 만들고, 후기 카드에 하트+카운트 토글을 붙였습니다([`useToggleReviewLike`](../src/hooks/useGatheringReviews.ts), 참여 토글과 같은 낙관적 방식). ⚠ 게이트 뒤 화면이라 프리뷰(목 데이터)에선 렌더링만 확인했습니다 — 실제 토글은 로그인 뒤 실데이터에서만 밟힙니다.
+
 남은 화면을 잔재가 많은 순으로. 숫자는 아래 두 패턴의 매치 수라 대략의 규모로만 보세요.
 
 | 파일 | 옛 토큰 | 다크 잔재 |
@@ -185,7 +187,7 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 | 인증 (멤버/게스트/관리자) | 동작 | `authStore` + `ProtectedRoute` |
 | 영수증 비용 청구 | 동작 | `/member/bill` → `BillFormPage` |
 | 행사 (타임라인) | 동작 | 참여자·관리자 라우트 모두 연결됨 |
-| 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제)·카테고리 생성까지 확인. 리더 위임·종료는 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
+| 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제·좋아요)·카테고리 생성까지 확인. 리더 위임·종료는 훅만 있고 UI 부재(위 참고). 사진·정산·템플릿은 미착수 |
 | 찬양팀 일정 | 동작 | `/worship`, Realtime 반영 |
 | 하단 탭바 | **동작** | 떠 있는 글래스 캡슐. `Layout`이 `TAB_BAR_ROUTES`에서 렌더 |
 | 순서별 평가 | **폐기** | 아래 참고 |

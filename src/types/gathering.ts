@@ -53,6 +53,12 @@ export interface GatheringReview {
   updated_at: string | null;
 }
 
+/** 후기 좋아요. 후기와 달리 CASCADE 라 user_id 는 항상 있다(떠나면 좋아요도 사라진다). */
+export interface ReviewLike {
+  review_id: string;
+  user_id: string;
+}
+
 /**
  * 카테고리는 멤버가 직접 만들 수 있어서 DB 테이블이다(코드 상수가 아니다).
  * 코드는 목록을 하드코딩하지 않고 읽기만 한다.

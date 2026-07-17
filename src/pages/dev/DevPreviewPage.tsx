@@ -173,6 +173,11 @@ const MOCK_REVIEWS: GatheringReviewData = {
       created_at: inDays(-9), updated_at: inDays(-8) },
   ],
   profiles: MOCK_GATHERINGS.profiles,
+  // r-1 에 좋아요 둘(내가 누른 것 하나 포함) — 채워진 하트·카운트 경로가 밟힌다.
+  likes: [
+    { review_id: "r-1", user_id: ME },
+    { review_id: "r-1", user_id: "u3" },
+  ],
 };
 
 // 내가 쓴 후기(삭제 버튼이 뜬다) + 남이 쓴 후기(안 뜬다).
@@ -184,6 +189,8 @@ const MOCK_MY_REVIEWS: GatheringReviewData = {
       created_at: inDays(-3), updated_at: null },
   ],
   profiles: MOCK_GATHERINGS.profiles,
+  // 남이 쓴 후기(r-4)에 좋아요 하나 — 아직 내가 안 누른(빈 하트) 경로.
+  likes: [{ review_id: "r-4", user_id: "u2" }],
 };
 
 // 행사 상세(관리자·타임라인 공용). 타임라인의 "LIVE/현재 진행" 을 보려면 진행 중이어야 하므로

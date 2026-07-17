@@ -159,6 +159,17 @@ npx supabase db pull
 
 ⚠ 리더가 소모임을 삭제하면 후기도 CASCADE 로 함께 사라집니다 — **남이 쓴 글이 리더 손에 지워집니다.** 확인 다이얼로그에서 "참여자 N명, 후기 M개가 함께 삭제됩니다"를 보여줘야 합니다.
 
+**`gathering_review_likes`** — 후기 좋아요
+
+| 컬럼 | 타입 | 비고 |
+| --- | --- | --- |
+| `review_id` | uuid → `gathering_reviews` | CASCADE. `user_id` 와 함께 **복합 PK** |
+| `user_id` | uuid → `auth.users` | **CASCADE** — 후기(SET NULL)와 다르다 |
+
+`user_id` 가 후기(SET NULL)와 반대로 CASCADE 인 이유는 성격이 달라서입니다 — 후기는 사람이 떠나도 남는 **기록**이지만, 좋아요는 살아있는 **반응** 신호라 계정이 사라지면 의미가 없습니다(참여 `gathering_participants` 와 같은 선택). `(review_id, user_id)` 복합 PK 가 "한 사람이 한 후기에 좋아요 하나"를 강제하므로 unique 제약을 따로 걸지 않고, 중복 insert 는 `upsert(ignoreDuplicates)` 로 조용히 무시됩니다.
+
+좋아요 테이블에는 `gathering_id` 가 없습니다(후기가 이미 모임에 매여 있으므로 비정규화하지 않았습니다). 그래서 조회는 후기 id 목록으로 `.in("review_id", ...)` 하고, Realtime 은 모임으로 필터하지 못해 어느 모임의 좋아요든 해당 모임 후기 쿼리를 다시 부릅니다 — 교회 규모에선 무시할 만한 비용입니다([`useGatheringReviews`](../src/hooks/useGatheringReviews.ts) 참고).
+
 #### 리더 승계 — 규칙이 앱이 아니라 DB 에 있는 이유
 
 리더가 사라지는 경로는 둘이고 **성격이 다릅니다.**
@@ -251,6 +262,7 @@ exists (select 1 from public.user_profiles p where p.id = auth.uid() and p.role 
 | `gatherings` | 로그인 사용자 전체 | **멤버만** insert, 수정·삭제는 **리더만** |
 | `gathering_participants` | 로그인 사용자 전체 | 본인 것만 insert(**마감·종료 전에만**) / delete(**언제든**) |
 | `gathering_reviews` | 로그인 사용자 전체 | **참가자만** insert, 수정·삭제는 본인 것만 |
+| `gathering_review_likes` | 로그인 사용자 전체 | **멤버만** insert(본인 것만), delete 는 본인 것만. **수정 없음** |
 
 **"멤버"는 `to authenticated`로 판별할 수 없습니다.** 익명 게스트도 `authenticated` 롤을 받기 때문입니다. 대신 `user_profiles` 행의 존재로 판별합니다(게스트는 이 행을 만들지 않습니다) — `events`의 admin 체크와 같은 패턴입니다.
 
