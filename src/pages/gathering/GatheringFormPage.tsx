@@ -11,7 +11,9 @@ import { useAuthStore } from "../../store/authStore";
 import { useCreateGathering, useGatherings, type GatheringData } from "../../hooks/useGatherings";
 import { useReceiptUpload } from "../../hooks/useReceiptUpload";
 import { uploadReceipt } from "../../lib/uploadReceipt";
-import { defaultGatheringAt, localInputToISO } from "../../lib/gatheringTime";
+import { defaultGatheringAt, formatGatheringAt, localInputToISO } from "../../lib/gatheringTime";
+import type { GenerateDescriptionInput } from "../../lib/generateDescription";
+import GenerationOverlay from "../../components/gathering/GenerationOverlay";
 import { PAGE_BOTTOM_PAD } from "../../constants/layout";
 import type { GatheringKind } from "../../types/gathering";
 import CategoryFormSheet from "./CategoryFormSheet";
@@ -21,6 +23,25 @@ import CategoryFormSheet from "./CategoryFormSheet";
 //   2. 무엇을 — 제목·카테고리
 //   3. 자세히 — 일시·장소·설명·사진. 전부 선택이라 마지막이다
 const STEPS = ["성격", "무엇을", "자세히"] as const;
+
+// 본문 작성 방식. 성격 선택(step 1)과 같은 3D 아이콘 카드 UI 를 쓴다.
+//   ai=Claude 가 대신 씀(스트리밍 타이핑 연출), self=직접 입력
+// 아이콘 파일은 public/icons-3d/ 에 넣는다(코드에선 public 을 뺀 절대경로).
+type DescMode = "ai" | "self";
+const DESC_OPTIONS: { key: DescMode; label: string; hint: string; img: string }[] = [
+  {
+    key: "ai",
+    label: "Claude로 작성",
+    hint: "입력한 내용으로 본문을 써줘요",
+    img: "/icons-3d/desc-ai.png",
+  },
+  {
+    key: "self",
+    label: "직접 작성",
+    hint: "내가 직접 적을게요",
+    img: "/icons-3d/desc-self.png",
+  },
+];
 
 // 아이콘은 3D 렌더 PNG(투명 배경) 다. public/icons-3d/ 에 있고 코드에선 public 을 뺀 절대경로로 부른다.
 //   원데이=달력(정한 하루), 챌린지=나침반(끝을 안 정하고 계속 나아가는 여정)
@@ -62,6 +83,10 @@ export default function GatheringFormPage() {
   const [at, setAt] = useState(defaultGatheringAt());
   const [place, setPlace] = useState("");
   const [description, setDescription] = useState("");
+  // 본문 작성 방식. null=아직 안 고름(카드 노출), self=직접 입력창, ai 는 오버레이로 처리
+  const [descMode, setDescMode] = useState<DescMode | null>(null);
+  // AI 오버레이에 넘길 입력. 열 때 한 번 고정해 오버레이가 재생성하지 않게 한다.
+  const [aiInput, setAiInput] = useState<GenerateDescriptionInput | null>(null);
   const [catSheetOpen, setCatSheetOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; at?: string }>({});
@@ -125,6 +150,22 @@ export default function GatheringFormPage() {
       console.error("[createGathering] error:", err);
       toast.error("잠시 후 다시 시도해주세요");
     }
+  };
+
+  // AI 카드 선택 → 지금까지 입력한 값을 모아 오버레이에 넘긴다. 이미 쓴 글이 있으면
+  // 시드로 넘겨 의도를 살린다. 오버레이가 스트리밍 생성 + 타이핑 연출을 담당한다.
+  const openAiOverlay = () => {
+    if (!kind) return;
+    const cat = categories.find((c) => c.id === categoryId);
+    setAiInput({
+      kind,
+      title: title.trim(),
+      category: cat ? `${cat.emoji} ${cat.label}` : null,
+      whenText: isChallenge || !at ? null : formatGatheringAt(localInputToISO(at)),
+      place: place.trim() || null,
+      seed: description.trim() || null,
+    });
+    setDescMode("ai");
   };
 
   const canAdvance = step === 0 ? kind !== null : true;
@@ -294,11 +335,49 @@ export default function GatheringFormPage() {
               )}
             </div>
 
-            <TextArea
-              label="한마디 (선택)" rows={3}
-              placeholder={isChallenge ? "예) 창세기부터 같이 읽어요" : "예) 커피 마시면서 얘기해요"}
-              value={description} onChange={(e) => setDescription(e.target.value)}
-            />
+            {/* 본문 — 성격 선택(step 1)과 같은 카드 UI 로 작성 방식을 먼저 고른다.
+                Claude 로 작성 → 스트리밍 타이핑 오버레이, 직접 작성 → 입력창 */}
+            <div className="flex flex-col gap-2.5">
+              {descMode === null && (
+                <>
+                  <span className="text-label2 font-medium text-label-normal">본문 (선택)</span>
+                  {DESC_OPTIONS.map((o) => (
+                    <button
+                      key={o.key} type="button"
+                      onClick={() => (o.key === "ai" ? openAiOverlay() : setDescMode("self"))}
+                      className="w-full text-left rounded-sheet px-4 py-4 flex items-center gap-3 bg-bg-normal shadow-small active:scale-[0.99] transition"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-body1 font-bold text-label-normal">{o.label}</p>
+                        <p className="text-label2 text-label-neutral mt-0.5">{o.hint}</p>
+                      </div>
+                      {/* 3D 아이콘은 자체 색을 가진 이미지 — 상태에 따라 색을 바꾸지 않는다 */}
+                      <img
+                        src={o.img} alt="" aria-hidden
+                        className="w-20 h-20 shrink-0 object-contain drop-shadow-md"
+                      />
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {descMode === "self" && (
+                <>
+                  <TextArea
+                    label="한마디" rows={5}
+                    placeholder={isChallenge ? "예) 창세기부터 같이 읽어요" : "예) 커피 마시면서 얘기해요"}
+                    value={description} onChange={(e) => setDescription(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setDescMode(null)}
+                    className="self-start text-caption1 font-medium text-label-neutral underline underline-offset-2 active:scale-95 transition"
+                  >
+                    본문 작성 방식 다시 고르기
+                  </button>
+                </>
+              )}
+            </div>
 
             <div className="flex flex-col gap-1.5">
               <span className="text-label2 font-medium text-label-normal">사진 (선택)</span>
@@ -356,6 +435,25 @@ export default function GatheringFormPage() {
             existing={categories}
             onClose={() => setCatSheetOpen(false)}
             onCreated={(c) => { setCategoryId(c.id); setCatSheetOpen(false); }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Claude 본문 생성 — 풀스크린 타이핑 오버레이. 확인하면 결과를 본문에 넣고
+          직접 입력창(self)으로 전환해 이어서 손볼 수 있게 한다. */}
+      <AnimatePresence>
+        {descMode === "ai" && aiInput && (
+          <GenerationOverlay
+            input={aiInput}
+            onConfirm={(text) => {
+              setDescription(text.trim());
+              setAiInput(null);
+              setDescMode("self");
+            }}
+            onCancel={() => {
+              setAiInput(null);
+              setDescMode(null);
+            }}
           />
         )}
       </AnimatePresence>

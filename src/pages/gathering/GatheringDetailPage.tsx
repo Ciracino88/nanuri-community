@@ -10,6 +10,7 @@ import BottomSheet from "../../components/ui/BottomSheet";
 import TextArea from "../../components/ui/TextArea";
 import TextField from "../../components/ui/TextField";
 import { confirmDialog } from "../../components/ConfirmDialog";
+import DescriptionBody from "../../components/gathering/DescriptionBody";
 import { useAuthStore } from "../../store/authStore";
 import {
   useDeleteGathering,
@@ -472,9 +473,7 @@ export default function GatheringDetailPage() {
       {/* 세부 내용 + 끝 구분선 */}
       {gathering.description && (
         <>
-          <p className="text-body1-reading text-label-normal whitespace-pre-wrap">
-            {gathering.description}
-          </p>
+          <DescriptionBody text={gathering.description} />
           <div className="h-px bg-line-solid" />
         </>
       )}

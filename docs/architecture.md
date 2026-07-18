@@ -21,6 +21,7 @@ graph TD
 | Cloudflare Worker | R2 업로드/삭제, 카카오 역지오코딩 프록시 | `VITE_CF_WORKER_URL` |
 | Cloudflare R2 | 영수증·포스터·배너 이미지 저장 | Worker 바인딩 `R2_BUCKET`, `R2_PUBLIC_URL` |
 | 카카오 로컬 API | 좌표 → 주소 변환 | Worker 시크릿 `KAKAO_REST_API_KEY` |
+| Claude API (Anthropic) | 소모임 본문 자동 생성 | Supabase Edge Function 시크릿 `ANTHROPIC_API_KEY` (도입 검토 중 — `feat/gathering-ai-description`) |
 
 ## Cloudflare Worker API
 
