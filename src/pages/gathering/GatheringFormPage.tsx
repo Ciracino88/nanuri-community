@@ -317,6 +317,10 @@ export default function GatheringFormPage() {
             ) : (
               <TextField
                 label="언제" type="datetime-local"
+                // iOS Safari 는 datetime-local 에 네이티브 컨트롤의 고유폭을 강제해
+                // w-full 을 무시하고 좁은 화면에서 장소 필드보다 넓어져 넘친다(좌우 스크롤).
+                // appearance-none 으로 그 강제를 꺼 텍스트 필드와 같은 폭으로 맞춘다(피커는 그대로 열림).
+                className="appearance-none"
                 value={at} error={errors.at}
                 onChange={(e) => { setAt(e.target.value); setErrors({}); }}
               />
