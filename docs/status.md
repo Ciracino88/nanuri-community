@@ -102,6 +102,12 @@ set -a; . ./.env.local; set +a; npx supabase db push --dry-run
 - **트리거는 안 건드렸습니다.** "마지막 참가자가 나가면 종료로 남긴다"는 계정 삭제 안전망으로 그대로 두고, UI 에서 리더가 직접 나가는 경로만 명시적 삭제로 처리했습니다.
 - ⚠ 게이트 뒤 화면이라 프리뷰(목 데이터)에선 **세 확인창의 렌더·문구·승계 대상 이름까지** 확인했습니다. 실제 종료·삭제·위임은 로그인 뒤 실데이터에서만 밟힙니다. 프리뷰 키: `gathering-detail-mine`(리더+타인) · `gathering-detail-solo`(리더 혼자).
 
+**~~소모임 본문 Claude 자동 생성~~ 완료 (2026-07-18)** — 개설 3단계의 본문 입력을 "Claude로 작성 / 직접 작성" 카드 선택으로 바꿨습니다. Claude 로 작성 → 풀스크린 타이핑 오버레이([`GenerationOverlay`](../src/components/gathering/GenerationOverlay.tsx))에서 스트리밍으로 본문이 써지고, 확인하면 직접 입력창으로 넘어가 이어서 손봅니다.
+
+- **Edge Function `generate-description`** — Claude 키를 프론트에 못 두니 [함수](../supabase/functions/generate-description/index.ts)에서 호출합니다. `verify_jwt=true`(플랫폼) + `getUser()`(실제 세션)로 로그인 사용자만 게이팅. `claude-opus-4-8` 를 **스트리밍**으로 받아 SSE 의 `text_delta` 만 뽑아 plain text 로 흘려보냅니다. **프로덕션 배포 완료**(ACTIVE, 시크릿 `ANTHROPIC_API_KEY` 설정됨). `functions.invoke` 는 스트리밍을 못 다뤄 [`generateDescription.ts`](../src/lib/generateDescription.ts)가 함수 URL 을 직접 `fetch` 하고 세션 토큰을 실어 보냅니다.
+- **마커-라이트 본문** — 결과는 작은 마커 방언(`# 제목` · `> 인용` · `❓/💬` FAQ · `- 목록`)으로 저장되고, [`parseDescription`](../src/lib/parseDescription.ts) → [`DescriptionBody`](../src/components/gathering/DescriptionBody.tsx)가 블록으로 파싱해 디자인 토큰으로 렌더합니다. 상세 화면 본문이 이걸로 교체됐습니다. **마커가 하나도 없으면 문단 하나** — 손으로 쓴 기존 통짜 글과 하위 호환입니다.
+- ⚠ 게이트 뒤 화면이라 실제 생성은 로그인 뒤에만 밟힙니다. 프리뷰(`gathering-detail`)에는 마커 본문 목데이터를 넣어 `DescriptionBody` 렌더만 확인했습니다.
+
 **~~ConfirmDialog 원티드 이식~~ 완료 (2026-07-18)** — [`ConfirmDialog`](../src/components/ConfirmDialog.tsx)를 옛 토큰(`bg-card`·`text-fg`·`bg-accent`…)에서 새 토큰으로 옮겼습니다. 이미 찬양팀·내정보(둘 다 새 디자인)가 쓰고 있어 그 둘도 함께 개선됩니다. danger 는 `bg-status-negative`(삭제), 기본은 `bg-primary-normal`.
 
 **~~후기 수정~~ 완료** — 내 후기 카드에 수정 버튼을 붙였습니다. 누르면 그 자리에서 인라인 편집(저장/취소)으로 바뀌고 [`useUpdateReview`](../src/hooks/useGatheringReviews.ts)를 호출합니다. `updated_at`이 채워지면 카드에 "· 수정됨"이 뜹니다.
@@ -196,7 +202,7 @@ grep -rnE "text-fg|bg-card|bg-surface|bg-sunken|text-accent|bg-accent|rounded-ti
 | 인증 (멤버/게스트/관리자) | 동작 | `authStore` + `ProtectedRoute` |
 | 영수증 비용 청구 | 동작 | `/member/bill` → `BillFormPage` |
 | 행사 (타임라인) | **폐기** | 아래 참고 — 코드·테이블 모두 제거 완료 |
-| 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제·좋아요)·카테고리 생성·리더 종료·삭제·위임까지 확인. 사진·정산·템플릿은 미착수 |
+| 소모임 | **2단계 동작** | 개설·참여·후기(작성·수정·삭제·좋아요)·카테고리 생성·리더 종료·삭제·위임·본문 Claude 자동 생성까지 확인. 정산·템플릿은 미착수 |
 | 찬양팀 일정 | 동작 | `/worship`, Realtime 반영 |
 | 하단 탭바 | **동작** | 떠 있는 글래스 캡슐. `Layout`이 `TAB_BAR_ROUTES`에서 렌더 |
 | 순서별 평가 | **폐기** | 아래 참고 |

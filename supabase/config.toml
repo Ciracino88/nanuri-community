@@ -424,7 +424,6 @@ entrypoint = "./functions/receipt-parser/index.ts"
 # static_files = [ "./functions/receipt-parser/*.html" ]
 
 # 소모임 본문 자동 생성 (Claude). verify_jwt=true 로 로그인 세션만 호출 가능.
-# 도입 검토 중 — feat/gathering-ai-description
 [functions.generate-description]
 enabled = true
 verify_jwt = true
